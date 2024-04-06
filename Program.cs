@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = "mysql://doadmin:AVNS_VTN30vCmZpJceD4V3An@playofferservice-db-do-user-14755325-0.c.db.ondigitalocean.com:25060/defaultdb?ssl-mode=REQUIRED";
+var connectionString = "server=playofferservice-db-do-user-14755325-0.c.db.ondigitalocean.com;port=25060;user=doadmin;password=AVNS_VTN30vCmZpJceD4V3An;database=defaultdb;";
 var serverVersion = ServerVersion.AutoDetect(connectionString);
 
 builder.Services.AddDbContext<PlayOfferContext>(options =>
