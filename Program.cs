@@ -1,4 +1,6 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using PlayOfferService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,7 +16,18 @@ builder.Services.AddDbContext<PlayOfferContext>(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "PlayOfferService API",
+        Description = "An ASP.NET Core Web API for managing PlayOffers",
+    });
+
+    options.IncludeXmlComments(Path.Combine(System.AppContext.BaseDirectory,
+        $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+});
 
 var app = builder.Build();
 
