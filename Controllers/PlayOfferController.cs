@@ -14,55 +14,28 @@ public class PlayOfferController: ControllerBase
     {
         _context = context;
     }
-
-    ///<summary>
-    ///Retrieves all play offers with a matching clubId
-    ///</summary>
-    ///<param name="clubId">The clubId to filter by</param>
-    ///<returns>A list of Play offers with a matching clubId</returns>
-    ///<response code="200">Returns a list of Play offers with a matching clubId</response>
-    ///<response code="204">No Play offers with a matching clubId were found</response>
-    [HttpGet]
-    [Route("club/{clubId}")]
-    [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
-    public ActionResult<IEnumerable<PlayOffer>> GetByClubId(int clubId)
-    {
-        var result = _context.PlayOffers.Where(po => po.ClubId == clubId).ToList();
-        return result.Count > 0 ? Ok(result) : NoContent();
-    }
     
     ///<summary>
-    ///Retrieves all play offers with a matching creatorId
+    ///Retrieve all Play Offers matching the query params
     ///</summary>
-    ///<param name="creatorId">The creatorId to filter by</param>
-    ///<returns>A list of Play offers with a matching creatorId</returns>
-    ///<response code="200">Returns a list of Play offers with a matching creatorId</response>
-    ///<response code="204">No Play offers with a matching creatorId were found</response>
-    [HttpGet]
-    [Route("creator/{creatorId}")]
-    [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
-    public ActionResult<IEnumerable<PlayOffer>> GetByCreatorId(int creatorId)
-    {
-        var result = _context.PlayOffers.Where(po => po.CreatorId == creatorId).ToList();
-        return result.Count > 0 ? Ok(result) : NoContent();
-    }
-    
-    ///<summary>
-    ///Retrieves the play offer with a matching id
-    ///</summary>
-    ///<param name="playOfferId">The id to filter by</param>
+    ///<param name="playOfferId">The id of the play offer</param>
+    ///<param name="creatorId">The id of the creator of the play offer</param>
+    ///<param name="clubId">The id of the club of the play offer</param>
     ///<returns>Play offer with a matching id</returns>
-    ///<response code="200">Returns a Play offer with a matching id</response>
-    ///<response code="204">No Play offer with a matching id was found</response>
+    ///<response code="200">Returns a Play offer matching the query params</response>
+    ///<response code="204">No Play offer with matching properties was found</response>
     [HttpGet]
-    [Route("{playOfferId}")]
     [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
-    public ActionResult<IEnumerable<PlayOffer>> GetById(int playOfferId)
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    public ActionResult<IEnumerable<PlayOffer>> GetById([FromQuery]int? playOfferId, [FromQuery]int? creatorId, [FromQuery] int? clubId)
     {
-        var result = _context.PlayOffers.Where(po => po.Id == playOfferId).ToList();
+        var result = _context.PlayOffers.Where(po => po != null
+                                                     && (!playOfferId.HasValue || po.Id == playOfferId)
+                                                     && (!creatorId.HasValue || po.CreatorId == creatorId)
+                                                     && (!clubId.HasValue || po.ClubId == clubId)
+        ).ToList();
         return result.Count > 0 ? Ok(result) : NoContent();
     }
     
@@ -77,6 +50,8 @@ public class PlayOfferController: ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(PlayOffer), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
+    [Consumes("application/json")]
+    [Produces("application/json")]
     public ActionResult<PlayOffer> Create(PlayOfferDto playOfferDto)
     {
         // TODO: Check if creatorId is valid, and retrieve clubId
@@ -95,6 +70,8 @@ public class PlayOfferController: ControllerBase
     [HttpDelete]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
+    [Consumes("application/json")]
+    [Produces("application/json")]
     public ActionResult Delete(int playOfferId)
     {
         var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == playOfferId);
@@ -115,6 +92,8 @@ public class PlayOfferController: ControllerBase
     [Route("/join")]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
+    [Consumes("application/json")]
+    [Produces("application/json")]
     public ActionResult Join(JoinPlayOfferDto joinPlayOfferDto)
     {
         var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == joinPlayOfferDto.PlayOfferId);
