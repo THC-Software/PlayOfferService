@@ -33,8 +33,8 @@ public class PlayOfferController: ControllerBase
     {
         var result = _context.PlayOffers.Where(po => po != null
                                                      && (!playOfferId.HasValue || po.Id == playOfferId)
-                                                     && (!creatorId.HasValue || po.CreatorId == creatorId)
-                                                     && (!clubId.HasValue || po.ClubId == clubId)
+                                                     && (!creatorId.HasValue || po.Creator.Id == creatorId)
+                                                     && (!clubId.HasValue || po.Club.Id == clubId)
         ).ToList();
         return result.Count > 0 ? Ok(result) : NoContent();
     }
@@ -100,7 +100,7 @@ public class PlayOfferController: ControllerBase
         
         // TODO: Check if opponentId is valid, and retrieve clubId
         if (playOffer == null) return BadRequest();
-        playOffer.OpponentId = joinPlayOfferDto.OpponentId;
+        playOffer.Opponent = new Member { Id = joinPlayOfferDto.OpponentId };
         _context.SaveChanges();
         
         //TODO: Send request to reservation service to create a reservation and update playOffer.ReservationId
