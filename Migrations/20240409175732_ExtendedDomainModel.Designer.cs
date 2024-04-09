@@ -12,7 +12,7 @@ using PlayOfferService.Repositories;
 namespace PlayOfferService.Migrations
 {
     [DbContext(typeof(PlayOfferContext))]
-    [Migration("20240409174338_ExtendedDomainModel")]
+    [Migration("20240409175732_ExtendedDomainModel")]
     partial class ExtendedDomainModel
     {
         /// <inheritdoc />
@@ -28,10 +28,7 @@ namespace PlayOfferService.Migrations
             modelBuilder.Entity("PlayOfferService.Models.Club", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("Id");
 
@@ -41,10 +38,7 @@ namespace PlayOfferService.Migrations
             modelBuilder.Entity("PlayOfferService.Models.Member", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ClubId")
                         .HasColumnType("int");
@@ -101,10 +95,7 @@ namespace PlayOfferService.Migrations
             modelBuilder.Entity("PlayOfferService.Models.Reservation", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("Id");
 
