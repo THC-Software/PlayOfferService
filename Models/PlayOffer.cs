@@ -1,12 +1,14 @@
 ﻿namespace PlayOfferService.Models;
 
 public class PlayOffer {
-    public int Id { get; set; }
-    public int ClubId { get; set; }
-    public int CreatorId { get; set; }
-    public int? OpponentId { get; set; }
-    public DateTime PlayDate { get; set; }
-    public int? ReservationId { get; set; }
+    public Guid Id { get; set; }
+    public Club Club { get; set; }
+    public Member Creator { get; set; }
+    public Member? Opponent { get; set; }
+    public DateTime ProposedStartTime { get; set; }
+    public DateTime ProposedEndTime { get; set; }
+    public DateTime AcceptedStartTime { get; set; }
+    public Reservation? Reservation { get; set; }
 
     public PlayOffer()
     {
@@ -14,10 +16,10 @@ public class PlayOffer {
     
     public PlayOffer(PlayOfferDto dto)
     {
-        ClubId = dto.ClubId;
-        CreatorId = dto.CreatorId;
-        OpponentId = dto.OpponentId;
-        PlayDate = dto.PlayDate;
-        ReservationId = dto.ReservationId;
+        Id = new Guid();
+        Club = new Club { Id= dto.ClubId };
+        Creator = new Member { Id = dto.CreatorId };
+        ProposedStartTime = dto.ProposedStartTime;
+        ProposedEndTime = dto.ProposedEndTime;
     }
 }

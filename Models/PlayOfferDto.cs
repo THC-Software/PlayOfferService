@@ -2,9 +2,8 @@ namespace PlayOfferService.Models;
 
 public class PlayOfferDto
 {
-    public int ClubId { get; set; }
-    public int CreatorId { get; set; }
-    public int? OpponentId { get; set; }
-    public DateTime PlayDate { get; set; }
-    public int? ReservationId { get; set; }
+    public Guid ClubId { get; set; }
+    public Guid CreatorId { get; set; }
+    public DateTime ProposedStartTime { get; set; }
+    public DateTime ProposedEndTime { get; set; }
 }

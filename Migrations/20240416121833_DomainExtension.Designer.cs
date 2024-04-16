@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PlayOfferService.Repositories;
 
@@ -11,9 +12,11 @@ using PlayOfferService.Repositories;
 namespace PlayOfferService.Migrations
 {
     [DbContext(typeof(PlayOfferContext))]
-    partial class PlayOfferContextModelSnapshot : ModelSnapshot
+    [Migration("20240416121833_DomainExtension")]
+    partial class DomainExtension
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

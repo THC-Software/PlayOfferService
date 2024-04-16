@@ -29,12 +29,12 @@ public class PlayOfferController: ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public ActionResult<IEnumerable<PlayOffer>> GetById([FromQuery]int? playOfferId, [FromQuery]int? creatorId, [FromQuery] int? clubId)
+    public ActionResult<IEnumerable<PlayOffer>> GetById([FromQuery]Guid? playOfferId, [FromQuery]Guid? creatorId, [FromQuery] Guid? clubId)
     {
         var result = _context.PlayOffers.Where(po => po != null
                                                      && (!playOfferId.HasValue || po.Id == playOfferId)
-                                                     && (!creatorId.HasValue || po.CreatorId == creatorId)
-                                                     && (!clubId.HasValue || po.ClubId == clubId)
+                                                     && (!creatorId.HasValue || po.Creator.Id == creatorId)
+                                                     && (!clubId.HasValue || po.Club.Id == clubId)
         ).ToList();
         return result.Count > 0 ? Ok(result) : NoContent();
     }
@@ -72,7 +72,7 @@ public class PlayOfferController: ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public ActionResult Delete(int playOfferId)
+    public ActionResult Delete(Guid playOfferId)
     {
         var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == playOfferId);
         if (playOffer == null) return BadRequest();
@@ -100,7 +100,7 @@ public class PlayOfferController: ControllerBase
         
         // TODO: Check if opponentId is valid, and retrieve clubId
         if (playOffer == null) return BadRequest();
-        playOffer.OpponentId = joinPlayOfferDto.OpponentId;
+        playOffer.Opponent = new Member { Id = joinPlayOfferDto.OpponentId };
         _context.SaveChanges();
         
         //TODO: Send request to reservation service to create a reservation and update playOffer.ReservationId
