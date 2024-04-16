@@ -12,8 +12,8 @@ using PlayOfferService.Repositories;
 namespace PlayOfferService.Migrations
 {
     [DbContext(typeof(PlayOfferContext))]
-    [Migration("20240409175732_ExtendedDomainModel")]
-    partial class ExtendedDomainModel
+    [Migration("20240416121833_DomainExtension")]
+    partial class DomainExtension
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,8 +27,9 @@ namespace PlayOfferService.Migrations
 
             modelBuilder.Entity("PlayOfferService.Models.Club", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -37,11 +38,11 @@ namespace PlayOfferService.Migrations
 
             modelBuilder.Entity("PlayOfferService.Models.Member", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)");
 
-                    b.Property<int>("ClubId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -52,23 +53,21 @@ namespace PlayOfferService.Migrations
 
             modelBuilder.Entity("PlayOfferService.Models.PlayOffer", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("AcceptedStartTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("ClubId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ClubId")
+                        .HasColumnType("char(36)");
 
-                    b.Property<int>("CreatorId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CreatorId")
+                        .HasColumnType("char(36)");
 
-                    b.Property<int?>("OpponentId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("OpponentId")
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("ProposedEndTime")
                         .HasColumnType("datetime(6)");
@@ -76,8 +75,8 @@ namespace PlayOfferService.Migrations
                     b.Property<DateTime>("ProposedStartTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("ReservationId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("ReservationId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -94,8 +93,9 @@ namespace PlayOfferService.Migrations
 
             modelBuilder.Entity("PlayOfferService.Models.Reservation", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 

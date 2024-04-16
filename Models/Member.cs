@@ -5,6 +5,6 @@ namespace PlayOfferService.Models;
 public class Member
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public Club Club { get; set; }
 }

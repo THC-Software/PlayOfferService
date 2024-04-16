@@ -4,6 +4,5 @@ namespace PlayOfferService.Models;
 
 public class Reservation
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 }

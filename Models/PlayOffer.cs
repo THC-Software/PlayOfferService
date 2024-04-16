@@ -1,7 +1,7 @@
 ﻿namespace PlayOfferService.Models;
 
 public class PlayOffer {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public Club Club { get; set; }
     public Member Creator { get; set; }
     public Member? Opponent { get; set; }
@@ -16,6 +16,7 @@ public class PlayOffer {
     
     public PlayOffer(PlayOfferDto dto)
     {
+        Id = new Guid();
         Club = new Club { Id= dto.ClubId };
         Creator = new Member { Id = dto.CreatorId };
         ProposedStartTime = dto.ProposedStartTime;
