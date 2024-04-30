@@ -6,4 +6,5 @@ namespace PlayOfferService.Domain.Events;
 [JsonDerivedType(typeof(PlayOfferCancelledEvent), typeDiscriminator: "PLAYOFFER_CANCELLED")]
 public class PlayOfferCancelledEvent : IDomainEvent
 {
+    public PlayOfferCancelledEvent(){}
 }

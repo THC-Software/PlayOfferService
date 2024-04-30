@@ -10,11 +10,12 @@ public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent<IDomain
     public void Configure(EntityTypeBuilder<BaseEvent<IDomainEvent>> builder)
     {
         builder.ToTable("Events");
+        builder.HasKey(e => e.EventId);
         
         builder.Property(e => e.EventId)
             .IsRequired()
             .ValueGeneratedNever();
-        builder.HasKey(e => e.EventId);
+        
         
         builder.Property(e => e.EntityId)
             .IsRequired();
@@ -34,7 +35,7 @@ public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent<IDomain
             .IsRequired();
 
         builder.Property(e => e.DomainEvent)
-            .HasConversion(
+            .HasConversion<string>(
                 e => JsonSerializer.Serialize(e, JsonSerializerOptions.Default),
                 e => JsonSerializer.Deserialize<IDomainEvent>(e, JsonSerializerOptions.Default)
             )

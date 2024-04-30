@@ -5,9 +5,16 @@ namespace PlayOfferService.Domain.Events;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "eventType")]
 [JsonDerivedType(typeof(PlayOfferReservationCreatedEvent), typeDiscriminator: "PLAYOFFER_RESERVATION_CREATED")]
-public class PlayOfferReservationCreatedEvent(Reservation reservation)
-    : IDomainEvent
+public class PlayOfferReservationCreatedEvent : IDomainEvent
 {
-    public Reservation Reservation { get; set; } = reservation;
+    public Reservation Reservation { get; set; }
+    
+    public PlayOfferReservationCreatedEvent(){}
+    
+    public PlayOfferReservationCreatedEvent(
+        Reservation reservation)
+    {
+        Reservation = reservation;
+    }
 }
 
