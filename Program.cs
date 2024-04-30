@@ -4,7 +4,7 @@ using PlayOfferService.Repositories;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = "server=playofferservice-db-do-user-14755325-0.c.db.ondigitalocean.com;port=25060;user=doadmin;password=AVNS_VTN30vCmZpJceD4V3An;database=defaultdb;";
+var connectionString = "server=pos_mysql;port=3306;user=pos_user;password=pos_pw;database=defaultdb;";
 var serverVersion = ServerVersion.AutoDetect(connectionString);
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
@@ -38,6 +38,11 @@ app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "PlayofferService API v1");
 });
+
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var dbContext = services.GetRequiredService<DatabaseContext>();
+dbContext.Database.EnsureCreated();
 
 
 app.UseHttpsRedirection();
