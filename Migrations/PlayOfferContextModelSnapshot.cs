@@ -10,7 +10,7 @@ using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Migrations
 {
-    [DbContext(typeof(PlayOfferContext))]
+    [DbContext(typeof(DatabaseContext))]
     partial class PlayOfferContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -30,7 +30,7 @@ namespace PlayOfferService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clubs");
+                    b.ToTable("Clubs", (string)null);
                 });
 
             modelBuilder.Entity("PlayOfferService.Models.Member", b =>
@@ -45,7 +45,7 @@ namespace PlayOfferService.Migrations
 
                     b.HasIndex("ClubId");
 
-                    b.ToTable("Members");
+                    b.ToTable("Members", (string)null);
                 });
 
             modelBuilder.Entity("PlayOfferService.Models.PlayOffer", b =>
@@ -85,7 +85,7 @@ namespace PlayOfferService.Migrations
 
                     b.HasIndex("ReservationId");
 
-                    b.ToTable("PlayOffers");
+                    b.ToTable("PlayOffers", (string)null);
                 });
 
             modelBuilder.Entity("PlayOfferService.Models.Reservation", b =>
@@ -96,7 +96,7 @@ namespace PlayOfferService.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Reservations");
+                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("PlayOfferService.Models.Member", b =>

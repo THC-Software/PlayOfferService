@@ -8,9 +8,9 @@ namespace PlayOfferService.Controllers;
 [Route("api")]
 public class PlayOfferController: ControllerBase
 {
-    private PlayOfferContext _context;
+    private DatabaseContext _context;
     
-    public PlayOfferController(PlayOfferContext context)
+    public PlayOfferController(DatabaseContext context)
     {
         _context = context;
     }

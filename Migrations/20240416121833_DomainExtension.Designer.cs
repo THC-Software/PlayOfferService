@@ -11,7 +11,7 @@ using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Migrations
 {
-    [DbContext(typeof(PlayOfferContext))]
+    [DbContext(typeof(DatabaseContext))]
     [Migration("20240416121833_DomainExtension")]
     partial class DomainExtension
     {

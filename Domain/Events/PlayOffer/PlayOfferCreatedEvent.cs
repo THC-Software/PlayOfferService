@@ -6,16 +6,11 @@ namespace PlayOfferService.Domain.Events;
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "eventType")]
 [JsonDerivedType(typeof(PlayOfferCreatedEvent), typeDiscriminator: "PLAYOFFER_CREATED")]
 public class PlayOfferCreatedEvent(
-    Guid eventId,
-    Guid entityId,
-    EventType eventType,
-    EntityType entityType,
-    DateTime createdAt,
     Club club,
     Member creator,
     DateTime proposedStartTime,
     DateTime proposedEndTime)
-    : BaseEvent(eventId, entityId, eventType, entityType, createdAt)
+    : IDomainEvent
 {
     public Club Club { get; set; } = club;
     public Member Creator { get; set; } = creator;
