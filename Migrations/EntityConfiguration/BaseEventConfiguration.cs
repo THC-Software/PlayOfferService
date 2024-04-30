@@ -36,7 +36,7 @@ public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent<IDomain
 
         builder.Property(e => e.DomainEvent)
             .HasConversion<string>(
-                e => JsonSerializer.Serialize(e, JsonSerializerOptions.Default),
+                e => JsonSerializer.Serialize<object>(e, JsonSerializerOptions.Default),
                 e => JsonSerializer.Deserialize<IDomainEvent>(e, JsonSerializerOptions.Default)
             )
             .IsRequired();
