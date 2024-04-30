@@ -9,7 +9,7 @@ var connectionString = "server=playofferservice-db-do-user-14755325-0.c.db.ondig
 var serverVersion = ServerVersion.AutoDetect(connectionString);
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseMySql(connectionString, serverVersion)
+    options.UseMySql(connectionString, serverVersion).UseCamelCaseNamingConvention()
 );
 
 // Add services to the container.

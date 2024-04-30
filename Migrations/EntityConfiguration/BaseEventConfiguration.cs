@@ -19,7 +19,7 @@ public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent<IDomain
         
         builder.Property(e => e.EntityId)
             .IsRequired();
-        builder.Property(e => e.CreatedAt)
+        builder.Property(e => e.Timestamp)
             .IsRequired();
         
         builder.Property(e => e.EventType)
@@ -34,7 +34,7 @@ public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent<IDomain
             )
             .IsRequired();
 
-        builder.Property(e => e.DomainEvent)
+        builder.Property(e => e.EventData)
             .HasConversion<string>(
                 e => JsonSerializer.Serialize<object>(e, JsonSerializerOptions.Default),
                 e => JsonSerializer.Deserialize<IDomainEvent>(e, JsonSerializerOptions.Default)
