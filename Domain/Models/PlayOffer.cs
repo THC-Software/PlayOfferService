@@ -1,6 +1,10 @@
-﻿namespace PlayOfferService.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using PlayOfferService.Domain.Events;
+
+namespace PlayOfferService.Models;
 
 public class PlayOffer {
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
     public Club Club { get; set; }
     public Member Creator { get; set; }

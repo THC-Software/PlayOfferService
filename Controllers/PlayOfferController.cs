@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using PlayOfferService.Domain.Events;
 using PlayOfferService.Models;
 using PlayOfferService.Repositories;
 
@@ -8,9 +10,9 @@ namespace PlayOfferService.Controllers;
 [Route("api")]
 public class PlayOfferController: ControllerBase
 {
-    private PlayOfferContext _context;
+    private DatabaseContext _context;
     
-    public PlayOfferController(PlayOfferContext context)
+    public PlayOfferController(DatabaseContext context)
     {
         _context = context;
     }
