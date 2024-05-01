@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using PlayOfferService.Commands;
 using PlayOfferService.Models;
 using PlayOfferService.Queries;
 using PlayOfferService.Repositories;
@@ -54,11 +55,11 @@ public class PlayOfferController : ControllerBase {
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public ActionResult<PlayOffer> Create(PlayOfferDto playOfferDto) {
+    public async Task<ActionResult<PlayOffer>> Create(PlayOfferDto playOfferDto) {
         // TODO: Check if creatorId is valid, and retrieve clubId
-        var result = _context.PlayOffers.Add(new PlayOffer(playOfferDto));
-        _context.SaveChanges();
-        return CreatedAtAction(nameof(GetByIdAsync), new { playOfferId = result.Entity.Id }, result.Entity);
+        var result = await _mediator.Send(new CreatePlayOfferCommand(playOfferDto));
+
+        return CreatedAtAction(nameof(GetByIdAsync), new { playOfferId = result.Id }, result);
     }
 
     ///<summary>
