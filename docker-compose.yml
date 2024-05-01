@@ -6,10 +6,7 @@
       - "6379:6379"
   pos_mysql:
     image: mysql:8
-    command: 
-      - --default-authentication-plugin=mysql_native_password
-      - mysql -uroot -prootpw -e "SET @@GLOBAL.ENFORCE_GTID_CONSISTENCY = ON;SET @@GLOBAL.GTID_MODE = OFF_PERMISSIVE;SET @@GLOBAL.GTID_MODE = ON_PERMISSIVE;SET @@GLOBAL.GTID_MODE = ON;"
-      - 
+    command: ["mysqld", "--default-authentication-plugin=mysql_native_password", "--server-id=1","mysql -uroot -prootpw -e \"SET @@GLOBAL.ENFORCE_GTID_CONSISTENCY = ON;SET @@GLOBAL.GTID_MODE = OFF_PERMISSIVE;SET @@GLOBAL.GTID_MODE = ON_PERMISSIVE;SET @@GLOBAL.GTID_MODE = ON;\""]
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpw
@@ -18,12 +15,24 @@
       MYSQL_PASSWORD: pos_pw
     ports:
       - "3306:3306"
+  pos_debezium:
+    image: debezium/server
+    restart: always
+    ports:
+      - "6380:8080"
+    depends_on:
+      - pos_mysql
+      - pos_redis
+    volumes:
+      - ./debezium-conf:/debezium/conf
   pos_service:
     image: playofferservice
     restart: always
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      - pos_mysql
     ports:
       - "8080:8080"
       - "8081:8081"
