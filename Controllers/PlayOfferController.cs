@@ -1,22 +1,23 @@
-using System.Text.Json;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PlayOfferService.Domain.Events;
 using PlayOfferService.Models;
+using PlayOfferService.Queries;
 using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Controllers;
 
 [ApiController]
 [Route("api")]
-public class PlayOfferController: ControllerBase
-{
-    private DatabaseContext _context;
-    
-    public PlayOfferController(DatabaseContext context)
-    {
+public class PlayOfferController : ControllerBase {
+
+    private readonly DatabaseContext _context;
+    private readonly IMediator _mediator;
+
+    public PlayOfferController(DatabaseContext context, IMediator mediator) {
         _context = context;
+        _mediator = mediator;
     }
-    
+
     ///<summary>
     ///Retrieve all Play Offers matching the query params
     ///</summary>
@@ -31,17 +32,16 @@ public class PlayOfferController: ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public ActionResult<IEnumerable<PlayOffer>> GetById([FromQuery]Guid? playOfferId, [FromQuery]Guid? creatorId, [FromQuery] Guid? clubId)
-    {
-        var result = _context.PlayOffers.Where(po => po != null
-                                                     && (!playOfferId.HasValue || po.Id == playOfferId)
-                                                     && (!creatorId.HasValue || po.Creator.Id == creatorId)
-                                                     && (!clubId.HasValue || po.Club.Id == clubId)
-        ).ToList();
-        return result.Count > 0 ? Ok(result) : NoContent();
+    public async Task<ActionResult<IEnumerable<PlayOffer>>> GetByIdAsync([FromQuery] Guid? playOfferId, [FromQuery] Guid? creatorId, [FromQuery] Guid? clubId) {
+
+        var result = await _mediator.Send(new GetPlayOffersByIdQuery(playOfferId, creatorId, clubId));
+
+        if (result.Count() == 0) return NoContent();
+
+        return Ok(result);
     }
-    
-        
+
+
     ///<summary>
     ///Create a new Play Offer
     ///</summary>
@@ -54,14 +54,13 @@ public class PlayOfferController: ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public ActionResult<PlayOffer> Create(PlayOfferDto playOfferDto)
-    {
+    public ActionResult<PlayOffer> Create(PlayOfferDto playOfferDto) {
         // TODO: Check if creatorId is valid, and retrieve clubId
         var result = _context.PlayOffers.Add(new PlayOffer(playOfferDto));
         _context.SaveChanges();
-        return CreatedAtAction(nameof(GetById), new { playOfferId = result.Entity.Id }, result.Entity);
+        return CreatedAtAction(nameof(GetByIdAsync), new { playOfferId = result.Entity.Id }, result.Entity);
     }
-    
+
     ///<summary>
     ///Deletes a Play Offer with a matching id
     ///</summary>
@@ -74,15 +73,14 @@ public class PlayOfferController: ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public ActionResult Delete(Guid playOfferId)
-    {
+    public ActionResult Delete(Guid playOfferId) {
         var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == playOfferId);
         if (playOffer == null) return BadRequest();
         _context.PlayOffers.Remove(playOffer);
         _context.SaveChanges();
         return Ok();
     }
-    
+
     ///<summary>
     ///Adds a given opponentId to a Play Offer and creates a reservation
     ///</summary>
@@ -96,15 +94,14 @@ public class PlayOfferController: ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public ActionResult Join(JoinPlayOfferDto joinPlayOfferDto)
-    {
+    public ActionResult Join(JoinPlayOfferDto joinPlayOfferDto) {
         var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == joinPlayOfferDto.PlayOfferId);
-        
+
         // TODO: Check if opponentId is valid, and retrieve clubId
         if (playOffer == null) return BadRequest();
         playOffer.Opponent = new Member { Id = joinPlayOfferDto.OpponentId };
         _context.SaveChanges();
-        
+
         //TODO: Send request to reservation service to create a reservation and update playOffer.ReservationId
         return Ok();
     }
