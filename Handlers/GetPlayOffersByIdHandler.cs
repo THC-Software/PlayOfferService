@@ -5,14 +5,17 @@ using PlayOfferService.Queries;
 using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Handlers;
-public class GetPlayOffersByIdHandler : IRequestHandler<GetPlayOffersByIdQuery, IEnumerable<PlayOffer>> {
+public class GetPlayOffersByIdHandler : IRequestHandler<GetPlayOffersByIdQuery, IEnumerable<PlayOffer>>
+{
     private readonly DatabaseContext _context;
 
-    public GetPlayOffersByIdHandler(DatabaseContext context) {
+    public GetPlayOffersByIdHandler(DatabaseContext context)
+    {
         _context = context;
     }
 
-    public async Task<IEnumerable<PlayOffer>> Handle(GetPlayOffersByIdQuery request, CancellationToken cancellationToken) {
+    public async Task<IEnumerable<PlayOffer>> Handle(GetPlayOffersByIdQuery request, CancellationToken cancellationToken)
+    {
 
         var playOfferId = request.playOfferId;
         var creatorId = request.creatorId;

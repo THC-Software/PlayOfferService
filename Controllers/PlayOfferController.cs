@@ -100,16 +100,22 @@ public class PlayOfferController : ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public ActionResult Join(JoinPlayOfferDto joinPlayOfferDto)
+    public async Task<ActionResult> Join(JoinPlayOfferDto joinPlayOfferDto)
     {
-        var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == joinPlayOfferDto.PlayOfferId);
+        //var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == joinPlayOfferDto.PlayOfferId);
 
-        // TODO: Check if opponentId is valid, and retrieve clubId
+        var playOffer = await _mediator.Send(new GetPlayOffersByIdQuery(joinPlayOfferDto.PlayOfferId, null, null));
+
         if (playOffer == null) return BadRequest();
-        playOffer.Opponent = new Member { Id = joinPlayOfferDto.OpponentId };
-        _context.SaveChanges();
 
-        //TODO: Send request to reservation service to create a reservation and update playOffer.ReservationId
-        return Ok();
+        var result = await _mediator.Send(new JoinPlayOfferCommand(joinPlayOfferDto));
+
+        //// TODO: Check if opponentId is valid, and retrieve clubId
+        //if (playOffer == null) return BadRequest();
+        //playOffer.Opponent = new Member { Id = joinPlayOfferDto.OpponentId };
+        //_context.SaveChanges();
+
+        ////TODO: Send request to reservation service to create a reservation and update playOffer.ReservationId
+        //return Ok();
     }
 }

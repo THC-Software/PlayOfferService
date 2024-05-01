@@ -6,27 +6,27 @@ namespace PlayOfferService.Handlers;
 
 public class DeletePlayOfferHandler : IRequestHandler<DeletePlayOfferCommand>
 {
-  private readonly DatabaseContext _context;
+    private readonly DatabaseContext _context;
 
-  public DeletePlayOfferHandler(DatabaseContext context)
-  {
-    _context = context;
-  }
-
-
-  public async Task Handle(DeletePlayOfferCommand request, CancellationToken cancellationToken)
-  {
-    var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == request.playOfferId);
-
-    if (playOffer == null)
+    public DeletePlayOfferHandler(DatabaseContext context)
     {
-      await Task.FromException(new NullReferenceException());
+        _context = context;
     }
 
-    _context.PlayOffers.Remove(playOffer);
 
-    await _context.SaveChangesAsync();
+    public async Task Handle(DeletePlayOfferCommand request, CancellationToken cancellationToken)
+    {
+        var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == request.playOfferId);
 
-    await Task.CompletedTask;
-  }
+        if (playOffer == null)
+        {
+            await Task.FromException(new NullReferenceException());
+        }
+
+        _context.PlayOffers.Remove(playOffer);
+
+        await _context.SaveChangesAsync();
+
+        await Task.CompletedTask;
+    }
 }

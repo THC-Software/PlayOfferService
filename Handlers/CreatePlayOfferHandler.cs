@@ -4,15 +4,18 @@ using PlayOfferService.Models;
 using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Handlers;
-public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, PlayOffer> {
+public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, PlayOffer>
+{
 
     private readonly DatabaseContext _context;
 
-    public CreatePlayOfferHandler(DatabaseContext context) {
+    public CreatePlayOfferHandler(DatabaseContext context)
+    {
         _context = context;
     }
 
-    public async Task<PlayOffer> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken) {
+    public async Task<PlayOffer> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
+    {
         var playOfferDto = request.playOfferDto;
 
         var playOffer = new PlayOffer(playOfferDto);

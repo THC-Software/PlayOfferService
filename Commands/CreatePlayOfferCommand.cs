@@ -2,5 +2,6 @@
 using PlayOfferService.Models;
 
 namespace PlayOfferService.Commands;
-public record CreatePlayOfferCommand(PlayOfferDto playOfferDto) : IRequest<PlayOffer> {
+public record CreatePlayOfferCommand(PlayOfferDto playOfferDto) : IRequest<PlayOffer>
+{
 }
