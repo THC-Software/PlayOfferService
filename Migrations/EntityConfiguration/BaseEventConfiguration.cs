@@ -9,7 +9,7 @@ public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent<IDomain
 {
     public void Configure(EntityTypeBuilder<BaseEvent<IDomainEvent>> builder)
     {
-        builder.ToTable("Events");
+        builder.ToTable("events");
         builder.HasKey(e => e.EventId);
         
         builder.Property(e => e.EventId)

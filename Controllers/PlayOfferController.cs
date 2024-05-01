@@ -120,12 +120,12 @@ public class PlayOfferController: ControllerBase
             Guid.NewGuid(),
             EventType.PLAYOFFER_CREATED,
             EntityType.PLAYOFFER,
-            DateTime.Now, 
+            DateTime.UtcNow, 
             new PlayOfferCreatedEvent(
                 club, 
                 new Member{Id=Guid.NewGuid(), Club = club},
-                DateTime.Now.AddHours(2), 
-                DateTime.Now.AddHours(6)
+                DateTime.UtcNow.AddHours(2), 
+                DateTime.UtcNow.AddHours(6)
             ));
         _context.Events.Add(testEvent);
         _context.SaveChanges();

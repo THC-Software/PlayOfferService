@@ -5,11 +5,10 @@ using Microsoft.OpenApi.Models;
 using PlayOfferService.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = "server=pos_mysql;port=3306;user=pos_user;password=pos_pw;database=defaultdb;";
-var serverVersion = ServerVersion.AutoDetect(connectionString);
+var connectionString = "Host=pos_postgres;Database=pos_db;Username=pos_user;Password=pos_password";
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseMySql(connectionString, serverVersion).UseCamelCaseNamingConvention()
+    options.UseNpgsql(connectionString)
 );
 
 // Add services to the container.
