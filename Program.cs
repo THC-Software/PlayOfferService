@@ -4,11 +4,10 @@ using PlayOfferService.Repositories;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = "server=playofferservice-db-do-user-14755325-0.c.db.ondigitalocean.com;port=25060;user=doadmin;password=AVNS_VTN30vCmZpJceD4V3An;database=defaultdb;";
-var serverVersion = ServerVersion.AutoDetect(connectionString);
+var connectionString = "Host=pos_postgres;Database=pos_db;Username=pos_user;Password=pos_password";
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseMySql(connectionString, serverVersion).UseCamelCaseNamingConvention()
+    options.UseNpgsql(connectionString)
 );
 
 // Add services to the container.
@@ -33,12 +32,17 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Progr
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "PlayofferService API v1");
+});
+
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var dbContext = services.GetRequiredService<DatabaseContext>();
+dbContext.Database.EnsureCreated();
+
 
 app.UseHttpsRedirection();
 

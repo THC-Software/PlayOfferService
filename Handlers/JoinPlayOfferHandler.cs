@@ -24,7 +24,7 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
             return Task.FromException(new NullReferenceException());
         }
 
-        playOffer.Opponent = new Member { Id = request.joinPlayOfferDto.OpponentId };
+        playOffer.Opponent = new Member { Id = request.joinPlayOfferDto.OpponentId, Club = playOffer.Club};
 
         await _context.SaveChangesAsync();
 

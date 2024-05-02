@@ -20,9 +20,9 @@ public class PlayOffer {
     
     public PlayOffer(PlayOfferDto dto)
     {
-        Id = new Guid();
+        Id = Guid.NewGuid();
         Club = new Club { Id= dto.ClubId };
-        Creator = new Member { Id = dto.CreatorId };
+        Creator = new Member { Id = dto.CreatorId, Club = Club};
         ProposedStartTime = dto.ProposedStartTime;
         ProposedEndTime = dto.ProposedEndTime;
     }

@@ -1,0 +1,36 @@
+﻿services:
+  pos_redis:
+    image: redis:7.0-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+  pos_postgres:
+    image: debezium/postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: pos_user
+      POSTGRES_PASSWORD: pos_password
+      POSTGRES_DB: pos_db
+    ports:
+      - "5432:5432"
+  pos_debezium:
+    image: debezium/server
+    restart: always
+    ports:
+      - "6380:8080"
+    depends_on:
+      - pos_postgres
+      - pos_redis
+    volumes:
+      - ./debezium-conf:/debezium/conf
+  pos_service:
+    image: playofferservice
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - pos_postgres
+    ports:
+      - "8080:8080"
+      - "8081:8081"

@@ -25,7 +25,12 @@ public class GetPlayOffersByIdHandler : IRequestHandler<GetPlayOffersByIdQuery, 
                                                      && (!playOfferId.HasValue || po.Id == playOfferId)
                                                      && (!creatorId.HasValue || po.Creator.Id == creatorId)
                                                      && (!clubId.HasValue || po.Club.Id == clubId)
-        ).ToListAsync();
+        )
+            .Include(po => po.Club)
+            .Include(po => po.Creator)
+            .Include(po => po.Opponent)
+            .Include(po => po.Reservation)
+            .ToListAsync();
 
         return result;
     }
