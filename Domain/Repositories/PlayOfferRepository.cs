@@ -36,7 +36,7 @@ public class PlayOfferRepository
             Guid entityId = group.Key;
             var eventsForPlayOffer = await _context.Events.Where(e => e.EntityId == entityId).ToListAsync();
             
-            var playOffer = new PlayOffer(entityId);
+            var playOffer = new PlayOffer();
             foreach (var baseEvent in eventsForPlayOffer)
             {
                 playOffer.Apply(baseEvent);

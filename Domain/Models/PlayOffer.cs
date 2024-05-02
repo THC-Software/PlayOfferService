@@ -26,4 +26,41 @@ public class PlayOffer {
         ProposedStartTime = dto.ProposedStartTime;
         ProposedEndTime = dto.ProposedEndTime;
     }
+    
+    public PlayOffer(Guid id)
+    {
+        Id = id;
+    }
+
+    public void Apply(BaseEvent<IDomainEvent> baseEvent)
+    {
+        switch (baseEvent.EventType)
+        {
+            case EventType.PLAYOFFER_CREATED:
+                Apply((PlayOfferCreatedEvent) baseEvent.EventData);
+                break;
+            case EventType.PLAYOFFER_JOINED:
+                Apply((PlayOfferJoinedEvent) baseEvent.EventData);
+                break;
+            case EventType.PLAYOFFER_CANCELLED:
+            case EventType.PLAYOFFER_RESERVATION_CREATED:
+                throw new NotImplementedException();
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+    
+    private void Apply(PlayOfferCreatedEvent domainEvent)
+    {
+        Id = domainEvent.Id;
+        Club = domainEvent.Club;
+        Creator = domainEvent.Creator;
+        ProposedStartTime = domainEvent.ProposedStartTime;
+        ProposedEndTime = domainEvent.ProposedEndTime;
+    }
+    
+    private void Apply(PlayOfferJoinedEvent domainEvent)
+    {
+        Opponent = domainEvent.Opponent;
+    }
 }
