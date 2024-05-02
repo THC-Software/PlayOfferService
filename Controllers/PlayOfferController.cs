@@ -108,27 +108,4 @@ public class PlayOfferController: ControllerBase
         //TODO: Send request to reservation service to create a reservation and update playOffer.ReservationId
         return Ok();
     }
-    
-    [HttpPost]
-    [Route("/test")]
-    public ActionResult Test()
-    {
-        var club = new Club { Id = Guid.NewGuid() };
-        
-        var testEvent = new BaseEvent<IDomainEvent>(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            EventType.PLAYOFFER_CREATED,
-            EntityType.PLAYOFFER,
-            DateTime.UtcNow, 
-            new PlayOfferCreatedEvent(
-                club, 
-                new Member{Id=Guid.NewGuid(), Club = club},
-                DateTime.UtcNow.AddHours(2), 
-                DateTime.UtcNow.AddHours(6)
-            ));
-        _context.Events.Add(testEvent);
-        _context.SaveChanges();
-        return Ok(testEvent);
-    }
 }
