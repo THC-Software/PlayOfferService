@@ -80,7 +80,7 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult> Delete(Guid playOfferId)
     {
-        var result = _mediator.Send(new DeletePlayOfferCommand(playOfferId));
+        var result = await _mediator.Send(new DeletePlayOfferCommand(playOfferId));
 
         if (result.Exception != null) return BadRequest();
 
@@ -102,20 +102,15 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult> Join(JoinPlayOfferDto joinPlayOfferDto)
     {
-        //var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == joinPlayOfferDto.PlayOfferId);
 
-        var playOffer = await _mediator.Send(new GetPlayOffersByIdQuery(joinPlayOfferDto.PlayOfferId, null, null));
+        var playOffers = await _mediator.Send(new GetPlayOffersByIdQuery(joinPlayOfferDto.PlayOfferId, null, null));
 
-        if (playOffer == null) return BadRequest();
+        if (playOffers == null || playOffers.Count() == 0) return BadRequest();
 
         var result = await _mediator.Send(new JoinPlayOfferCommand(joinPlayOfferDto));
 
-        //// TODO: Check if opponentId is valid, and retrieve clubId
-        //if (playOffer == null) return BadRequest();
-        //playOffer.Opponent = new Member { Id = joinPlayOfferDto.OpponentId };
-        //_context.SaveChanges();
+        if (result.Exception != null) return BadRequest();
 
-        ////TODO: Send request to reservation service to create a reservation and update playOffer.ReservationId
-        //return Ok();
+        return Ok();
     }
 }

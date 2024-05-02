@@ -4,7 +4,7 @@ using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Handlers;
 
-public class DeletePlayOfferHandler : IRequestHandler<DeletePlayOfferCommand>
+public class DeletePlayOfferHandler : IRequestHandler<DeletePlayOfferCommand, Task>
 {
     private readonly DatabaseContext _context;
 
@@ -14,19 +14,19 @@ public class DeletePlayOfferHandler : IRequestHandler<DeletePlayOfferCommand>
     }
 
 
-    public async Task Handle(DeletePlayOfferCommand request, CancellationToken cancellationToken)
+    public async Task<Task> Handle(DeletePlayOfferCommand request, CancellationToken cancellationToken)
     {
         var playOffer = _context.PlayOffers.FirstOrDefault(po => po.Id == request.playOfferId);
 
         if (playOffer == null)
         {
-            await Task.FromException(new NullReferenceException());
+            return Task.FromException(new NullReferenceException());
         }
 
         _context.PlayOffers.Remove(playOffer);
 
         await _context.SaveChangesAsync();
 
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 }
