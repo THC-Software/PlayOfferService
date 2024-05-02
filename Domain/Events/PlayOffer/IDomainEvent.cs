@@ -1,6 +1,6 @@
 namespace PlayOfferService.Domain.Events;
 
-public class IDomainEvent
+public interface IDomainEvent
 {
     
 }
