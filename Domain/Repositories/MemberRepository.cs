@@ -21,17 +21,8 @@ public class MemberRepository
             .OrderBy(e => e.Timestamp)
             .ToListAsync();
 
-        if (events.First().EventType != EventType.MEMBER_ACCOUNT_CREATED)
-        {
-            throw new DataException("INVALID STATE: First Member Event must be of type " +
-                                    nameof(EventType.MEMBER_ACCOUNT_CREATED));
-        }
-
         var member = new Member();
-        foreach (var baseEvent in events)
-        {
-            member.Apply(baseEvent);
-        }
+        member.Apply(events);
 
         return member;
     }

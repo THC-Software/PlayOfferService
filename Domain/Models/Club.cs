@@ -9,21 +9,30 @@ public class Club
     public Guid Id { get; set; }
     public bool IsLocked { get; set; }
 
-    public void Apply(BaseEvent<IDomainEvent> baseEvent)
+    public void Apply(List<BaseEvent<IDomainEvent>> baseEvents)
     {
-        switch (baseEvent.EventType)
+        if (baseEvents.First().EventType != EventType.TENNIS_CLUB_REGISTERED)
         {
-            case EventType.TENNIS_CLUB_REGISTERED:
-                Apply((ClubCreatedEvent) baseEvent.EventData);
-                break;
-            case EventType.TENNIS_CLUB_LOCKED:
-                Apply((ClubLockedEvent) baseEvent.EventData);
-                break;
-            case EventType.TENNIS_CLUB_UNLOCKED:
-                Apply((ClubUnlockedEvent) baseEvent.EventData);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            throw new ArgumentException("First Club event must be of type "
+                                        +nameof(EventType.TENNIS_CLUB_REGISTERED));
+        }
+        
+        foreach (var baseEvent in baseEvents)
+        {
+            switch (baseEvent.EventType)
+            {
+                case EventType.TENNIS_CLUB_REGISTERED:
+                    Apply((ClubCreatedEvent) baseEvent.EventData);
+                    break;
+                case EventType.TENNIS_CLUB_LOCKED:
+                    Apply((ClubLockedEvent) baseEvent.EventData);
+                    break;
+                case EventType.TENNIS_CLUB_UNLOCKED:
+                    Apply((ClubUnlockedEvent) baseEvent.EventData);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
     

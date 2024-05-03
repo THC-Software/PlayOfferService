@@ -21,16 +21,9 @@ public class ClubRepository
             .OrderBy(e => e.Timestamp)
             .ToListAsync();
         
-        if (events.First().EventType != EventType.TENNIS_CLUB_REGISTERED)
-        {
-            throw new DataException("INVALID STATE: First Club Event must be of type "+nameof(EventType.TENNIS_CLUB_REGISTERED));
-        }
-        
         var club = new Club();
-        foreach (var baseEvent in events)
-        {
-            club.Apply(baseEvent);
-        }
+        club.Apply(events);
+
         return club;
     }
 }

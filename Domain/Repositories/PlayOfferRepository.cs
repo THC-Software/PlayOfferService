@@ -13,7 +13,7 @@ public class PlayOfferRepository
         _context = context;
     }
     
-    public async Task<IEnumerable<PlayOffer>> GetPlayOffersById(Guid? playOfferId, Guid? creatorId, Guid? clubId)
+    public async Task<IEnumerable<PlayOffer>> GetPlayOffersByIds(Guid? playOfferId, Guid? creatorId, Guid? clubId)
     {
         var playOfferCreatedEvents = await _context.Events.Where(e =>
             e.EventType == EventType.PLAYOFFER_CREATED
@@ -34,13 +34,11 @@ public class PlayOfferRepository
         foreach (var group in playOfferCreatedEvents.GroupBy(e => e.EntityId))
         {
             Guid entityId = group.Key;
-            var eventsForPlayOffer = await _context.Events.Where(e => e.EntityId == entityId).ToListAsync();
+            var eventsForPlayOffer = group.ToList();
+            eventsForPlayOffer.AddRange(await _context.Events.Where(e => e.EntityId == entityId).ToListAsync());
             
             var playOffer = new PlayOffer();
-            foreach (var baseEvent in eventsForPlayOffer)
-            {
-                playOffer.Apply(baseEvent);
-            }
+            playOffer.Apply(eventsForPlayOffer);
             result.Add(playOffer);
         }
 

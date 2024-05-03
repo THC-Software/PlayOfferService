@@ -11,21 +11,30 @@ public class Member
     
     public bool IsLocked { get; set; }
 
-    public void Apply(BaseEvent<IDomainEvent> baseEvent)
+    public void Apply(List<BaseEvent<IDomainEvent>> baseEvents)
     {
-        switch (baseEvent.EventType)
+        if (baseEvents.First().EventType != EventType.MEMBER_ACCOUNT_CREATED)
         {
-            case EventType.MEMBER_ACCOUNT_CREATED:
-                Apply((MemberCreatedEvent) baseEvent.EventData);
-                break;
-            case EventType.MEMBER_ACCOUNT_LOCKED:
-                Apply((MemberLockedEvent) baseEvent.EventData);
-                break;
-            case EventType.MEMBER_ACCOUNT_UNLOCKED:
-                Apply((MemberUnlockedEvent) baseEvent.EventData);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            throw new ArgumentException("First Member event must be of type "
+                                        + nameof(EventType.MEMBER_ACCOUNT_CREATED));
+        }
+
+        foreach (var baseEvent in baseEvents)
+        {
+            switch (baseEvent.EventType)
+            {
+                case EventType.MEMBER_ACCOUNT_CREATED:
+                    Apply((MemberCreatedEvent) baseEvent.EventData);
+                    break;
+                case EventType.MEMBER_ACCOUNT_LOCKED:
+                    Apply((MemberLockedEvent) baseEvent.EventData);
+                    break;
+                case EventType.MEMBER_ACCOUNT_UNLOCKED:
+                    Apply((MemberUnlockedEvent) baseEvent.EventData);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
     

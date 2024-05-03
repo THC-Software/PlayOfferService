@@ -13,6 +13,7 @@ public class PlayOffer {
     public DateTime ProposedEndTime { get; set; }
     public DateTime AcceptedStartTime { get; set; }
     public Reservation? Reservation { get; set; }
+    public bool IsCancelled { get; set; }
 
     public PlayOffer()
     {
@@ -32,21 +33,32 @@ public class PlayOffer {
         Id = id;
     }
 
-    public void Apply(BaseEvent<IDomainEvent> baseEvent)
+    public void Apply(List<BaseEvent<IDomainEvent>> baseEvents)
     {
-        switch (baseEvent.EventType)
+        if(baseEvents.First().EventType != EventType.PLAYOFFER_CREATED)
         {
-            case EventType.PLAYOFFER_CREATED:
-                Apply((PlayOfferCreatedEvent) baseEvent.EventData);
-                break;
-            case EventType.PLAYOFFER_JOINED:
-                Apply((PlayOfferJoinedEvent) baseEvent.EventData);
-                break;
-            case EventType.PLAYOFFER_CANCELLED:
-            case EventType.PLAYOFFER_RESERVATION_CREATED:
-                throw new NotImplementedException();
-            default:
-                throw new ArgumentOutOfRangeException();
+            throw new ArgumentException("First PlayOffer event must be of type "
+                                        + nameof(EventType.PLAYOFFER_CREATED));
+        }
+        
+        foreach (var baseEvent in baseEvents)
+        {
+            switch (baseEvent.EventType)
+            {
+                case EventType.PLAYOFFER_CREATED:
+                    Apply((PlayOfferCreatedEvent) baseEvent.EventData);
+                    break;
+                case EventType.PLAYOFFER_JOINED:
+                    Apply((PlayOfferJoinedEvent) baseEvent.EventData);
+                    break;
+                case EventType.PLAYOFFER_CANCELLED:
+                    Apply((PlayOfferCancelledEvent) baseEvent.EventData);
+                    break;
+                case EventType.PLAYOFFER_RESERVATION_CREATED:
+                    throw new NotImplementedException();
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
     
@@ -57,10 +69,26 @@ public class PlayOffer {
         Creator = domainEvent.Creator;
         ProposedStartTime = domainEvent.ProposedStartTime;
         ProposedEndTime = domainEvent.ProposedEndTime;
+        IsCancelled = false;
     }
     
     private void Apply(PlayOfferJoinedEvent domainEvent)
     {
+        if (IsCancelled)
+        {
+            throw new ArgumentException("PlayOffer is cancelled");
+        }
+        if (domainEvent.AcceptedStartTime < ProposedStartTime || domainEvent.AcceptedStartTime > ProposedEndTime)
+        {
+            throw new ArgumentException("Accepted start time must be within the proposed start and end time");
+        }
+            
+        AcceptedStartTime = domainEvent.AcceptedStartTime;
         Opponent = domainEvent.Opponent;
+    }
+    
+    private void Apply(PlayOfferCancelledEvent domainEvent)
+    {
+        IsCancelled = true;
     }
 }

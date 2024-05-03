@@ -8,7 +8,7 @@ namespace PlayOfferService.Tests;
 public class ClubUnitTest
 {
     [Test]
-    public void ApplyClubCreationEventTest()
+    public void ApplyClubCreatedEventTest()
     {
         // Given
         var clubId = Guid.NewGuid();
@@ -26,7 +26,7 @@ public class ClubUnitTest
         
         // When
         var club = new Club();
-        club.Apply(clubCreationEvent);
+        club.Apply([clubCreationEvent]);
         
         // Then
         Assert.That(club.Id, Is.EqualTo(clubId));
@@ -37,22 +37,23 @@ public class ClubUnitTest
     public void ApplyClubLockEventTest()
     {
         // Given
-        var club = new Club
+        var clubEvents = new List<BaseEvent<IDomainEvent>>
         {
-            Id = Guid.NewGuid(),
-            IsLocked = false
-        };
-        var clubLockEvent = new BaseEvent<IDomainEvent>
-        {
-            EntityId = club.Id,
-            EntityType = EntityType.CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_LOCKED,
-            EventData = new ClubLockedEvent()
+            new()
+            {
+                EventType = EventType.TENNIS_CLUB_REGISTERED,
+                EventData = new ClubCreatedEvent()
+            },
+            new()
+            {
+                EventType = EventType.TENNIS_CLUB_LOCKED,
+                EventData = new ClubLockedEvent()
+            }
         };
         
         // When
-        club.Apply(clubLockEvent);
+        var club = new Club();
+        club.Apply(clubEvents);
         
         // Then
         Assert.That(club.IsLocked, Is.True);
@@ -62,22 +63,28 @@ public class ClubUnitTest
     public void ApplyClubUnlockEventTest()
     {
         // Given
-        var club = new Club
+        var clubEvents = new List<BaseEvent<IDomainEvent>>
         {
-            Id = Guid.NewGuid(),
-            IsLocked = true
-        };
-        var clubUnlockEvent = new BaseEvent<IDomainEvent>
-        {
-            EntityId = club.Id,
-            EntityType = EntityType.CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_UNLOCKED,
-            EventData = new ClubUnlockedEvent()
+            new()
+            {
+                EventType = EventType.TENNIS_CLUB_REGISTERED,
+                EventData = new ClubCreatedEvent()
+            },
+            new()
+            {
+                EventType = EventType.TENNIS_CLUB_LOCKED,
+                EventData = new ClubLockedEvent()
+            },
+            new()
+            {
+                EventType = EventType.TENNIS_CLUB_UNLOCKED,
+                EventData = new ClubUnlockedEvent()
+            }
         };
         
         // When
-        club.Apply(clubUnlockEvent);
+        var club = new Club();
+        club.Apply(clubEvents);
         
         // Then
         Assert.That(club.IsLocked, Is.False);
