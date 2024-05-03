@@ -76,7 +76,7 @@ public class PlayOffer {
     {
         if (IsCancelled)
         {
-            throw new ArgumentException("PlayOffer is cancelled");
+            throw new ArgumentException("Can't join cancelled PlayOffer");
         }
         if (domainEvent.AcceptedStartTime < ProposedStartTime || domainEvent.AcceptedStartTime > ProposedEndTime)
         {

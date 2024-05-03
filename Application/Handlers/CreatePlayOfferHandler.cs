@@ -45,7 +45,7 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Pl
             EventType = EventType.PLAYOFFER_CREATED,
             EventData = new PlayOfferCreatedEvent
             {
-                Id = Guid.NewGuid(),
+                Id = playOfferId,
                 Club = club,
                 Creator = creator,
                 ProposedStartTime = playOfferDto.ProposedStartTime.ToUniversalTime(),

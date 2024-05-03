@@ -29,6 +29,11 @@ public class PlayOfferRepository
             && (!creatorId.HasValue || ((PlayOfferCreatedEvent)e.EventData).Creator.Id == creatorId)
             && (!clubId.HasValue || ((PlayOfferCreatedEvent)e.EventData).Club.Id == clubId)).ToList();
         
+        if(playOfferCreatedEvents.Count == 0)
+        {
+            return new List<PlayOffer>();
+        }
+        
         var result = new List<PlayOffer>();
         foreach (var group in playOfferCreatedEvents.GroupBy(e => e.EntityId))
         {

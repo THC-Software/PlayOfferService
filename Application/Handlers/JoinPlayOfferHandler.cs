@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Commands;
+using PlayOfferService.Domain.Events;
 using PlayOfferService.Models;
 using PlayOfferService.Repositories;
 
@@ -8,24 +9,39 @@ namespace PlayOfferService.Handlers;
 
 public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 {
-    public readonly DatabaseContext _context;
+    private readonly DatabaseContext _context;
+    private readonly PlayOfferRepository _playOfferRepository;
+    private readonly MemberRepository _memberRepository;
 
-    public JoinPlayOfferHandler(DatabaseContext context)
+    public JoinPlayOfferHandler(DatabaseContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository)
     {
         _context = context;
+        _playOfferRepository = playOfferRepository;
+        _memberRepository = memberRepository;
     }
 
     public async Task<Task> Handle(JoinPlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var playOffer = await _context.PlayOffers.FirstOrDefaultAsync(po => po.Id == request.joinPlayOfferDto.PlayOfferId);
-
-        if (playOffer == null)
+        var existingComponent = await _memberRepository.GetMemberById(request.joinPlayOfferDto.OpponentId);
+        var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.joinPlayOfferDto.PlayOfferId)).First();
+        
+        var domainEvent = new BaseEvent
         {
-            return Task.FromException(new NullReferenceException());
-        }
+            EntityId = request.joinPlayOfferDto.PlayOfferId,
+            EntityType = EntityType.PLAYOFFER,
+            EventId = Guid.NewGuid(),
+            EventType = EventType.PLAYOFFER_JOINED,
+            EventData = new PlayOfferJoinedEvent
+            {
+                Opponent = existingComponent,
+                AcceptedStartTime = request.joinPlayOfferDto.AcceptedStartTime.ToUniversalTime(),
+            },
+            Timestamp = DateTime.UtcNow
+        };
+        
+        existingPlayOffer.Apply([domainEvent]);
 
-        playOffer.Opponent = new Member { Id = request.joinPlayOfferDto.OpponentId, Club = playOffer.Club};
-
+        _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();
 
         return Task.CompletedTask;

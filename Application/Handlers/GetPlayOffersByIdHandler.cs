@@ -7,31 +7,15 @@ using PlayOfferService.Repositories;
 namespace PlayOfferService.Handlers;
 public class GetPlayOffersByIdHandler : IRequestHandler<GetPlayOffersByIdQuery, IEnumerable<PlayOffer>>
 {
-    private readonly DatabaseContext _context;
+    private readonly PlayOfferRepository _playOfferRepository;
 
-    public GetPlayOffersByIdHandler(DatabaseContext context)
+    public GetPlayOffersByIdHandler(PlayOfferRepository playOfferRepository)
     {
-        _context = context;
+        _playOfferRepository = playOfferRepository;
     }
 
     public async Task<IEnumerable<PlayOffer>> Handle(GetPlayOffersByIdQuery request, CancellationToken cancellationToken)
     {
-
-        var playOfferId = request.playOfferId;
-        var creatorId = request.creatorId;
-        var clubId = request.clubId;
-
-        var result = await _context.PlayOffers.Where(po => po != null
-                                                     && (!playOfferId.HasValue || po.Id == playOfferId)
-                                                     && (!creatorId.HasValue || po.Creator.Id == creatorId)
-                                                     && (!clubId.HasValue || po.Club.Id == clubId)
-        )
-            .Include(po => po.Club)
-            .Include(po => po.Creator)
-            .Include(po => po.Opponent)
-            .Include(po => po.Reservation)
-            .ToListAsync();
-
-        return result;
+        return await _playOfferRepository.GetPlayOffersByIds(request.playOfferId, request.creatorId, request.clubId);
     }
 }

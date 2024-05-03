@@ -107,7 +107,7 @@ public class PlayOfferUnitTest
         playOffer.Apply(playOfferEvents);
         
         // Then
-        Assert.That(playOffer.Opponent.Id, Is.EqualTo(opponentId));
+        Assert.That(playOffer.Opponent?.Id, Is.EqualTo(opponentId));
         Assert.That(playOffer.AcceptedStartTime, Is.EqualTo(acceptedStartTime));
     }
     
