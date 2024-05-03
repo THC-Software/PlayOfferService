@@ -22,8 +22,11 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 
     public async Task<Task> Handle(JoinPlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var existingComponent = await _memberRepository.GetMemberById(request.joinPlayOfferDto.OpponentId);
-        var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.joinPlayOfferDto.PlayOfferId)).First();
+        var existingPlayOffers = await _playOfferRepository.GetPlayOffersByIds(request.joinPlayOfferDto.PlayOfferId);
+        if (existingPlayOffers.ToList().Count == 0)
+            throw new ArgumentException("PlayOffer not found with id: " + request.joinPlayOfferDto.PlayOfferId);
+        
+        var existingOpponent = await _memberRepository.GetMemberById(request.joinPlayOfferDto.OpponentId);
         
         var domainEvent = new BaseEvent
         {
@@ -33,13 +36,13 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
             EventType = EventType.PLAYOFFER_JOINED,
             EventData = new PlayOfferJoinedEvent
             {
-                Opponent = existingComponent,
+                Opponent = existingOpponent,
                 AcceptedStartTime = request.joinPlayOfferDto.AcceptedStartTime.ToUniversalTime(),
             },
             Timestamp = DateTime.UtcNow
         };
         
-        existingPlayOffer.Apply([domainEvent]);
+        existingPlayOffers.First().Apply([domainEvent]);
 
         _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();

@@ -75,13 +75,16 @@ public class PlayOffer {
     private void Apply(PlayOfferJoinedEvent domainEvent)
     {
         if (IsCancelled)
-        {
             throw new ArgumentException("Can't join cancelled PlayOffer");
-        }
+        
         if (domainEvent.AcceptedStartTime < ProposedStartTime || domainEvent.AcceptedStartTime > ProposedEndTime)
-        {
             throw new ArgumentException("Accepted start time must be within the proposed start and end time");
-        }
+        
+        if (domainEvent.Opponent.Id == Creator.Id)
+            throw new ArgumentException("Creator can't join his own PlayOffer");
+        
+        if (domainEvent.Opponent.Club.Id != Club.Id)
+            throw new ArgumentException("Opponent must be from the same club as the creator of the PlayOffer");
             
         AcceptedStartTime = domainEvent.AcceptedStartTime;
         Opponent = domainEvent.Opponent;

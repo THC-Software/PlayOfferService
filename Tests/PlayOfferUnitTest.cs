@@ -76,6 +76,10 @@ public class PlayOfferUnitTest
         // Given
         var opponentId = Guid.NewGuid();
         var acceptedStartTime = DateTime.UtcNow.AddHours(3);
+        var club = new Club
+        {
+            Id = Guid.NewGuid()
+        };
         
         var playOfferEvents = new List<BaseEvent>
         {
@@ -84,6 +88,11 @@ public class PlayOfferUnitTest
                 EventType = EventType.PLAYOFFER_CREATED,
                 EventData = new PlayOfferCreatedEvent
                 {
+                    Creator = new Member
+                    {
+                        Id = Guid.NewGuid()
+                    },
+                    Club = club,
                     ProposedStartTime = DateTime.UtcNow.AddHours(2),
                     ProposedEndTime = DateTime.UtcNow.AddHours(5)
                 }
@@ -95,7 +104,8 @@ public class PlayOfferUnitTest
                 {
                     Opponent = new Member
                     {
-                        Id = opponentId
+                        Id = opponentId,
+                        Club = club
                     },
                     AcceptedStartTime = acceptedStartTime
                 }
@@ -131,6 +141,72 @@ public class PlayOfferUnitTest
                 EventData = new PlayOfferJoinedEvent
                 {
                     AcceptedStartTime = acceptedStartTime
+                }
+            }
+        };
+        
+        // When & Then
+        Assert.Throws<ArgumentException>(() => playOffer.Apply(playOfferEvents));
+    }
+    
+    [Test]
+    public void ApplyPlayOfferJoinedEvent_DifferentClubs()
+    {
+        // Given
+        var playOffer = new PlayOffer
+        {
+            Id = Guid.NewGuid(),
+            Club = new Club
+            {
+                Id = Guid.NewGuid()
+            },
+            Creator = new Member
+            {
+                Id = Guid.NewGuid()
+            }
+        };
+        var playOfferEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.PLAYOFFER_JOINED,
+                EventData = new PlayOfferJoinedEvent
+                {
+                    Opponent = new Member
+                    {
+                        Id = Guid.NewGuid(),
+                        Club = new Club
+                        {
+                            Id = Guid.NewGuid()
+                        }
+                    }
+                }
+            }
+        };
+        
+        // When & Then
+        Assert.Throws<ArgumentException>(() => playOffer.Apply(playOfferEvents));
+    }
+
+    [Test]
+    public void ApplyPlayOfferJoinedEvent_OpponentEqualsCreator()
+    {
+        // Given
+        var playOffer = new PlayOffer
+        {
+            Creator = new Member
+            {
+                Id = Guid.NewGuid()
+            }
+        };
+        var playOfferEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.PLAYOFFER_JOINED,
+                EventData = new PlayOfferJoinedEvent
+                {
+                    Opponent = playOffer.Creator
                 }
             }
         };
