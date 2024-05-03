@@ -20,7 +20,11 @@ public class ClubRepository
             .Where(e => e.EntityId == clubId)
             .OrderBy(e => e.Timestamp)
             .ToListAsync();
-        
+
+        if (events.Count == 0)
+        {
+            throw new ArgumentException("No club found with id " + clubId);
+        }
         var club = new Club();
         club.Apply(events);
 

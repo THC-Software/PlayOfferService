@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Models;
 
 namespace PlayOfferService.Repositories;
@@ -21,6 +22,10 @@ public class MemberRepository
             .OrderBy(e => e.Timestamp)
             .ToListAsync();
 
+        if (events.Count == 0)
+        {
+            throw new ArgumentException("No member found with id " + memberId);
+        }
         var member = new Member();
         member.Apply(events);
 

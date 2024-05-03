@@ -13,15 +13,14 @@ public class PlayOfferRepository
         _context = context;
     }
     
-    public async Task<IEnumerable<PlayOffer>> GetPlayOffersByIds(Guid? playOfferId, Guid? creatorId, Guid? clubId)
+    public async Task<IEnumerable<PlayOffer>> GetPlayOffersByIds(
+        Guid? playOfferId,
+        Guid? creatorId = null,
+        Guid? clubId = null)
     {
         var playOfferCreatedEvents = await _context.Events.Where(e =>
             e.EventType == EventType.PLAYOFFER_CREATED
         )
-            .Include(e => e.EventData)
-            .Include(e => e.EventData)
-            .Include(e => ((PlayOfferCreatedEvent)e.EventData).Club)
-            .Include(e => ((PlayOfferCreatedEvent)e.EventData).Creator)
             .ToListAsync();
 
         playOfferCreatedEvents = playOfferCreatedEvents.Where(e =>
@@ -36,10 +35,14 @@ public class PlayOfferRepository
             Guid entityId = group.Key;
             var eventsForPlayOffer = group.ToList();
             eventsForPlayOffer.AddRange(await _context.Events.Where(e => e.EntityId == entityId).ToListAsync());
-            
-            var playOffer = new PlayOffer();
-            playOffer.Apply(eventsForPlayOffer);
-            result.Add(playOffer);
+
+            if (eventsForPlayOffer.Count != 0)
+            {
+                var playOffer = new PlayOffer();
+                playOffer.Apply(eventsForPlayOffer);
+                result.Add(playOffer);
+            }           
+
         }
 
         return result;
