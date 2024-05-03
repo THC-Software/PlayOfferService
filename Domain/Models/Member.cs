@@ -1,10 +1,47 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.Member;
 
 namespace PlayOfferService.Models;
 
 public class Member
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
     public Club Club { get; set; }
+    
+    public bool IsLocked { get; set; }
+
+    public void Apply(BaseEvent<IDomainEvent> baseEvent)
+    {
+        switch (baseEvent.EventType)
+        {
+            case EventType.MEMBER_ACCOUNT_CREATED:
+                Apply((MemberCreatedEvent) baseEvent.EventData);
+                break;
+            case EventType.MEMBER_ACCOUNT_LOCKED:
+                Apply((MemberLockedEvent) baseEvent.EventData);
+                break;
+            case EventType.MEMBER_ACCOUNT_UNLOCKED:
+                Apply((MemberUnlockedEvent) baseEvent.EventData);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+    
+    private void Apply(MemberCreatedEvent domainEvent)
+    {
+        Id = domainEvent.MemberAccountId;
+        Club = domainEvent.Club;
+    }
+    
+    private void Apply(MemberLockedEvent domainEvent)
+    {
+        IsLocked = true;
+    }
+    
+    private void Apply(MemberUnlockedEvent domainEvent)
+    {
+        IsLocked = false;
+    }
 }

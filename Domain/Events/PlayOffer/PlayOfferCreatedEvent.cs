@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
+using PlayOfferService.Domain.Events;
 using PlayOfferService.Models;
 
-namespace PlayOfferService.Domain.Events;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "eventType")]
 [JsonDerivedType(typeof(PlayOfferCreatedEvent), typeDiscriminator: "PLAYOFFER_CREATED")]
