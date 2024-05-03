@@ -14,7 +14,7 @@ public class MemberUnitTest
         // Given
         var memberId = Guid.NewGuid();
         var clubId = Guid.NewGuid();
-        var memberCreationEvent = new BaseEvent<IDomainEvent>
+        var memberCreationEvent = new BaseEvent
         {
             EntityId = memberId,
             EntityType = EntityType.MEMBER,
@@ -49,7 +49,7 @@ public class MemberUnitTest
             Id = Guid.NewGuid(),
             IsLocked = false
         };
-        var memberEvents = new List<BaseEvent<IDomainEvent>>
+        var memberEvents = new List<BaseEvent>
         {
             new()
             {
@@ -74,7 +74,7 @@ public class MemberUnitTest
             Id = Guid.NewGuid(),
             IsLocked = true
         };
-        var memberEvents = new List<BaseEvent<IDomainEvent>>
+        var memberEvents = new List<BaseEvent>
         {
             new()
             {

@@ -9,7 +9,7 @@ public class Club
     public Guid Id { get; set; }
     public bool IsLocked { get; set; }
 
-    public void Apply(List<BaseEvent<IDomainEvent>> baseEvents)
+    public void Apply(List<BaseEvent> baseEvents)
     {
         if (Id == Guid.Empty && baseEvents.First().EventType != EventType.TENNIS_CLUB_REGISTERED)
         {

@@ -33,7 +33,7 @@ public class PlayOffer {
         Id = id;
     }
 
-    public void Apply(List<BaseEvent<IDomainEvent>> baseEvents)
+    public void Apply(List<BaseEvent> baseEvents)
     {
         if(Id == Guid.Empty && baseEvents.First().EventType != EventType.PLAYOFFER_CREATED)
         {

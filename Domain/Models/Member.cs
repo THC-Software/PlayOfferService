@@ -11,7 +11,7 @@ public class Member
     
     public bool IsLocked { get; set; }
 
-    public void Apply(List<BaseEvent<IDomainEvent>> baseEvents)
+    public void Apply(List<BaseEvent> baseEvents)
     {
         if (Id == Guid.Empty && baseEvents.First().EventType != EventType.MEMBER_ACCOUNT_CREATED)
         {

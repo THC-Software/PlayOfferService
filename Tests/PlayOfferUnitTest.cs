@@ -14,7 +14,7 @@ public class PlayOfferUnitTest
         var playOfferId = Guid.NewGuid();
         var clubId = Guid.NewGuid();
         var creatorId = Guid.NewGuid();
-        var playOfferCreatedEvent = new BaseEvent<IDomainEvent>
+        var playOfferCreatedEvent = new BaseEvent
         {
             EventType = EventType.PLAYOFFER_CREATED,
             EventData = new PlayOfferCreatedEvent
@@ -54,7 +54,7 @@ public class PlayOfferUnitTest
         {
             Id = Guid.NewGuid()
         };
-        var playOfferEvents = new List<BaseEvent<IDomainEvent>>
+        var playOfferEvents = new List<BaseEvent>
         {
             new()
             {
@@ -77,7 +77,7 @@ public class PlayOfferUnitTest
         var opponentId = Guid.NewGuid();
         var acceptedStartTime = DateTime.UtcNow.AddHours(3);
         
-        var playOfferEvents = new List<BaseEvent<IDomainEvent>>
+        var playOfferEvents = new List<BaseEvent>
         {
             new()
             {
@@ -123,7 +123,7 @@ public class PlayOfferUnitTest
         };
         var acceptedStartTime = DateTime.UtcNow;
 
-        var playOfferEvents = new List<BaseEvent<IDomainEvent>>
+        var playOfferEvents = new List<BaseEvent>
         {
             new()
             {
@@ -147,7 +147,7 @@ public class PlayOfferUnitTest
         {
             Id = Guid.NewGuid(),
         };
-        var playOfferEvents = new List<BaseEvent<IDomainEvent>>
+        var playOfferEvents = new List<BaseEvent>
         {
             new()
             {

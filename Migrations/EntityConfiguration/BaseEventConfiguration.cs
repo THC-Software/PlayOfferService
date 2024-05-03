@@ -5,9 +5,9 @@ using PlayOfferService.Domain.Events;
 
 namespace PlayOfferService.Repositories;
 
-public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent<IDomainEvent>>
+public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent>
 {
-    public void Configure(EntityTypeBuilder<BaseEvent<IDomainEvent>> builder)
+    public void Configure(EntityTypeBuilder<BaseEvent> builder)
     {
         builder.ToTable("events");
         builder.HasKey(e => e.EventId);

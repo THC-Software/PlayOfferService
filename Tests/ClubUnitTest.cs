@@ -12,7 +12,7 @@ public class ClubUnitTest
     {
         // Given
         var clubId = Guid.NewGuid();
-        var clubCreationEvent = new BaseEvent<IDomainEvent>
+        var clubCreationEvent = new BaseEvent
         {
             EntityId = clubId,
             EntityType = EntityType.CLUB,
@@ -41,7 +41,7 @@ public class ClubUnitTest
             Id = Guid.NewGuid()
         };
         // Given
-        var clubEvents = new List<BaseEvent<IDomainEvent>>
+        var clubEvents = new List<BaseEvent>
         {
             new()
             {
@@ -66,7 +66,7 @@ public class ClubUnitTest
             Id = Guid.NewGuid(),
             IsLocked = true
         };
-        var clubEvents = new List<BaseEvent<IDomainEvent>>
+        var clubEvents = new List<BaseEvent>
         {
             new()
             {
