@@ -11,7 +11,7 @@ public class Club
 
     public void Apply(List<BaseEvent<IDomainEvent>> baseEvents)
     {
-        if (baseEvents.First().EventType != EventType.TENNIS_CLUB_REGISTERED)
+        if (Id == Guid.Empty && baseEvents.First().EventType != EventType.TENNIS_CLUB_REGISTERED)
         {
             throw new ArgumentException("First Club event must be of type "
                                         +nameof(EventType.TENNIS_CLUB_REGISTERED));

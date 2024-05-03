@@ -50,17 +50,12 @@ public class PlayOfferUnitTest
     public void ApplyPlayOfferCancelledEvent()
     {
         // Given
+        var playOffer = new PlayOffer
+        {
+            Id = Guid.NewGuid()
+        };
         var playOfferEvents = new List<BaseEvent<IDomainEvent>>
         {
-            new()
-            {
-                EventType = EventType.PLAYOFFER_CREATED,
-                EventData = new PlayOfferCreatedEvent
-                {
-                    ProposedStartTime = DateTime.UtcNow.AddHours(2),
-                    ProposedEndTime = DateTime.UtcNow.AddHours(5)
-                }
-            },
             new()
             {
                 EventType = EventType.PLAYOFFER_CANCELLED,
@@ -69,7 +64,6 @@ public class PlayOfferUnitTest
         };
 
         // When
-        var playOffer = new PlayOffer();
         playOffer.Apply(playOfferEvents);
 
         // Then
@@ -121,19 +115,16 @@ public class PlayOfferUnitTest
     public void ApplyPlayOfferJoinedEvent_InvalidAcceptedStartTime()
     {
         // Given
+        var playOffer = new PlayOffer
+        {
+            Id = Guid.NewGuid(),
+            ProposedStartTime = DateTime.UtcNow.AddHours(2),
+            ProposedEndTime = DateTime.UtcNow.AddHours(5)
+        };
         var acceptedStartTime = DateTime.UtcNow;
 
         var playOfferEvents = new List<BaseEvent<IDomainEvent>>
         {
-            new()
-            {
-                EventType = EventType.PLAYOFFER_CREATED,
-                EventData = new PlayOfferCreatedEvent
-                {
-                    ProposedStartTime = DateTime.UtcNow.AddHours(2),
-                    ProposedEndTime = DateTime.UtcNow.AddHours(5)
-                }
-            },
             new()
             {
                 EventType = EventType.PLAYOFFER_JOINED,
@@ -145,7 +136,6 @@ public class PlayOfferUnitTest
         };
         
         // When & Then
-        var playOffer = new PlayOffer();
         Assert.Throws<ArgumentException>(() => playOffer.Apply(playOfferEvents));
     }
     
@@ -153,17 +143,12 @@ public class PlayOfferUnitTest
     public void ApplyPlayOfferJoinedEvent_Cancelled()
     {
         // Given
+        var playOffer = new PlayOffer
+        {
+            Id = Guid.NewGuid(),
+        };
         var playOfferEvents = new List<BaseEvent<IDomainEvent>>
         {
-            new()
-            {
-                EventType = EventType.PLAYOFFER_CREATED,
-                EventData = new PlayOfferCreatedEvent
-                {
-                    ProposedStartTime = DateTime.UtcNow.AddHours(2),
-                    ProposedEndTime = DateTime.UtcNow.AddHours(5)
-                }
-            },
             new()
             {
                 EventType = EventType.PLAYOFFER_CANCELLED,
@@ -177,7 +162,6 @@ public class PlayOfferUnitTest
         };
         
         // When & Then
-        var playOffer = new PlayOffer();
         Assert.Throws<ArgumentException>(() => playOffer.Apply(playOfferEvents));
     }
 }

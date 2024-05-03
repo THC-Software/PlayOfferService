@@ -44,13 +44,13 @@ public class MemberUnitTest
     public void ApplyMemberLockEventTest()
     {
         // Given
+        var member = new Member
+        {
+            Id = Guid.NewGuid(),
+            IsLocked = false
+        };
         var memberEvents = new List<BaseEvent<IDomainEvent>>
         {
-            new()
-            {
-                EventType = EventType.MEMBER_ACCOUNT_CREATED,
-                EventData = new MemberCreatedEvent()
-            },
             new()
             {
                 EventType = EventType.MEMBER_ACCOUNT_LOCKED,
@@ -59,7 +59,6 @@ public class MemberUnitTest
         };
         
         // When
-        var member = new Member();
         member.Apply(memberEvents);
         
         // Then
@@ -70,18 +69,13 @@ public class MemberUnitTest
     public void ApplyMemberUnlockEventTest()
     {
         // Given
+        var member = new Member
+        {
+            Id = Guid.NewGuid(),
+            IsLocked = true
+        };
         var memberEvents = new List<BaseEvent<IDomainEvent>>
         {
-            new()
-            {
-                EventType = EventType.MEMBER_ACCOUNT_CREATED,
-                EventData = new MemberCreatedEvent()
-            },
-            new()
-            {
-                EventType = EventType.MEMBER_ACCOUNT_LOCKED,
-                EventData = new MemberLockedEvent()
-            },
             new()
             {
                 EventType = EventType.MEMBER_ACCOUNT_UNLOCKED,
@@ -90,7 +84,6 @@ public class MemberUnitTest
         };
         
         // When
-        var member = new Member();
         member.Apply(memberEvents);
         
         // Then

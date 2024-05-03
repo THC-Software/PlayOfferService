@@ -13,7 +13,7 @@ public class Member
 
     public void Apply(List<BaseEvent<IDomainEvent>> baseEvents)
     {
-        if (baseEvents.First().EventType != EventType.MEMBER_ACCOUNT_CREATED)
+        if (Id == Guid.Empty && baseEvents.First().EventType != EventType.MEMBER_ACCOUNT_CREATED)
         {
             throw new ArgumentException("First Member event must be of type "
                                         + nameof(EventType.MEMBER_ACCOUNT_CREATED));

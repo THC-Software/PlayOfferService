@@ -35,7 +35,7 @@ public class PlayOffer {
 
     public void Apply(List<BaseEvent<IDomainEvent>> baseEvents)
     {
-        if(baseEvents.First().EventType != EventType.PLAYOFFER_CREATED)
+        if(Id == Guid.Empty && baseEvents.First().EventType != EventType.PLAYOFFER_CREATED)
         {
             throw new ArgumentException("First PlayOffer event must be of type "
                                         + nameof(EventType.PLAYOFFER_CREATED));

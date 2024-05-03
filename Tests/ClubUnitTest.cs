@@ -36,14 +36,13 @@ public class ClubUnitTest
     [Test]
     public void ApplyClubLockEventTest()
     {
+        var club = new Club
+        {
+            Id = Guid.NewGuid()
+        };
         // Given
         var clubEvents = new List<BaseEvent<IDomainEvent>>
         {
-            new()
-            {
-                EventType = EventType.TENNIS_CLUB_REGISTERED,
-                EventData = new ClubCreatedEvent()
-            },
             new()
             {
                 EventType = EventType.TENNIS_CLUB_LOCKED,
@@ -52,7 +51,6 @@ public class ClubUnitTest
         };
         
         // When
-        var club = new Club();
         club.Apply(clubEvents);
         
         // Then
@@ -63,18 +61,13 @@ public class ClubUnitTest
     public void ApplyClubUnlockEventTest()
     {
         // Given
+        var club = new Club
+        {
+            Id = Guid.NewGuid(),
+            IsLocked = true
+        };
         var clubEvents = new List<BaseEvent<IDomainEvent>>
         {
-            new()
-            {
-                EventType = EventType.TENNIS_CLUB_REGISTERED,
-                EventData = new ClubCreatedEvent()
-            },
-            new()
-            {
-                EventType = EventType.TENNIS_CLUB_LOCKED,
-                EventData = new ClubLockedEvent()
-            },
             new()
             {
                 EventType = EventType.TENNIS_CLUB_UNLOCKED,
@@ -83,7 +76,6 @@ public class ClubUnitTest
         };
         
         // When
-        var club = new Club();
         club.Apply(clubEvents);
         
         // Then
