@@ -11,9 +11,13 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 );
 
 // Add services to the container.
-
+builder.Services.AddScoped<ClubRepository>();
+builder.Services.AddScoped<MemberRepository>();
+builder.Services.AddScoped<PlayOfferRepository>();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+// Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -28,8 +32,6 @@ builder.Services.AddSwaggerGen(options =>
         $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 });
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
 var app = builder.Build();
 
 app.UseSwagger();
@@ -41,6 +43,8 @@ app.UseSwaggerUI(options =>
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 var dbContext = services.GetRequiredService<DatabaseContext>();
+
+// Create the database if it doesn't exist
 dbContext.Database.EnsureCreated();
 
 

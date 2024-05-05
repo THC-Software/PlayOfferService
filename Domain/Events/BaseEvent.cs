@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlayOfferService.Domain.Events;
 
-public class BaseEvent<T> where T : IDomainEvent
+public class BaseEvent
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid EventId { get; set; }
@@ -11,7 +11,7 @@ public class BaseEvent<T> where T : IDomainEvent
     public EventType EventType { get; set; }
     public EntityType EntityType { get; set; }
     public DateTime Timestamp { get; set; }
-    public T EventData { get; set; }
+    public IDomainEvent EventData { get; set; }
     
     public BaseEvent(){}
     
@@ -21,7 +21,7 @@ public class BaseEvent<T> where T : IDomainEvent
         EventType eventType,
         EntityType entityType,
         DateTime timestamp,
-        T eventData)
+        IDomainEvent eventData)
     {
         EventId = eventId;
         EntityId = entityId;

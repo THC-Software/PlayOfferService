@@ -67,11 +67,11 @@ public class PlayOfferController : ControllerBase
     }
 
     ///<summary>
-    ///Deletes a Play Offer with a matching id
+    ///Cancels a Play Offer with a matching id
     ///</summary>
-    ///<param name="playOfferId">The id of the Play Offer to delete</param>
+    ///<param name="playOfferId">The id of the Play Offer to cancel</param>
     ///<returns>Nothing</returns>
-    ///<response code="200">The Play Offer with the matching id was deleted</response>
+    ///<response code="200">The Play Offer with the matching id was cancelled</response>
     ///<response code="400">No Play Offer with matching id found</response>
     [HttpDelete]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status200OK)]
@@ -80,7 +80,7 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult> Delete(Guid playOfferId)
     {
-        var result = await _mediator.Send(new DeletePlayOfferCommand(playOfferId));
+        var result = await _mediator.Send(new CancelPlayOfferCommand(playOfferId));
 
         if (result.Exception != null) return BadRequest();
 
