@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using PlayOfferService.Domain.Events;
 using PlayOfferService.Repositories;
 using StackExchange.Redis;
 
@@ -5,26 +8,28 @@ namespace PlayOfferService.Application;
 
 public class RedisPlayOfferStreamService : BackgroundService
 {
-    private readonly PlayOfferRepository _playOfferRepository;
-    private Task _readTask;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+    private Task? _readTask;
     private readonly CancellationToken _cancellationToken;
-    private readonly ConnectionMultiplexer _muxer;
     private readonly IDatabase _db;
     private const string StreamName = "pos.public.events";
     private const string GroupName = "pos.domain.events.group";
     
     
-    public RedisPlayOfferStreamService()
+    public RedisPlayOfferStreamService(IServiceScopeFactory serviceScopeFactory)
     {
-        _playOfferRepository = null;
+        _serviceScopeFactory = serviceScopeFactory;
         var tokenSource = new CancellationTokenSource();
         _cancellationToken = tokenSource.Token;
-        _muxer = ConnectionMultiplexer.Connect("pos_redis");
-        _db = _muxer.GetDatabase();
+        var muxer = ConnectionMultiplexer.Connect("pos_redis");
+        _db = muxer.GetDatabase();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        using IServiceScope scope = _serviceScopeFactory.CreateScope();
+        PlayOfferRepository playOfferRepository = scope.ServiceProvider.GetRequiredService<PlayOfferRepository>();
+        
         if (!(await _db.KeyExistsAsync(StreamName)) ||
             (await _db.StreamGroupInfoAsync(StreamName)).All(x=>x.Name!=GroupName))
         {
@@ -41,19 +46,33 @@ public class RedisPlayOfferStreamService : BackgroundService
                     await _db.StreamAcknowledgeAsync(StreamName, GroupName, id);
                     id = string.Empty;
                 }
-                var result = await _db.StreamReadGroupAsync(StreamName, GroupName, "avg-1", ">", 1);
+                var result = await _db.StreamReadGroupAsync(StreamName, GroupName, "pos-1", ">", 1);
                 if (result.Any())
                 {
-                    var event = ParseEvent(result.First());
+                    var parsedEvent = ParseEvent(result.First());
+                    await playOfferRepository.UpdateEntityAsync(parsedEvent);
                 }
                 await Task.Delay(1000);
             }
-        });
+        }, stoppingToken);
     }
     
-    private void ParseEvent(StreamEntry value)
+    private BaseEvent ParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
-        Console.WriteLine(dict.Values.ToString());
+        var jsonContent = JsonNode.Parse(dict.Values.First());
+        var eventInfo = jsonContent["payload"]["after"];
+        
+        var baseEvent = new BaseEvent
+        {
+            EventId = Guid.Parse(eventInfo["EventId"].GetValue<string>()),
+            EventType = (EventType)Enum.Parse(typeof(EventType), eventInfo["EventType"].GetValue<string>()),
+            Timestamp = DateTime.Parse(eventInfo["Timestamp"].GetValue<string>()),
+            EntityId = Guid.Parse(eventInfo["EntityId"].GetValue<string>()),
+            EntityType = (EntityType)Enum.Parse(typeof(EntityType), eventInfo["EntityType"].GetValue<string>()),
+            EventData = JsonSerializer.Deserialize<IDomainEvent>(eventInfo["EventData"].GetValue<string>(), JsonSerializerOptions.Default),
+        };
+        
+        return baseEvent;
     }
 }

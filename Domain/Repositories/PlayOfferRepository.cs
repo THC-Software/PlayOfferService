@@ -52,4 +52,10 @@ public class PlayOfferRepository
 
         return result;
     }
+
+    public Task UpdateEntityAsync(BaseEvent baseEvent)
+    {
+        Console.WriteLine("PlayOfferRepo received event: " + baseEvent.EventType);
+        return Task.CompletedTask;
+    }
 }
