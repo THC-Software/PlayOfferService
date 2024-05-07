@@ -31,4 +31,9 @@ public class MemberRepository
 
         return member;
     }
+
+    public async Task UpdateEntityAsync(BaseEvent parsedEvent)
+    {
+        throw new NotImplementedException();
+    }
 }

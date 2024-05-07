@@ -19,6 +19,8 @@ builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddHostedService<RedisPlayOfferStreamService>();
+builder.Services.AddHostedService<RedisClubStreamService>();
+builder.Services.AddHostedService<RedisMemberStreamService>();
 
 // Swagger configuration
 builder.Services.AddEndpointsApiExplorer();

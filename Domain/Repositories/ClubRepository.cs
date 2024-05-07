@@ -30,4 +30,9 @@ public class ClubRepository
 
         return club;
     }
+
+    public async Task UpdateEntityAsync(BaseEvent parsedEvent)
+    {
+        throw new NotImplementedException();
+    }
 }
