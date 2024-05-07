@@ -1,20 +1,23 @@
-using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PlayOfferService.Repositories;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = "server=playofferservice-db-do-user-14755325-0.c.db.ondigitalocean.com;port=25060;user=doadmin;password=AVNS_VTN30vCmZpJceD4V3An;database=defaultdb;";
-var serverVersion = ServerVersion.AutoDetect(connectionString);
+var connectionString = "Host=pos_postgres;Database=pos_db;Username=pos_user;Password=pos_password";
 
-builder.Services.AddDbContext<PlayOfferContext>(options =>
-    options.UseMySql(connectionString, serverVersion)
+builder.Services.AddDbContext<DatabaseContext>(options =>
+    options.UseNpgsql(connectionString)
 );
 
 // Add services to the container.
-
+builder.Services.AddScoped<ClubRepository>();
+builder.Services.AddScoped<MemberRepository>();
+builder.Services.AddScoped<PlayOfferRepository>();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+// Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -31,11 +34,19 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "PlayofferService API v1");
+});
+
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var dbContext = services.GetRequiredService<DatabaseContext>();
+
+// Create the database if it doesn't exist
+dbContext.Database.EnsureCreated();
+
 
 app.UseHttpsRedirection();
 
