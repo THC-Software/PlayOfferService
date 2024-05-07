@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PlayOfferService.Repositories;
 using System.Reflection;
+using PlayOfferService.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = "Host=pos_postgres;Database=pos_db;Username=pos_user;Password=pos_password";
@@ -16,6 +17,8 @@ builder.Services.AddScoped<MemberRepository>();
 builder.Services.AddScoped<PlayOfferRepository>();
 builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+builder.Services.AddHostedService<RedisPlayOfferStreamService>();
 
 // Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
