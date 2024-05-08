@@ -51,6 +51,8 @@ public class RedisMemberStreamService : BackgroundService
                 if (result.Any())
                 {
                     var parsedEvent = ParseEvent(result.First());
+                    if (parsedEvent == null)
+                        continue;
                     await memberRepository.UpdateEntityAsync(parsedEvent);
                 }
                 await Task.Delay(1000);
@@ -58,12 +60,19 @@ public class RedisMemberStreamService : BackgroundService
         }, stoppingToken);
     }
     
-    private BaseEvent ParseEvent(StreamEntry value)
+    private BaseEvent? ParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
         var eventInfo = jsonContent["payload"]["after"];
         // TODO: copy eventType into eventData for deserialization, depending on event format of member microservice
+        
+        if (eventInfo["EventType"].GetValue<string>() != "TENNIS_CLUB_REGISTERED"
+            && eventInfo["EventType"].GetValue<string>() != "TENNIS_CLUB_LOCKED"
+            && eventInfo["EventType"].GetValue<string>() != "TENNIS_CLUB_UNLOCKED")
+        {
+            return null;
+        }
         
         var baseEvent = new BaseEvent
         {
