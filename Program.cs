@@ -1,14 +1,31 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using PlayOfferService.Application;
+using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Repositories;
 using System.Reflection;
-using PlayOfferService.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = "Host=pos_postgres;Database=pos_db;Username=pos_user;Password=pos_password";
 
+var readConnectionString = "Host=pos_postgres;Database=pos_read_db;Username=pos_user;Password=pos_password";
+var writeConnectionString = "Host=pos_postgres;Database=pos_write_db;Username=pos_user;Password=pos_password";
+
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseNpgsql(connectionString)
+);
+
+builder.Services.AddDbContext<ReadDbContext>(options =>
+    options.UseNpgsql(readConnectionString)
+);
+
+builder.Services.AddDbContext<WriteDbContext>(options =>
+    options.UseNpgsql(writeConnectionString)
+);
+
+builder.Services.AddScoped(serviceProvider => new CQRSContexts(
+    serviceProvider.GetRequiredService<ReadDbContext>(),
+    serviceProvider.GetRequiredService<WriteDbContext>())
 );
 
 // Add services to the container.
@@ -48,10 +65,13 @@ app.UseSwaggerUI(options =>
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 var dbContext = services.GetRequiredService<DatabaseContext>();
+var readDbContext = services.GetRequiredService<ReadDbContext>();
+var writeDbContext = services.GetRequiredService<WriteDbContext>();
 
 // Create the database if it doesn't exist
 dbContext.Database.EnsureCreated();
-
+readDbContext.Database.EnsureCreated();
+writeDbContext.Database.EnsureCreated();
 
 app.UseHttpsRedirection();
 
