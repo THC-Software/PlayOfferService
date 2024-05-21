@@ -46,6 +46,7 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 
         _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();
+        await _playOfferRepository.UpdateEntityAsync(domainEvent);
 
         return Task.CompletedTask;
     }

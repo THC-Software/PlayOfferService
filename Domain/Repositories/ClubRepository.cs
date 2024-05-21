@@ -29,8 +29,23 @@ public class ClubRepository
         return club.First();
     }
 
-    public async Task UpdateEntityAsync(BaseEvent parsedEvent)
+    public async Task UpdateEntityAsync(BaseEvent baseEvent)
     {
-        throw new NotImplementedException();
+        Console.WriteLine("MemberRepo received event: " + baseEvent.EventType);
+        var existingClub = await GetClubById(baseEvent.EntityId);
+        
+        var appliedEvents = await _context.AppliedEvents
+            .Where(e => e.EntityId == baseEvent.EntityId)
+            .ToListAsync();
+        
+        if (appliedEvents.Any(e => e.EventId == baseEvent.EventId))
+        {
+            Console.WriteLine("Event already applied, skipping");
+            return;
+        }
+        
+        existingClub.Apply([baseEvent]);
+        _context.AppliedEvents.Add(baseEvent);
+        await _context.SaveChangesAsync();
     }
 }

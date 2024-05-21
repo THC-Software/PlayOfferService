@@ -30,8 +30,23 @@ public class MemberRepository
         return member.First();
     }
 
-    public async Task UpdateEntityAsync(BaseEvent parsedEvent)
+    public async Task UpdateEntityAsync(BaseEvent baseEvent)
     {
-        throw new NotImplementedException();
+        Console.WriteLine("MemberRepository received event: " + baseEvent.EventType);
+        var existingMember = await GetMemberById(baseEvent.EntityId);
+        
+        var appliedEvents = await _context.AppliedEvents
+            .Where(e => e.EntityId == baseEvent.EntityId)
+            .ToListAsync();
+        
+        if (appliedEvents.Any(e => e.EventId == baseEvent.EventId))
+        {
+            Console.WriteLine("Event already applied, skipping");
+            return;
+        }
+        
+        existingMember.Apply([baseEvent]);
+        _context.AppliedEvents.Add(baseEvent);
+        await _context.SaveChangesAsync();
     }
 }

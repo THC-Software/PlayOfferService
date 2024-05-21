@@ -37,7 +37,7 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Pl
         }
 
         var playOfferId = Guid.NewGuid();
-        var playOfferCreatedEvent = new BaseEvent
+        var domainEvent = new BaseEvent
         {
             EntityId = playOfferId,
             EntityType = EntityType.PLAYOFFER,
@@ -54,8 +54,9 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Pl
             Timestamp = DateTime.Now.ToUniversalTime()
         };
 
-        _context.Events.Add(playOfferCreatedEvent);
+        _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();
+        await _playOfferRepository.UpdateEntityAsync(domainEvent);
 
         return (await _playOfferRepository.GetPlayOffersByIds(playOfferId)).First();
     }

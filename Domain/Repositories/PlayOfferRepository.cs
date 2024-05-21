@@ -33,9 +33,23 @@ public class PlayOfferRepository
         return playOffers;
     }
 
-    public Task UpdateEntityAsync(BaseEvent baseEvent)
+    public async Task UpdateEntityAsync(BaseEvent baseEvent)
     {
-        Console.WriteLine("PlayOfferRepo received event: " + baseEvent.EventType);
-        return Task.CompletedTask;
+        Console.WriteLine("PlayOfferRepository received event: " + baseEvent.EventType);
+        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
+        
+        var appliedEvents = await _context.AppliedEvents
+            .Where(e => e.EntityId == baseEvent.EntityId)
+            .ToListAsync();
+        
+        if (appliedEvents.Any(e => e.EventId == baseEvent.EventId))
+        {
+            Console.WriteLine("Event already applied, skipping");
+            return;
+        }
+        
+        existingPlayOffer.Apply([baseEvent]);
+        _context.AppliedEvents.Add(baseEvent);
+        await _context.SaveChangesAsync();
     }
 }
