@@ -133,17 +133,17 @@ public class MemberRepositoryTest : TestSetup
     {
         //Given
         var existingMember = await TestMemberRepository.GetMemberById(Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"));
-        var memberLockEvent = new BaseEvent
+        var memberUnlockEvent = new BaseEvent
         {
             EntityId = existingMember.Id,
             EntityType = EntityType.MEMBER,
             EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_ACCOUNT_LOCKED,
-            EventData = new MemberLockedEvent()
+            EventType = EventType.MEMBER_ACCOUNT_UNLOCKED,
+            EventData = new MemberUnlockedEvent()
         };
         
         //When
-        await TestMemberRepository.UpdateEntityAsync(memberLockEvent);
+        await TestMemberRepository.UpdateEntityAsync(memberUnlockEvent);
         
         //Then
         var projectedMember = await TestMemberRepository.GetMemberById(existingMember.Id);
