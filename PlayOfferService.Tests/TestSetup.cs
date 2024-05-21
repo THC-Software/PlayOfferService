@@ -13,6 +13,7 @@ public class TestSetup
     private PostgreSqlContainer _readDbContainer;
     private PostgreSqlContainer _writeDbContainer;
     protected ClubRepository TestClubRepository;
+    protected MemberRepository TestMemberRepository;
     protected HttpClient HttpClient;
     
     [SetUp]
@@ -52,7 +53,11 @@ public class TestSetup
                        throw new Exception("Could not get DbWriteContext");
         
         TestClubRepository = scope.ServiceProvider.GetService<ClubRepository>() ??
-                          throw new Exception("Could not get EventRepository");
+                          throw new Exception("Could not get ClubRepository");
+
+        TestMemberRepository = scope.ServiceProvider.GetService<MemberRepository>() ??
+                               throw new Exception("Could not get MemberRepository");;
+                               
         _readContext.Database.EnsureCreated();
         _writeContext.Database.EnsureCreated();
     }
