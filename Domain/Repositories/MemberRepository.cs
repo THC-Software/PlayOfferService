@@ -2,34 +2,32 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
+using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
 
 namespace PlayOfferService.Repositories;
 
 public class MemberRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly DbReadContext _context;
 
-    public MemberRepository(DatabaseContext context)
+    public MemberRepository(DbReadContext context)
     {
         _context = context;
     }
 
     public async Task<Member> GetMemberById(Guid? memberId)
     {
-        var events = await _context.Events
-            .Where(e => e.EntityId == memberId)
-            .OrderBy(e => e.Timestamp)
+        var member = await _context.Members
+            .Where(e => e.Id == memberId)
             .ToListAsync();
 
-        if (events.Count == 0)
+        if (member.Count == 0)
         {
             throw new ArgumentException("No member found with id " + memberId);
         }
-        var member = new Member();
-        member.Apply(events);
 
-        return member;
+        return member.First();
     }
 
     public async Task UpdateEntityAsync(BaseEvent parsedEvent)

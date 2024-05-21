@@ -9,11 +9,11 @@ namespace PlayOfferService.Handlers;
 
 public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 {
-    private readonly DatabaseContext _context;
+    private readonly DbWriteContext _context;
     private readonly PlayOfferRepository _playOfferRepository;
     private readonly MemberRepository _memberRepository;
 
-    public JoinPlayOfferHandler(DatabaseContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository)
+    public JoinPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository)
     {
         _context = context;
         _playOfferRepository = playOfferRepository;

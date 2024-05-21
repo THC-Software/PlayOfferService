@@ -11,7 +11,7 @@ public class PlayOffer {
     public Member? Opponent { get; set; }
     public DateTime ProposedStartTime { get; set; }
     public DateTime ProposedEndTime { get; set; }
-    public DateTime AcceptedStartTime { get; set; }
+    public DateTime? AcceptedStartTime { get; set; }
     public Reservation? Reservation { get; set; }
     public bool IsCancelled { get; set; }
 

@@ -7,9 +7,9 @@ namespace PlayOfferService.Handlers;
 
 public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Task>
 {
-    private readonly DatabaseContext _context;
+    private readonly DbWriteContext _context;
 
-    public CancelPlayOfferHandler(DatabaseContext context)
+    public CancelPlayOfferHandler(DbWriteContext context)
     {
         _context = context;
     }

@@ -10,7 +10,7 @@ using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(DbWriteContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

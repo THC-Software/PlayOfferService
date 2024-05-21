@@ -1,34 +1,32 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
 
 namespace PlayOfferService.Repositories;
 
 public class ClubRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly DbReadContext _context;
     
-    public ClubRepository(DatabaseContext context)
+    public ClubRepository(DbReadContext context)
     {
         _context = context;
     }
     
     public async Task<Club> GetClubById(Guid clubId)
     {
-        var events = await _context.Events
-            .Where(e => e.EntityId == clubId)
-            .OrderBy(e => e.Timestamp)
+        var club = await _context.Clubs
+            .Where(e => e.Id == clubId)
             .ToListAsync();
 
-        if (events.Count == 0)
+        if (club.Count == 0)
         {
             throw new ArgumentException("No club found with id " + clubId);
         }
-        var club = new Club();
-        club.Apply(events);
 
-        return club;
+        return club.First();
     }
 
     public async Task UpdateEntityAsync(BaseEvent parsedEvent)

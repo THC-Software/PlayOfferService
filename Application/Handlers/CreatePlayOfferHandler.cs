@@ -8,12 +8,12 @@ namespace PlayOfferService.Handlers;
 public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, PlayOffer>
 {
 
-    private readonly DatabaseContext _context;
+    private readonly DbWriteContext _context;
     private readonly ClubRepository _clubRepository;
     private readonly MemberRepository _memberRepository;
     private readonly PlayOfferRepository _playOfferRepository;
 
-    public CreatePlayOfferHandler(DatabaseContext context, ClubRepository clubRepository, MemberRepository memberRepository, PlayOfferRepository playOfferRepository)
+    public CreatePlayOfferHandler(DbWriteContext context, ClubRepository clubRepository, MemberRepository memberRepository, PlayOfferRepository playOfferRepository)
     {
         _context = context;
         _clubRepository = clubRepository;

@@ -12,10 +12,10 @@ namespace PlayOfferService.Controllers;
 public class PlayOfferController : ControllerBase
 {
 
-    private readonly DatabaseContext _context;
+    private readonly DbWriteContext _context;
     private readonly IMediator _mediator;
 
-    public PlayOfferController(DatabaseContext context, IMediator mediator)
+    public PlayOfferController(DbWriteContext context, IMediator mediator)
     {
         _context = context;
         _mediator = mediator;

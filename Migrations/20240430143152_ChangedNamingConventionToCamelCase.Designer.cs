@@ -11,7 +11,7 @@ using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(DbWriteContext))]
     [Migration("20240430143152_ChangedNamingConventionToCamelCase")]
     partial class ChangedNamingConventionToCamelCase
     {
