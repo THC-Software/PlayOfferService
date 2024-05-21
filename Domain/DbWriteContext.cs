@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Events.Member;
-using PlayOfferService.Models;
+using PlayOfferService.Repositories;
 
-namespace PlayOfferService.Repositories;
+namespace PlayOfferService.Domain;
 
 public class DbWriteContext : DbContext
 {

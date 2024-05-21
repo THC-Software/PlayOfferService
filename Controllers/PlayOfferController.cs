@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PlayOfferService.Commands;
+using PlayOfferService.Domain;
 using PlayOfferService.Models;
 using PlayOfferService.Queries;
 using PlayOfferService.Repositories;
@@ -11,13 +12,11 @@ namespace PlayOfferService.Controllers;
 [Route("api")]
 public class PlayOfferController : ControllerBase
 {
-
-    private readonly DbWriteContext _context;
+    
     private readonly IMediator _mediator;
 
-    public PlayOfferController(DbWriteContext context, IMediator mediator)
+    public PlayOfferController(IMediator mediator)
     {
-        _context = context;
         _mediator = mediator;
     }
 

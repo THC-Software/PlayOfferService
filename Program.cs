@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using PlayOfferService.Application;
 using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Repositories;
 using System.Reflection;
+using PlayOfferService.Application;
+using PlayOfferService.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +24,12 @@ builder.Services.AddScoped<PlayOfferRepository>();
 builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-builder.Services.AddHostedService<RedisPlayOfferStreamService>();
-builder.Services.AddHostedService<RedisClubStreamService>();
-builder.Services.AddHostedService<RedisMemberStreamService>();
+if (builder.Environment.EnvironmentName != "Test")
+{
+    builder.Services.AddHostedService<RedisPlayOfferStreamService>();
+    builder.Services.AddHostedService<RedisClubStreamService>();
+    builder.Services.AddHostedService<RedisMemberStreamService>();
+}
 
 // Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
@@ -51,14 +54,17 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "PlayofferService API v1");
 });
 
-using var scope = app.Services.CreateScope();
-var services = scope.ServiceProvider;
-var readDbContext = services.GetRequiredService<DbReadContext>();
-var writeDbContext = services.GetRequiredService<DbWriteContext>();
-
 // Create the database if it doesn't exist
-readDbContext.Database.EnsureCreated();
-writeDbContext.Database.EnsureCreated();
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+    var readDbContext = services.GetRequiredService<DbReadContext>();
+    var writeDbContext = services.GetRequiredService<DbWriteContext>();
+    
+    readDbContext.Database.EnsureCreated();
+    writeDbContext.Database.EnsureCreated();
+}
 
 app.UseHttpsRedirection();
 
@@ -67,3 +73,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Needed for integration tests
+public abstract partial class Startup
+{
+}

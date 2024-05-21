@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
 
-namespace PlayOfferService.Repositories;
+namespace PlayOfferService.Domain.Repositories;
 
 public class PlayOfferRepository
 {
@@ -36,8 +35,6 @@ public class PlayOfferRepository
     public async Task UpdateEntityAsync(BaseEvent baseEvent)
     {
         Console.WriteLine("PlayOfferRepository received event: " + baseEvent.EventType);
-        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
-        
         var appliedEvents = await _context.AppliedEvents
             .Where(e => e.EntityId == baseEvent.EntityId)
             .ToListAsync();
@@ -48,7 +45,17 @@ public class PlayOfferRepository
             return;
         }
         
-        existingPlayOffer.Apply([baseEvent]);
+        if (baseEvent.EventType == EventType.PLAYOFFER_CREATED)
+        {
+            var newPlayOffer = new PlayOffer();
+            newPlayOffer.Apply([baseEvent]);
+            _context.PlayOffers.Add(newPlayOffer);
+        }
+        else
+        {
+            var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
+            existingPlayOffer.Apply([baseEvent]);
+        }
         _context.AppliedEvents.Add(baseEvent);
         await _context.SaveChangesAsync();
     }

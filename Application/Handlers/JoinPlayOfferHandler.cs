@@ -1,11 +1,10 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Commands;
+using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
-using PlayOfferService.Repositories;
+using PlayOfferService.Domain.Repositories;
 
-namespace PlayOfferService.Handlers;
+namespace PlayOfferService.Application.Handlers;
 
 public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 {

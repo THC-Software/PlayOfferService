@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
 using PlayOfferService.Queries;
 using PlayOfferService.Repositories;

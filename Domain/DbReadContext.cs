@@ -3,7 +3,7 @@ using PlayOfferService.Domain.Events;
 using PlayOfferService.Models;
 using PlayOfferService.Repositories;
 
-namespace PlayOfferService.Domain.Repositories;
+namespace PlayOfferService.Domain;
 
 public class DbReadContext : DbContext
 {

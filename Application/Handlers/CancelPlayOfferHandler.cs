@@ -1,9 +1,10 @@
 using MediatR;
 using PlayOfferService.Commands;
+using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Repositories;
+using PlayOfferService.Domain.Repositories;
 
-namespace PlayOfferService.Handlers;
+namespace PlayOfferService.Application.Handlers;
 
 public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Task>
 {

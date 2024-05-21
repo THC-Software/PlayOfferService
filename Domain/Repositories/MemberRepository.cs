@@ -1,11 +1,8 @@
-using System.Data;
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Events.Member;
-using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
 
-namespace PlayOfferService.Repositories;
+namespace PlayOfferService.Domain.Repositories;
 
 public class MemberRepository
 {
@@ -33,8 +30,6 @@ public class MemberRepository
     public async Task UpdateEntityAsync(BaseEvent baseEvent)
     {
         Console.WriteLine("MemberRepository received event: " + baseEvent.EventType);
-        var existingMember = await GetMemberById(baseEvent.EntityId);
-        
         var appliedEvents = await _context.AppliedEvents
             .Where(e => e.EntityId == baseEvent.EntityId)
             .ToListAsync();
@@ -45,7 +40,18 @@ public class MemberRepository
             return;
         }
         
-        existingMember.Apply([baseEvent]);
+        if (baseEvent.EventType == EventType.MEMBER_ACCOUNT_CREATED)
+        {
+            var newMember = new Member();
+            newMember.Apply([baseEvent]);
+            _context.Members.Add(newMember);
+        }
+        else
+        {
+            var existingMember = await GetMemberById(baseEvent.EntityId);
+            existingMember.Apply([baseEvent]);
+        }
+
         _context.AppliedEvents.Add(baseEvent);
         await _context.SaveChangesAsync();
     }

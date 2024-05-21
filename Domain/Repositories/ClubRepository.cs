@@ -1,10 +1,8 @@
-using System.Data;
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
 
-namespace PlayOfferService.Repositories;
+namespace PlayOfferService.Domain.Repositories;
 
 public class ClubRepository
 {
@@ -32,8 +30,6 @@ public class ClubRepository
     public async Task UpdateEntityAsync(BaseEvent baseEvent)
     {
         Console.WriteLine("MemberRepo received event: " + baseEvent.EventType);
-        var existingClub = await GetClubById(baseEvent.EntityId);
-        
         var appliedEvents = await _context.AppliedEvents
             .Where(e => e.EntityId == baseEvent.EntityId)
             .ToListAsync();
@@ -44,7 +40,18 @@ public class ClubRepository
             return;
         }
         
-        existingClub.Apply([baseEvent]);
+        if (baseEvent.EventType == EventType.TENNIS_CLUB_REGISTERED)
+        {
+            var newClub = new Club();
+            newClub.Apply([baseEvent]);
+            _context.Clubs.Add(newClub);
+        }
+        else
+        {
+            var existingClub = await GetClubById(baseEvent.EntityId);
+            existingClub.Apply([baseEvent]);
+        }
+        
         _context.AppliedEvents.Add(baseEvent);
         await _context.SaveChangesAsync();
     }

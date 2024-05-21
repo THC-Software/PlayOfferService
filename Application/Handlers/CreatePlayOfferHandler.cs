@@ -1,8 +1,9 @@
 ﻿using MediatR;
 using PlayOfferService.Commands;
+using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
-using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Handlers;
 public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, PlayOffer>
