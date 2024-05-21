@@ -1,22 +1,18 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Models;
+using PlayOfferService.Repositories;
 
-namespace PlayOfferService.Repositories;
+namespace PlayOfferService.Domain.Repositories;
 
-public class DatabaseContext : DbContext
+public class WriteDbContext : DbContext
 {
 
-    public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+    public WriteDbContext(DbContextOptions<WriteDbContext> options) : base(options)
     {
 
     }
-
-    public DbSet<PlayOffer> PlayOffers { get; set; }
-    public DbSet<Club> Clubs { get; set; }
-    public DbSet<Member> Members { get; set; }
-    public DbSet<Reservation> Reservations { get; set; }
     public DbSet<BaseEvent> Events { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
