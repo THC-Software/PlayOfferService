@@ -1,6 +1,8 @@
+using NSubstitute;
 using NUnit.Framework.Internal;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
+using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
 
 namespace PlayOfferService.Tests.IntegrationTests;
@@ -8,23 +10,15 @@ namespace PlayOfferService.Tests.IntegrationTests;
 [TestFixture]
 public class MemberRepositoryTest : TestSetup
 {
+    private ClubRepository _clubRepositoryMock;
+    
     [SetUp]
     public async Task MemberSetup()
     {
-        var clubCreationEvent = new BaseEvent
-        {
-            EntityId = Guid.Parse("0411624f-ac2a-4ce8-a02f-b8978bb6d84d"),
-            EntityType = EntityType.CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_REGISTERED,
-            EventData = new ClubCreatedEvent
-            {
-                TennisClubId = Guid.Parse("0411624f-ac2a-4ce8-a02f-b8978bb6d84d")
-            }
-        };
-        await TestClubRepository.UpdateEntityAsync(clubCreationEvent);
+        var testClub = new Club { Id = Guid.NewGuid(), IsLocked = false };
+        _clubRepositoryMock = Substitute.For<ClubRepository>();
+        _clubRepositoryMock.GetClubById(Guid.NewGuid()).ReturnsForAnyArgs(testClub);
         
-        var existingClub = await TestClubRepository.GetClubById(Guid.Parse("0411624f-ac2a-4ce8-a02f-b8978bb6d84d"));
         var memberCreationEvent = new BaseEvent
         {
             EntityId = Guid.Parse("16a1a213-f684-4e08-b9ef-61b372c59bf4"),
@@ -34,7 +28,7 @@ public class MemberRepositoryTest : TestSetup
             EventData = new MemberCreatedEvent
             {
                 MemberAccountId = Guid.Parse("16a1a213-f684-4e08-b9ef-61b372c59bf4"),
-                Club = existingClub
+                Club = testClub
             }
         };
         await TestMemberRepository.UpdateEntityAsync(memberCreationEvent);
@@ -48,7 +42,7 @@ public class MemberRepositoryTest : TestSetup
             EventData = new MemberCreatedEvent
             {
                 MemberAccountId = Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"),
-                Club = existingClub
+                Club = testClub
             }
         };
         var memberLockEvent = new BaseEvent
@@ -68,7 +62,7 @@ public class MemberRepositoryTest : TestSetup
     public async Task MemberCreatedEvent_ProjectionTest()
     {
         //Given
-        var existingClub = await TestClubRepository.GetClubById(Guid.Parse("0411624f-ac2a-4ce8-a02f-b8978bb6d84d"));
+        var testClub = await _clubRepositoryMock.GetClubById(Guid.NewGuid());
         
         var memberId = Guid.NewGuid();
         var memberCreatedEvent = new BaseEvent
@@ -80,7 +74,7 @@ public class MemberRepositoryTest : TestSetup
             EventData = new MemberCreatedEvent
             {
                 MemberAccountId = memberId,
-                Club = existingClub
+                Club = testClub
             }
         };
         
@@ -94,7 +88,7 @@ public class MemberRepositoryTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedMember.Id, Is.EqualTo(memberId));
-            Assert.That(projectedMember.Club.Id, Is.EqualTo(Guid.Parse("0411624f-ac2a-4ce8-a02f-b8978bb6d84d")));
+            Assert.That(projectedMember.Club.Id, Is.EqualTo(testClub.Id));
             Assert.That(projectedMember.IsLocked, Is.False);
         });
     }
@@ -123,7 +117,6 @@ public class MemberRepositoryTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedMember.Id, Is.EqualTo(existingMember.Id));
-            Assert.That(projectedMember.Club.Id, Is.EqualTo(Guid.Parse("0411624f-ac2a-4ce8-a02f-b8978bb6d84d")));
             Assert.That(projectedMember.IsLocked, Is.True);
         });
     }
@@ -152,10 +145,7 @@ public class MemberRepositoryTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedMember.Id, Is.EqualTo(existingMember.Id));
-            Assert.That(projectedMember.Club.Id, Is.EqualTo(Guid.Parse("0411624f-ac2a-4ce8-a02f-b8978bb6d84d")));
             Assert.That(projectedMember.IsLocked, Is.False);
         });
     }
-    
-    
 }

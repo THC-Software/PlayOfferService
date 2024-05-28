@@ -56,7 +56,7 @@ public class TestSetup
                           throw new Exception("Could not get ClubRepository");
 
         TestMemberRepository = scope.ServiceProvider.GetService<MemberRepository>() ??
-                               throw new Exception("Could not get MemberRepository");;
+                               throw new Exception("Could not get MemberRepository");
                                
         _readContext.Database.EnsureCreated();
         _writeContext.Database.EnsureCreated();

@@ -7,13 +7,15 @@ namespace PlayOfferService.Domain.Repositories;
 public class ClubRepository
 {
     private readonly DbReadContext _context;
-    
+
+    public ClubRepository(){}
+
     public ClubRepository(DbReadContext context)
     {
         _context = context;
     }
     
-    public async Task<Club> GetClubById(Guid clubId)
+    public virtual async Task<Club> GetClubById(Guid clubId)
     {
         var club = await _context.Clubs
             .Where(e => e.Id == clubId)
