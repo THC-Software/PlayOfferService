@@ -1,9 +1,12 @@
-﻿services:
+﻿version: '3.5'
+services:
   pos_redis:
     image: redis:7.0-alpine
     restart: always
     ports:
       - "6379:6379"
+    networks: 
+      - global_network
   pos_postgres_write:
     image: debezium/postgres:16-alpine
     restart: always
@@ -13,6 +16,8 @@
       POSTGRES_DB: pos_write_db
     ports:
       - "5432:5432"
+    networks:
+      - global_network
   pos_postgres_read:
     image: debezium/postgres:16-alpine
     restart: always
@@ -22,6 +27,8 @@
       POSTGRES_DB: pos_read_db
     ports:
       - "5433:5432"
+    networks: 
+      - global_network
   pos_debezium:
     image: debezium/server
     restart: always
@@ -32,6 +39,8 @@
       - pos_redis
     volumes:
       - ./debezium-conf:/debezium/conf
+    networks:
+      - global_network
   pos_service:
     image: playofferservice
     restart: always
@@ -44,3 +53,10 @@
     ports:
       - "8080:8080"
       - "8081:8081"
+    networks:
+      - global_network
+      
+networks:
+  global_network:
+    name: global_network
+    driver: bridge

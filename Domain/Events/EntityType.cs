@@ -5,5 +5,5 @@ public enum EntityType
     PLAYOFFER,
     RESERVATION,
     MEMBER,
-    CLUB
+    TENNIS_CLUB
 }

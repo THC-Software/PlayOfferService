@@ -13,9 +13,8 @@ public class RedisMemberStreamService : BackgroundService
     private Task? _readTask;
     private readonly CancellationToken _cancellationToken;
     private readonly IDatabase _db;
-    // TODO: Change the StreamName to the correct stream name
-    private const string StreamName = "member.placeholder";
-    private const string GroupName = "pos.club.events.group";
+    private const string StreamName = "club_service_events.public.DomainEvent";
+    private const string GroupName = "pos.member.events.group";
     
     
     public RedisMemberStreamService(IServiceScopeFactory serviceScopeFactory)
@@ -67,23 +66,17 @@ public class RedisMemberStreamService : BackgroundService
         var eventInfo = jsonContent["payload"]["after"];
         // TODO: copy eventType into eventData for deserialization, depending on event format of member microservice
         
-        if (eventInfo["EventType"].GetValue<string>() != "TENNIS_CLUB_REGISTERED"
-            && eventInfo["EventType"].GetValue<string>() != "TENNIS_CLUB_LOCKED"
-            && eventInfo["EventType"].GetValue<string>() != "TENNIS_CLUB_UNLOCKED")
+        var eventType = eventInfo["eventType"].GetValue<string>();
+        var entityType = eventInfo["entityType"].GetValue<string>();
+        
+        if ((eventType != "MEMBER_REGISTERED"
+             && eventType != "MEMBER_DELETED"
+             && eventType != "MEMBER_LOCKED"
+             && eventType != "MEMBER_UNLOCKED") || entityType != "MEMBER")
         {
             return null;
         }
-        
-        var baseEvent = new BaseEvent
-        {
-            EventId = Guid.Parse(eventInfo["EventId"].GetValue<string>()),
-            EventType = (EventType)Enum.Parse(typeof(EventType), eventInfo["EventType"].GetValue<string>()),
-            Timestamp = DateTime.Parse(eventInfo["Timestamp"].GetValue<string>()),
-            EntityId = Guid.Parse(eventInfo["EntityId"].GetValue<string>()),
-            EntityType = (EntityType)Enum.Parse(typeof(EntityType), eventInfo["EntityType"].GetValue<string>()),
-            EventData = JsonSerializer.Deserialize<IDomainEvent>(eventInfo["EventData"].GetValue<string>(), JsonSerializerOptions.Default),
-        };
-        
-        return baseEvent;
+
+        return EventParser.ParseEvent(eventInfo);
     }
 }

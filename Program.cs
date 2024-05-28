@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PlayOfferService.Domain.Repositories;
 using System.Reflection;
+using Microsoft.Extensions.Options;
 using PlayOfferService.Application;
 using PlayOfferService.Domain;
 
@@ -10,11 +11,17 @@ var builder = WebApplication.CreateBuilder(args);
 var readConnectionString = "Host=pos_postgres_read;Database=pos_read_db;Username=pos_user;Password=pos_password";
 var writeConnectionString = "Host=pos_postgres_write;Database=pos_write_db;Username=pos_user;Password=pos_password;";
 builder.Services.AddDbContext<DbReadContext>(options =>
-    options.UseNpgsql(readConnectionString)
+    {
+        options.UseNpgsql(readConnectionString);
+        options.UseCamelCaseNamingConvention();
+    }
 );
 
 builder.Services.AddDbContext<DbWriteContext>(options =>
-    options.UseNpgsql(writeConnectionString)
+    {
+        options.UseNpgsql(writeConnectionString);
+        options.UseCamelCaseNamingConvention();
+    }
 );
 
 // Add services to the container.

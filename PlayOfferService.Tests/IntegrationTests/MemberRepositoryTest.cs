@@ -24,11 +24,11 @@ public class MemberRepositoryTest : TestSetup
             EntityId = Guid.Parse("16a1a213-f684-4e08-b9ef-61b372c59bf4"),
             EntityType = EntityType.MEMBER,
             EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_ACCOUNT_CREATED,
+            EventType = EventType.MEMBER_REGISTERED,
             EventData = new MemberCreatedEvent
             {
-                MemberAccountId = Guid.Parse("16a1a213-f684-4e08-b9ef-61b372c59bf4"),
-                Club = testClub
+                MemberId = new MemberId{Id=Guid.Parse("16a1a213-f684-4e08-b9ef-61b372c59bf4")},
+                TennisClubId = new TennisClubId{Id=testClub.Id}
             }
         };
         await TestMemberRepository.UpdateEntityAsync(memberCreationEvent);
@@ -38,11 +38,11 @@ public class MemberRepositoryTest : TestSetup
             EntityId = Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"),
             EntityType = EntityType.MEMBER,
             EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_ACCOUNT_CREATED,
+            EventType = EventType.MEMBER_REGISTERED,
             EventData = new MemberCreatedEvent
             {
-                MemberAccountId = Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"),
-                Club = testClub
+                MemberId = new MemberId{Id=Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d")},
+                TennisClubId = new TennisClubId{Id=testClub.Id}
             }
         };
         var memberLockEvent = new BaseEvent
@@ -50,7 +50,7 @@ public class MemberRepositoryTest : TestSetup
             EntityId = Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"),
             EntityType = EntityType.MEMBER,
             EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_ACCOUNT_LOCKED,
+            EventType = EventType.MEMBER_LOCKED,
             EventData = new MemberLockedEvent()
         };
         await TestMemberRepository.UpdateEntityAsync(lockedMemberCreationEvent);
@@ -70,11 +70,11 @@ public class MemberRepositoryTest : TestSetup
             EntityId = memberId,
             EntityType = EntityType.MEMBER,
             EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_ACCOUNT_CREATED,
+            EventType = EventType.MEMBER_REGISTERED,
             EventData = new MemberCreatedEvent
             {
-                MemberAccountId = memberId,
-                Club = testClub
+                MemberId = new MemberId{Id=memberId},
+                TennisClubId = new TennisClubId{Id=testClub.Id}
             }
         };
         
@@ -88,7 +88,7 @@ public class MemberRepositoryTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedMember.Id, Is.EqualTo(memberId));
-            Assert.That(projectedMember.Club.Id, Is.EqualTo(testClub.Id));
+            Assert.That(projectedMember.ClubId, Is.EqualTo(testClub.Id));
             Assert.That(projectedMember.IsLocked, Is.False);
         });
     }
@@ -103,7 +103,7 @@ public class MemberRepositoryTest : TestSetup
             EntityId = existingMember.Id,
             EntityType = EntityType.MEMBER,
             EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_ACCOUNT_LOCKED,
+            EventType = EventType.MEMBER_LOCKED,
             EventData = new MemberLockedEvent()
         };
         
@@ -131,7 +131,7 @@ public class MemberRepositoryTest : TestSetup
             EntityId = existingMember.Id,
             EntityType = EntityType.MEMBER,
             EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_ACCOUNT_UNLOCKED,
+            EventType = EventType.MEMBER_UNLOCKED,
             EventData = new MemberUnlockedEvent()
         };
         

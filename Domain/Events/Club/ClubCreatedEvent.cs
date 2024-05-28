@@ -1,6 +1,12 @@
+using PlayOfferService.Domain.Events.Member;
+using PlayOfferService.Models;
+
 namespace PlayOfferService.Domain.Events;
 
 public class ClubCreatedEvent : IDomainEvent
 {
-    public Guid TennisClubId { get; set; }
+    public TennisClubId TennisClubId { get; set; }
+    public string Name { get; set; }
+    public SubscriptionTierId SubscriptionTierId { get; set; }
+    public TennisClubStatus Status { get; set; }
 }

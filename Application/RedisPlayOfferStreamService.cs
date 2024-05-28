@@ -64,16 +64,6 @@ public class RedisPlayOfferStreamService : BackgroundService
         var jsonContent = JsonNode.Parse(dict.Values.First());
         var eventInfo = jsonContent["payload"]["after"];
         
-        var baseEvent = new BaseEvent
-        {
-            EventId = Guid.Parse(eventInfo["EventId"].GetValue<string>()),
-            EventType = (EventType)Enum.Parse(typeof(EventType), eventInfo["EventType"].GetValue<string>()),
-            Timestamp = DateTime.Parse(eventInfo["Timestamp"].GetValue<string>()).ToUniversalTime(),
-            EntityId = Guid.Parse(eventInfo["EntityId"].GetValue<string>()),
-            EntityType = (EntityType)Enum.Parse(typeof(EntityType), eventInfo["EntityType"].GetValue<string>()),
-            EventData = JsonSerializer.Deserialize<IDomainEvent>(eventInfo["EventData"].GetValue<string>(), JsonSerializerOptions.Default),
-        };
-        
-        return baseEvent;
+        return EventParser.ParseEvent(eventInfo);
     }
 }

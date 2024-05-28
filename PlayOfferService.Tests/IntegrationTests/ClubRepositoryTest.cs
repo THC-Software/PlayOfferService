@@ -1,4 +1,5 @@
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Tests.IntegrationTests;
@@ -12,30 +13,30 @@ public class ClubRepositoryTest : TestSetup
         var clubCreationEvent = new BaseEvent
         {
             EntityId = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"),
-            EntityType = EntityType.CLUB,
+            EntityType = EntityType.TENNIS_CLUB,
             EventId = Guid.NewGuid(),
             EventType = EventType.TENNIS_CLUB_REGISTERED,
             EventData = new ClubCreatedEvent
             {
-                TennisClubId = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa")
+                TennisClubId = new TennisClubId {Id = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa")}
             }
         };
         
         var lockedClubCreationEvent = new BaseEvent
         {
             EntityId = Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"),
-            EntityType = EntityType.CLUB,
+            EntityType = EntityType.TENNIS_CLUB,
             EventId = Guid.NewGuid(),
             EventType = EventType.TENNIS_CLUB_REGISTERED,
             EventData = new ClubCreatedEvent
             {
-                TennisClubId = Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac")
+                TennisClubId = new TennisClubId{Id=Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac")}
             }
         };
         var clubLockedEvent = new BaseEvent
         {
             EntityId = Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"),
-            EntityType = EntityType.CLUB,
+            EntityType = EntityType.TENNIS_CLUB,
             EventId = Guid.NewGuid(),
             EventType = EventType.TENNIS_CLUB_LOCKED,
             EventData = new ClubLockedEvent()
@@ -53,12 +54,12 @@ public class ClubRepositoryTest : TestSetup
         var clubCreationEvent = new BaseEvent
         {
             EntityId = clubId,
-            EntityType = EntityType.CLUB,
+            EntityType = EntityType.TENNIS_CLUB,
             EventId = Guid.NewGuid(),
             EventType = EventType.TENNIS_CLUB_REGISTERED,
             EventData = new ClubCreatedEvent
             {
-                TennisClubId = clubId
+                TennisClubId = new TennisClubId{Id=clubId}
             }
         };
         
@@ -83,7 +84,7 @@ public class ClubRepositoryTest : TestSetup
         var clubLockedEvent = new BaseEvent
         {
             EntityId = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"),
-            EntityType = EntityType.CLUB,
+            EntityType = EntityType.TENNIS_CLUB,
             EventId = Guid.NewGuid(),
             EventType = EventType.TENNIS_CLUB_LOCKED,
             EventData = new ClubLockedEvent()
@@ -110,7 +111,7 @@ public class ClubRepositoryTest : TestSetup
         var clubUnlockedEvent = new BaseEvent
         {
             EntityId = Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"),
-            EntityType = EntityType.CLUB,
+            EntityType = EntityType.TENNIS_CLUB,
             EventId = Guid.NewGuid(),
             EventType = EventType.TENNIS_CLUB_UNLOCKED,
             EventData = new ClubUnlockedEvent()

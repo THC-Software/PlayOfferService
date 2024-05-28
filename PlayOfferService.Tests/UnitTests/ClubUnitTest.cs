@@ -1,4 +1,5 @@
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Models;
 
 namespace PlayOfferService.Tests;
@@ -14,12 +15,12 @@ public class ClubUnitTest
         var clubCreationEvent = new BaseEvent
         {
             EntityId = clubId,
-            EntityType = EntityType.CLUB,
+            EntityType = EntityType.TENNIS_CLUB,
             EventId = Guid.NewGuid(),
             EventType = EventType.TENNIS_CLUB_REGISTERED,
             EventData = new ClubCreatedEvent
             {
-                TennisClubId = clubId
+                TennisClubId = new TennisClubId{Id=clubId}
             }
         };
 

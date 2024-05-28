@@ -13,8 +13,7 @@ public class RedisClubStreamService : BackgroundService
     private Task? _readTask;
     private readonly CancellationToken _cancellationToken;
     private readonly IDatabase _db;
-    // TODO: Change the StreamName to the correct stream name
-    private const string StreamName = "club.placeholder";
+    private const string StreamName = "club_service_events.public.DomainEvent";
     private const string GroupName = "pos.club.events.group";
     
     
@@ -52,7 +51,7 @@ public class RedisClubStreamService : BackgroundService
             {
                 var streamEntry = result.First();
                 id = streamEntry.Id;
-                var parsedEvent = ParseEvent(streamEntry);
+                var parsedEvent = FilterandParseEvent(streamEntry);
                 if (parsedEvent == null)
                     continue;
                 await clubRepository.UpdateEntityAsync(parsedEvent);
@@ -62,30 +61,23 @@ public class RedisClubStreamService : BackgroundService
 
     }
     
-    private BaseEvent? ParseEvent(StreamEntry value)
+    private BaseEvent? FilterandParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
         var eventInfo = jsonContent["payload"]["after"];
-        // TODO: copy eventType into eventData for deserialization, depending on event format of club microservice
         
-        if (eventInfo["EventType"].GetValue<string>() != "MEMBER_ACCOUNT_CREATED"
-            && eventInfo["EventType"].GetValue<string>() != "MEMBER_ACCOUNT_LOCKED"
-            && eventInfo["EventType"].GetValue<string>() != "MEMBER_ACCOUNT_UNLOCKED")
+        var eventType = eventInfo["eventType"].GetValue<string>();
+        var entityType = eventInfo["entityType"].GetValue<string>();
+        
+        if ((eventType != "TENNIS_CLUB_REGISTERED"
+            && eventType != "TENNIS_CLUB_LOCKED"
+            && eventType != "TENNIS_CLUB_UNLOCKED"
+            && eventType != "TENNIS_CLUB_DELETED") || entityType != "TENNIS_CLUB")
         {
             return null;
         }
         
-        var baseEvent = new BaseEvent
-        {
-            EventId = Guid.Parse(eventInfo["EventId"].GetValue<string>()),
-            EventType = (EventType)Enum.Parse(typeof(EventType), eventInfo["EventType"].GetValue<string>()),
-            Timestamp = DateTime.Parse(eventInfo["Timestamp"].GetValue<string>()),
-            EntityId = Guid.Parse(eventInfo["EntityId"].GetValue<string>()),
-            EntityType = (EntityType)Enum.Parse(typeof(EntityType), eventInfo["EntityType"].GetValue<string>()),
-            EventData = JsonSerializer.Deserialize<IDomainEvent>(eventInfo["EventData"].GetValue<string>(), JsonSerializerOptions.Default),
-        };
-        
-        return baseEvent;
+        return EventParser.ParseEvent(eventInfo);
     }
 }

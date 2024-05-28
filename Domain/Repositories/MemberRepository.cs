@@ -42,7 +42,7 @@ public class MemberRepository
             return;
         }
         
-        if (baseEvent.EventType == EventType.MEMBER_ACCOUNT_CREATED)
+        if (baseEvent.EventType == EventType.MEMBER_REGISTERED)
         {
             var newMember = new Member();
             newMember.Apply([baseEvent]);
