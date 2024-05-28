@@ -62,7 +62,7 @@ public class PlayOfferController : ControllerBase
         // TODO: Check if creatorId is valid, and retrieve clubId
         var result = await _mediator.Send(new CreatePlayOfferCommand(playOfferDto));
 
-        return CreatedAtAction(nameof(Create), new { playOfferId = result.Id }, result);
+        return CreatedAtAction(nameof(Create), new { playOfferId = result }, result);
     }
 
     ///<summary>

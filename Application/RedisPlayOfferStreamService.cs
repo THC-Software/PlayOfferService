@@ -37,25 +37,25 @@ public class RedisPlayOfferStreamService : BackgroundService
             await _db.StreamCreateConsumerGroupAsync(StreamName, GroupName, "0-0", true);
         }
         
-        _readTask = Task.Run(async () =>
+
+        var id = string.Empty;
+        while (!_cancellationToken.IsCancellationRequested)
         {
-            string id = string.Empty;
-            while (!_cancellationToken.IsCancellationRequested)
+            if (!string.IsNullOrEmpty(id))
             {
-                if (!string.IsNullOrEmpty(id))
-                {
-                    await _db.StreamAcknowledgeAsync(StreamName, GroupName, id);
-                    id = string.Empty;
-                }
-                var result = await _db.StreamReadGroupAsync(StreamName, GroupName, "pos-1", ">", 1);
-                if (result.Any())
-                {
-                    var parsedEvent = ParseEvent(result.First());
-                    await playOfferRepository.UpdateEntityAsync(parsedEvent);
-                }
-                await Task.Delay(1000);
+                await _db.StreamAcknowledgeAsync(StreamName, GroupName, id);
+                id = string.Empty;
             }
-        }, stoppingToken);
+            var result = await _db.StreamReadGroupAsync(StreamName, GroupName, "pos-1", ">", 1);
+            if (result.Any())
+            {
+                var streamEntry = result.First();
+                id = streamEntry.Id;
+                var parsedEvent = ParseEvent(streamEntry);
+                await playOfferRepository.UpdateEntityAsync(parsedEvent);
+            }
+            await Task.Delay(1000);
+        }
     }
     
     private BaseEvent ParseEvent(StreamEntry value)
@@ -68,7 +68,7 @@ public class RedisPlayOfferStreamService : BackgroundService
         {
             EventId = Guid.Parse(eventInfo["EventId"].GetValue<string>()),
             EventType = (EventType)Enum.Parse(typeof(EventType), eventInfo["EventType"].GetValue<string>()),
-            Timestamp = DateTime.Parse(eventInfo["Timestamp"].GetValue<string>()),
+            Timestamp = DateTime.Parse(eventInfo["Timestamp"].GetValue<string>()).ToUniversalTime(),
             EntityId = Guid.Parse(eventInfo["EntityId"].GetValue<string>()),
             EntityType = (EntityType)Enum.Parse(typeof(EntityType), eventInfo["EntityType"].GetValue<string>()),
             EventData = JsonSerializer.Deserialize<IDomainEvent>(eventInfo["EventData"].GetValue<string>(), JsonSerializerOptions.Default),

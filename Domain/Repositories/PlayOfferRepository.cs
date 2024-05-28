@@ -7,10 +7,14 @@ namespace PlayOfferService.Domain.Repositories;
 public class PlayOfferRepository
 {
     private readonly DbReadContext _context;
+    private readonly ClubRepository _clubRepository;
+    private readonly MemberRepository _memberRepository;
     
-    public PlayOfferRepository(DbReadContext context)
+    public PlayOfferRepository(DbReadContext context, ClubRepository clubRepository, MemberRepository memberRepository)
     {
         _context = context;
+        _clubRepository = clubRepository;
+        _memberRepository = memberRepository;
     }
     
     public async Task<IEnumerable<PlayOffer>> GetPlayOffersByIds(
@@ -44,19 +48,49 @@ public class PlayOfferRepository
             Console.WriteLine("Event already applied, skipping");
             return;
         }
-        
-        if (baseEvent.EventType == EventType.PLAYOFFER_CREATED)
+
+        switch (baseEvent.EventType)
         {
-            var newPlayOffer = new PlayOffer();
-            newPlayOffer.Apply([baseEvent]);
-            _context.PlayOffers.Add(newPlayOffer);
+            case EventType.PLAYOFFER_CANCELLED:
+                await CancelPlayOffer(baseEvent);
+                break;
+            case EventType.PLAYOFFER_CREATED:
+                await CreatePlayOffer(baseEvent);
+                break;
+            case EventType.PLAYOFFER_JOINED:
+                await JoinPlayOffer(baseEvent);
+                break;
         }
-        else
-        {
-            var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
-            existingPlayOffer.Apply([baseEvent]);
-        }
+
         _context.AppliedEvents.Add(baseEvent);
         await _context.SaveChangesAsync();
+    }
+
+    private async Task CancelPlayOffer(BaseEvent baseEvent)
+    {
+        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
+        existingPlayOffer.Apply([baseEvent]);
+    }
+
+    private async Task CreatePlayOffer(BaseEvent baseEvent)
+    {
+        var existingMember = await _memberRepository.GetMemberById(((PlayOfferCreatedEvent)baseEvent.EventData).Creator.Id);
+        ((PlayOfferCreatedEvent)baseEvent.EventData).Creator = existingMember;
+        
+        var existingClub = await _clubRepository.GetClubById(((PlayOfferCreatedEvent)baseEvent.EventData).Club.Id);
+        ((PlayOfferCreatedEvent)baseEvent.EventData).Club = existingClub;
+        
+        var newPlayOffer = new PlayOffer();
+        newPlayOffer.Apply([baseEvent]);
+        _context.PlayOffers.Add(newPlayOffer);
+    }
+
+    private async Task JoinPlayOffer(BaseEvent baseEvent)
+    {
+        var existingMember = await _memberRepository.GetMemberById(((PlayOfferJoinedEvent)baseEvent.EventData).Opponent.Id);
+        ((PlayOfferJoinedEvent)baseEvent.EventData).Opponent = existingMember;
+        
+        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
+        existingPlayOffer.Apply([baseEvent]);
     }
 }

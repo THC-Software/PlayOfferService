@@ -36,7 +36,6 @@ public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Ta
         
         _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();
-        await _playOfferRepository.UpdateEntityAsync(domainEvent);
         
         return Task.CompletedTask;
     }

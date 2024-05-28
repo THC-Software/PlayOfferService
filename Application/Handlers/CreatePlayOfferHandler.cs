@@ -6,7 +6,7 @@ using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
 
 namespace PlayOfferService.Handlers;
-public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, PlayOffer>
+public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Guid>
 {
 
     private readonly DbWriteContext _context;
@@ -22,7 +22,7 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Pl
         _playOfferRepository = playOfferRepository;
     }
 
-    public async Task<PlayOffer> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
     {
         var playOfferDto = request.playOfferDto;
         
@@ -50,16 +50,15 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Pl
                 Club = club,
                 Creator = creator,
                 ProposedStartTime = playOfferDto.ProposedStartTime.ToUniversalTime(),
-                ProposedEndTime = playOfferDto.ProposedEndTime
+                ProposedEndTime = playOfferDto.ProposedEndTime.ToUniversalTime()
             },
             Timestamp = DateTime.Now.ToUniversalTime()
         };
 
         _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();
-        await _playOfferRepository.UpdateEntityAsync(domainEvent);
 
-        return (await _playOfferRepository.GetPlayOffersByIds(playOfferId)).First();
+        return playOfferId;
     }
 
 }
