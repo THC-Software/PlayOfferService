@@ -38,27 +38,28 @@ public class RedisClubStreamService : BackgroundService
             await _db.StreamCreateConsumerGroupAsync(StreamName, GroupName, "0-0", true);
         }
         
-        _readTask = Task.Run(async () =>
+
+        var id = string.Empty;
+        while (!_cancellationToken.IsCancellationRequested)
         {
-            string id = string.Empty;
-            while (!_cancellationToken.IsCancellationRequested)
+            if (!string.IsNullOrEmpty(id))
             {
-                if (!string.IsNullOrEmpty(id))
-                {
-                    await _db.StreamAcknowledgeAsync(StreamName, GroupName, id);
-                    id = string.Empty;
-                }
-                var result = await _db.StreamReadGroupAsync(StreamName, GroupName, "pos-club", ">", 1);
-                if (result.Any())
-                {
-                    var parsedEvent = ParseEvent(result.First());
-                    if (parsedEvent == null)
-                        continue;
-                    await clubRepository.UpdateEntityAsync(parsedEvent);
-                }
-                await Task.Delay(1000);
+                await _db.StreamAcknowledgeAsync(StreamName, GroupName, id);
+                id = string.Empty;
             }
-        }, stoppingToken);
+            var result = await _db.StreamReadGroupAsync(StreamName, GroupName, "pos-club", ">", 1);
+            if (result.Any())
+            {
+                var streamEntry = result.First();
+                id = streamEntry.Id;
+                var parsedEvent = ParseEvent(streamEntry);
+                if (parsedEvent == null)
+                    continue;
+                await clubRepository.UpdateEntityAsync(parsedEvent);
+            }
+            await Task.Delay(1000);
+        }
+
     }
     
     private BaseEvent? ParseEvent(StreamEntry value)

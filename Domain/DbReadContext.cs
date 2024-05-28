@@ -25,8 +25,8 @@ public class DbReadContext : DbContext
         modelBuilder.ApplyConfiguration(new BaseEventConfiguration());
         
         // TODO: Remove before coop testing
-        var testClub = new Club{Id = Guid.NewGuid(), IsLocked = false};
-        var testMemberIds = new List<Guid> {Guid.NewGuid(), Guid.NewGuid()};
+        var testClub = new Club{Id = Guid.Parse("06b812a7-5131-4510-82ff-bffac33e0f3e"), IsLocked = false};
+        var testMemberIds = new List<Guid> {Guid.Parse("40c0981d-e2f8-4af3-ae6c-17f79f3ba8c2"), Guid.Parse("ccc1c8fc-89b5-4026-b190-9d9e7e7bc18d")};
         
         var testMembers = new List<Object>{
             new {Id = testMemberIds[0], ClubId = testClub.Id, IsLocked = false},
