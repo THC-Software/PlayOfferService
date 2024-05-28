@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PlayOfferService.Commands;
+using PlayOfferService.Domain;
 using PlayOfferService.Models;
 using PlayOfferService.Queries;
 using PlayOfferService.Repositories;
@@ -11,13 +12,11 @@ namespace PlayOfferService.Controllers;
 [Route("api")]
 public class PlayOfferController : ControllerBase
 {
-
-    private readonly DatabaseContext _context;
+    
     private readonly IMediator _mediator;
 
-    public PlayOfferController(DatabaseContext context, IMediator mediator)
+    public PlayOfferController(IMediator mediator)
     {
-        _context = context;
         _mediator = mediator;
     }
 
@@ -63,7 +62,7 @@ public class PlayOfferController : ControllerBase
         // TODO: Check if creatorId is valid, and retrieve clubId
         var result = await _mediator.Send(new CreatePlayOfferCommand(playOfferDto));
 
-        return CreatedAtAction(nameof(Create), new { playOfferId = result.Id }, result);
+        return CreatedAtAction(nameof(Create), new { playOfferId = result }, result);
     }
 
     ///<summary>

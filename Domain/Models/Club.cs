@@ -30,6 +30,10 @@ public class Club
                 case EventType.TENNIS_CLUB_UNLOCKED:
                     Apply((ClubUnlockedEvent) baseEvent.EventData);
                     break;
+                case EventType.TENNIS_CLUB_DELETED:
+                    // TODO: Implement
+                    Console.WriteLine("Club deleted event not implemented yet");
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -38,7 +42,7 @@ public class Club
     
     private void Apply(ClubCreatedEvent domainEvent)
     {
-        Id = domainEvent.TennisClubId;
+        Id = domainEvent.TennisClubId.Id;
     }
     
     private void Apply(ClubLockedEvent domainEvent)

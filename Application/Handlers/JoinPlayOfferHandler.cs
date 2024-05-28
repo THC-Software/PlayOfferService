@@ -1,19 +1,18 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Commands;
+using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
-using PlayOfferService.Repositories;
+using PlayOfferService.Domain.Repositories;
 
-namespace PlayOfferService.Handlers;
+namespace PlayOfferService.Application.Handlers;
 
 public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 {
-    private readonly DatabaseContext _context;
+    private readonly DbWriteContext _context;
     private readonly PlayOfferRepository _playOfferRepository;
     private readonly MemberRepository _memberRepository;
 
-    public JoinPlayOfferHandler(DatabaseContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository)
+    public JoinPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository)
     {
         _context = context;
         _playOfferRepository = playOfferRepository;

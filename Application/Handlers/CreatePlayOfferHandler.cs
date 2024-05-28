@@ -1,19 +1,20 @@
 ﻿using MediatR;
 using PlayOfferService.Commands;
+using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
-using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Handlers;
-public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, PlayOffer>
+public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Guid>
 {
 
-    private readonly DatabaseContext _context;
+    private readonly DbWriteContext _context;
     private readonly ClubRepository _clubRepository;
     private readonly MemberRepository _memberRepository;
     private readonly PlayOfferRepository _playOfferRepository;
 
-    public CreatePlayOfferHandler(DatabaseContext context, ClubRepository clubRepository, MemberRepository memberRepository, PlayOfferRepository playOfferRepository)
+    public CreatePlayOfferHandler(DbWriteContext context, ClubRepository clubRepository, MemberRepository memberRepository, PlayOfferRepository playOfferRepository)
     {
         _context = context;
         _clubRepository = clubRepository;
@@ -21,7 +22,7 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Pl
         _playOfferRepository = playOfferRepository;
     }
 
-    public async Task<PlayOffer> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
     {
         var playOfferDto = request.playOfferDto;
         
@@ -37,7 +38,7 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Pl
         }
 
         var playOfferId = Guid.NewGuid();
-        var playOfferCreatedEvent = new BaseEvent
+        var domainEvent = new BaseEvent
         {
             EntityId = playOfferId,
             EntityType = EntityType.PLAYOFFER,
@@ -49,15 +50,15 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Pl
                 Club = club,
                 Creator = creator,
                 ProposedStartTime = playOfferDto.ProposedStartTime.ToUniversalTime(),
-                ProposedEndTime = playOfferDto.ProposedEndTime
+                ProposedEndTime = playOfferDto.ProposedEndTime.ToUniversalTime()
             },
             Timestamp = DateTime.Now.ToUniversalTime()
         };
 
-        _context.Events.Add(playOfferCreatedEvent);
+        _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();
 
-        return (await _playOfferRepository.GetPlayOffersByIds(playOfferId)).First();
+        return playOfferId;
     }
 
 }

@@ -4,13 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using PlayOfferService.Domain;
 using PlayOfferService.Repositories;
 
 #nullable disable
 
 namespace PlayOfferService.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(DbWriteContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

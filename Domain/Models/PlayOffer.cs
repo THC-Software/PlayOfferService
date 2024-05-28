@@ -11,27 +11,11 @@ public class PlayOffer {
     public Member? Opponent { get; set; }
     public DateTime ProposedStartTime { get; set; }
     public DateTime ProposedEndTime { get; set; }
-    public DateTime AcceptedStartTime { get; set; }
+    public DateTime? AcceptedStartTime { get; set; }
     public Reservation? Reservation { get; set; }
     public bool IsCancelled { get; set; }
 
-    public PlayOffer()
-    {
-    }
-    
-    public PlayOffer(PlayOfferDto dto)
-    {
-        Id = Guid.NewGuid();
-        Club = new Club { Id= dto.ClubId };
-        Creator = new Member { Id = dto.CreatorId, Club = Club};
-        ProposedStartTime = dto.ProposedStartTime;
-        ProposedEndTime = dto.ProposedEndTime;
-    }
-    
-    public PlayOffer(Guid id)
-    {
-        Id = id;
-    }
+    public PlayOffer() {}
 
     public void Apply(List<BaseEvent> baseEvents)
     {
@@ -83,7 +67,7 @@ public class PlayOffer {
         if (domainEvent.Opponent.Id == Creator.Id)
             throw new ArgumentException("Creator can't join his own PlayOffer");
         
-        if (domainEvent.Opponent.Club.Id != Club.Id)
+        if (domainEvent.Opponent.ClubId != Club.Id)
             throw new ArgumentException("Opponent must be from the same club as the creator of the PlayOffer");
             
         AcceptedStartTime = domainEvent.AcceptedStartTime;

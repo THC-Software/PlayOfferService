@@ -105,7 +105,7 @@ public class PlayOfferUnitTest
                     Opponent = new Member
                     {
                         Id = opponentId,
-                        Club = club
+                        ClubId = club.Id
                     },
                     AcceptedStartTime = acceptedStartTime
                 }
@@ -175,10 +175,7 @@ public class PlayOfferUnitTest
                     Opponent = new Member
                     {
                         Id = Guid.NewGuid(),
-                        Club = new Club
-                        {
-                            Id = Guid.NewGuid()
-                        }
+                        ClubId = Guid.NewGuid()
                     }
                 }
             }

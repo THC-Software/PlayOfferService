@@ -19,14 +19,11 @@ public class MemberUnitTest
             EntityId = memberId,
             EntityType = EntityType.MEMBER,
             EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_ACCOUNT_CREATED,
+            EventType = EventType.MEMBER_REGISTERED,
             EventData = new MemberCreatedEvent
             {
-                MemberAccountId = memberId,
-                Club = new Club
-                {
-                    Id = clubId
-                }
+                MemberId = new MemberId{Id=memberId},
+                TennisClubId = new TennisClubId{Id=clubId}
             }
         };
         
@@ -36,7 +33,7 @@ public class MemberUnitTest
         
         // Then
         Assert.That(member.Id, Is.EqualTo(memberId));
-        Assert.That(member.Club.Id, Is.EqualTo(clubId));
+        Assert.That(member.ClubId, Is.EqualTo(clubId));
         Assert.That(member.IsLocked, Is.False);
     }
     
@@ -53,7 +50,7 @@ public class MemberUnitTest
         {
             new()
             {
-                EventType = EventType.MEMBER_ACCOUNT_LOCKED,
+                EventType = EventType.MEMBER_LOCKED,
                 EventData = new MemberLockedEvent()
             }
         };
@@ -78,7 +75,7 @@ public class MemberUnitTest
         {
             new()
             {
-                EventType = EventType.MEMBER_ACCOUNT_UNLOCKED,
+                EventType = EventType.MEMBER_UNLOCKED,
                 EventData = new MemberUnlockedEvent()
             }
         };

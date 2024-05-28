@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using PlayOfferService.Domain;
 using PlayOfferService.Repositories;
 
 #nullable disable
 
 namespace PlayOfferService.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(DbWriteContext))]
     [Migration("20240430143152_ChangedNamingConventionToCamelCase")]
     partial class ChangedNamingConventionToCamelCase
     {

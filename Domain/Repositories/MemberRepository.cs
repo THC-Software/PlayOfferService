@@ -1,34 +1,60 @@
-using System.Data;
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Models;
 
-namespace PlayOfferService.Repositories;
+namespace PlayOfferService.Domain.Repositories;
 
 public class MemberRepository
 {
-    private readonly DatabaseContext _context;
+    private readonly DbReadContext _context;
+    
+    public MemberRepository(){}
 
-    public MemberRepository(DatabaseContext context)
+    public MemberRepository(DbReadContext context)
     {
         _context = context;
     }
 
-    public async Task<Member> GetMemberById(Guid? memberId)
+    public virtual async Task<Member> GetMemberById(Guid? memberId)
     {
-        var events = await _context.Events
-            .Where(e => e.EntityId == memberId)
-            .OrderBy(e => e.Timestamp)
+        var member = await _context.Members
+            .Where(e => e.Id == memberId)
             .ToListAsync();
 
-        if (events.Count == 0)
+        if (member.Count == 0)
         {
             throw new ArgumentException("No member found with id " + memberId);
         }
-        var member = new Member();
-        member.Apply(events);
 
-        return member;
+        return member.First();
+    }
+
+    public async Task UpdateEntityAsync(BaseEvent baseEvent)
+    {
+        Console.WriteLine("MemberRepository received event: " + baseEvent.EventType);
+        var appliedEvents = await _context.AppliedEvents
+            .Where(e => e.EntityId == baseEvent.EntityId)
+            .ToListAsync();
+        
+        if (appliedEvents.Any(e => e.EventId == baseEvent.EventId))
+        {
+            Console.WriteLine("Event already applied, skipping");
+            return;
+        }
+        
+        if (baseEvent.EventType == EventType.MEMBER_REGISTERED)
+        {
+            var newMember = new Member();
+            newMember.Apply([baseEvent]);
+            _context.Members.Add(newMember);
+        }
+        else
+        {
+            var existingMember = await GetMemberById(baseEvent.EntityId);
+            existingMember.Apply([baseEvent]);
+        }
+
+        _context.AppliedEvents.Add(baseEvent);
+        await _context.SaveChangesAsync();
     }
 }
