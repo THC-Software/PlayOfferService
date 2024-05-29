@@ -9,7 +9,7 @@ public class Member
     public Guid Id { get; set; }
     public Guid ClubId { get; set; }
     
-    public bool IsLocked { get; set; }
+    public Status Status { get; set; }
 
     public void Apply(List<BaseEvent> baseEvents)
     {
@@ -33,8 +33,7 @@ public class Member
                     Apply((MemberUnlockedEvent) baseEvent.EventData);
                     break;
                 case EventType.MEMBER_DELETED:
-                    // TODO: Implement
-                    Console.WriteLine("Member deleted event not implemented yet");
+                    Apply((MemberDeletedEvent) baseEvent.EventData);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -50,11 +49,16 @@ public class Member
     
     private void Apply(MemberLockedEvent domainEvent)
     {
-        IsLocked = true;
+        Status = Status.LOCKED;
     }
     
     private void Apply(MemberUnlockedEvent domainEvent)
     {
-        IsLocked = false;
+        Status = Status.ACTIVE;
+    }
+    
+    private void Apply(MemberDeletedEvent domainEvent)
+    {
+        Status = Status.DELETED;
     }
 }

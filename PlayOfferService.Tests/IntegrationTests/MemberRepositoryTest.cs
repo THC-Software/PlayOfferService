@@ -15,7 +15,7 @@ public class MemberRepositoryTest : TestSetup
     [SetUp]
     public async Task MemberSetup()
     {
-        var testClub = new Club { Id = Guid.NewGuid(), IsLocked = false };
+        var testClub = new Club { Id = Guid.NewGuid(), Status = Status.ACTIVE };
         _clubRepositoryMock = Substitute.For<ClubRepository>();
         _clubRepositoryMock.GetClubById(Guid.NewGuid()).ReturnsForAnyArgs(testClub);
         
@@ -89,7 +89,7 @@ public class MemberRepositoryTest : TestSetup
         {
             Assert.That(projectedMember.Id, Is.EqualTo(memberId));
             Assert.That(projectedMember.ClubId, Is.EqualTo(testClub.Id));
-            Assert.That(projectedMember.IsLocked, Is.False);
+            Assert.That(projectedMember.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
     
@@ -117,7 +117,7 @@ public class MemberRepositoryTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedMember.Id, Is.EqualTo(existingMember.Id));
-            Assert.That(projectedMember.IsLocked, Is.True);
+            Assert.That(projectedMember.Status, Is.EqualTo(Status.LOCKED));
         });
     }
     
@@ -145,7 +145,35 @@ public class MemberRepositoryTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedMember.Id, Is.EqualTo(existingMember.Id));
-            Assert.That(projectedMember.IsLocked, Is.False);
+            Assert.That(projectedMember.Status, Is.EqualTo(Status.ACTIVE));
+        });
+    }
+    
+    [Test]
+    public async Task MemberDeletedEvent_ProjectionTest()
+    {
+        //Given
+        var existingMember = await TestMemberRepository.GetMemberById(Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"));
+        var memberDeleteEvent = new BaseEvent
+        {
+            EntityId = existingMember.Id,
+            EntityType = EntityType.MEMBER,
+            EventId = Guid.NewGuid(),
+            EventType = EventType.MEMBER_DELETED,
+            EventData = new MemberDeletedEvent()
+        };
+        
+        //When
+        await TestMemberRepository.UpdateEntityAsync(memberDeleteEvent);
+        
+        //Then
+        var projectedMember = await TestMemberRepository.GetMemberById(existingMember.Id);
+        
+        Assert.That(projectedMember, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(projectedMember.Id, Is.EqualTo(existingMember.Id));
+            Assert.That(projectedMember.Status, Is.EqualTo(Status.DELETED));
         });
     }
 }

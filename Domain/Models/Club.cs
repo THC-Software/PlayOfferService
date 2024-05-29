@@ -7,7 +7,7 @@ public class Club
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
-    public bool IsLocked { get; set; }
+    public Status Status { get; set; }
 
     public void Apply(List<BaseEvent> baseEvents)
     {
@@ -31,8 +31,7 @@ public class Club
                     Apply((ClubUnlockedEvent) baseEvent.EventData);
                     break;
                 case EventType.TENNIS_CLUB_DELETED:
-                    // TODO: Implement
-                    Console.WriteLine("Club deleted event not implemented yet");
+                    Apply((ClubDeletedEvent) baseEvent.EventData);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -47,11 +46,16 @@ public class Club
     
     private void Apply(ClubLockedEvent domainEvent)
     {
-        IsLocked = true;
+        Status = Status.LOCKED;
     }
     
     private void Apply(ClubUnlockedEvent domainEvent)
     {
-        IsLocked = false;
+        Status = Status.ACTIVE;
+    }
+    
+    private void Apply(ClubDeletedEvent domainEvent)
+    {
+        Status = Status.DELETED;
     }
 }

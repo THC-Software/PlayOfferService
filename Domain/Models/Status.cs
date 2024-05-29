@@ -1,8 +1,8 @@
 namespace PlayOfferService.Models;
 
-public enum TennisClubStatus
+public enum Status
 {
-    NONE,
+    ACTIVE,
     LOCKED,
     DELETED
 }
