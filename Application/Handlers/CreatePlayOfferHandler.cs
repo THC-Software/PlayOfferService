@@ -25,13 +25,27 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
     {
         var playOfferDto = request.playOfferDto;
         
-        var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
-        if(creator == null)
-            throw new NotFoundException($"Member {request.playOfferDto.CreatorId} not found!");
-        
         var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
         if(club == null)
             throw new ArgumentException($"Club {request.playOfferDto.ClubId} not found");
+        switch (club.Status)
+        {
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't create PlayOffer while club is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't create PlayOffer in deleted club!");
+        }
+        
+        var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
+        if(creator == null)
+            throw new NotFoundException($"Member {request.playOfferDto.CreatorId} not found!");
+        switch (creator.Status)
+        {
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't create PlayOffer while member is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't create PlayOffer as a deleted member!");
+        }
 
         var playOfferId = Guid.NewGuid();
         var domainEvent = new BaseEvent

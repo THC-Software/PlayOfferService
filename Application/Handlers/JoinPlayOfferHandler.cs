@@ -4,6 +4,7 @@ using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Repositories;
+using PlayOfferService.Models;
 
 namespace PlayOfferService.Application.Handlers;
 
@@ -42,6 +43,22 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
         
         if (existingOpponent.ClubId != existingPlayOffer.Creator.ClubId)
             throw new InvalidOperationException("Opponent must be from the same club as the creator of the PlayOffer");
+        
+        switch (existingPlayOffer.Club.Status)
+        {
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't join PlayOffer while club is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't join PlayOffer in deleted club!");
+        }
+        
+        switch (existingOpponent.Status)
+        {
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't join PlayOffer while member is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't join PlayOffer as a deleted member!");
+        }
         
         var domainEvent = new BaseEvent
         {
