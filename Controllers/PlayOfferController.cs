@@ -1,10 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PlayOfferService.Commands;
-using PlayOfferService.Domain;
 using PlayOfferService.Models;
 using PlayOfferService.Queries;
-using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Controllers;
 

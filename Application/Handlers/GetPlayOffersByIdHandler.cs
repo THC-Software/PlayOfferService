@@ -1,9 +1,7 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Repositories;
 using PlayOfferService.Models;
 using PlayOfferService.Queries;
-using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Handlers;
 public class GetPlayOffersByIdHandler : IRequestHandler<GetPlayOffersByIdQuery, IEnumerable<PlayOffer>>

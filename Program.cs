@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using PlayOfferService.Application;
+using PlayOfferService.Domain;
 using PlayOfferService.Domain.Repositories;
 using System.Reflection;
 using Microsoft.Extensions.Options;

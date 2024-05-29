@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
 

@@ -3,7 +3,6 @@ using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Models;
 
 namespace PlayOfferService.Handlers;
 public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Guid>
@@ -25,14 +24,14 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
     public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
     {
         var playOfferDto = request.playOfferDto;
-        
+
         var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
-        if(creator == null)
+        if (creator == null)
         {
             throw new ArgumentException("Creator not found");
         }
         var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
-        if(club == null)
+        if (club == null)
         {
             throw new ArgumentException("Club not found");
         }
@@ -47,8 +46,8 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
             EventData = new PlayOfferCreatedEvent
             {
                 Id = playOfferId,
-                Club = club,
-                Creator = creator,
+                Club = club.Id,
+                Creator = creator.Id,
                 ProposedStartTime = playOfferDto.ProposedStartTime.ToUniversalTime(),
                 ProposedEndTime = playOfferDto.ProposedEndTime.ToUniversalTime()
             },

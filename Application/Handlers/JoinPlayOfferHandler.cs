@@ -24,9 +24,9 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
         var existingPlayOffers = await _playOfferRepository.GetPlayOffersByIds(request.joinPlayOfferDto.PlayOfferId);
         if (existingPlayOffers.ToList().Count == 0)
             throw new ArgumentException("PlayOffer not found with id: " + request.joinPlayOfferDto.PlayOfferId);
-        
+
         var existingOpponent = await _memberRepository.GetMemberById(request.joinPlayOfferDto.OpponentId);
-        
+
         var domainEvent = new BaseEvent
         {
             EntityId = request.joinPlayOfferDto.PlayOfferId,
@@ -40,7 +40,7 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
             },
             Timestamp = DateTime.UtcNow
         };
-        
+
         existingPlayOffers.First().Apply([domainEvent]);
 
         _context.Events.Add(domainEvent);
