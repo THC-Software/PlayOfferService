@@ -1,4 +1,5 @@
 using MediatR;
+using PlayOfferService.Application.Exceptions;
 using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
@@ -22,7 +23,11 @@ public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Ta
     {
         var existingPlayOffers = await _playOfferRepository.GetPlayOffersByIds(request.playOfferId);
         if (existingPlayOffers.ToList().Count == 0)
-            throw new ArgumentException("PlayOffer not found with id: " + request.playOfferId);
+            throw new NotFoundException($"PlayOffer {request.playOfferId} not found!");
+        if (existingPlayOffers.First().Opponent != null)
+            throw new InvalidOperationException($"PlayOffer {request.playOfferId} is already accepted and cannot be cancelled!");
+        if (existingPlayOffers.First().IsCancelled)
+            throw new InvalidOperationException($"PlayOffer {request.playOfferId} is already cancelled!");
         
         var domainEvent = new BaseEvent
         {

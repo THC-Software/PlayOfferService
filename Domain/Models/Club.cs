@@ -11,12 +11,6 @@ public class Club
 
     public void Apply(List<BaseEvent> baseEvents)
     {
-        if (Id == Guid.Empty && baseEvents.First().EventType != EventType.TENNIS_CLUB_REGISTERED)
-        {
-            throw new ArgumentException("First Club event must be of type "
-                                        +nameof(EventType.TENNIS_CLUB_REGISTERED));
-        }
-        
         foreach (var baseEvent in baseEvents)
         {
             switch (baseEvent.EventType)
@@ -34,7 +28,7 @@ public class Club
                     Apply((ClubDeletedEvent) baseEvent.EventData);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Club!");
             }
         }
     }

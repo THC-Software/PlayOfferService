@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using PlayOfferService.Application.Exceptions;
 using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
@@ -21,11 +22,26 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 
     public async Task<Task> Handle(JoinPlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var existingPlayOffers = await _playOfferRepository.GetPlayOffersByIds(request.joinPlayOfferDto.PlayOfferId);
-        if (existingPlayOffers.ToList().Count == 0)
-            throw new ArgumentException("PlayOffer not found with id: " + request.joinPlayOfferDto.PlayOfferId);
+        var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.joinPlayOfferDto.PlayOfferId)).FirstOrDefault();
+        if (existingPlayOffer == null)
+            throw new NotFoundException($"PlayOffer {request.joinPlayOfferDto.PlayOfferId} not found!");
         
         var existingOpponent = await _memberRepository.GetMemberById(request.joinPlayOfferDto.OpponentId);
+        if (existingOpponent == null)
+            throw new NotFoundException($"Member {request.joinPlayOfferDto.OpponentId} not found!");
+        
+        if (existingOpponent.Id == existingPlayOffer.Creator.Id)
+            throw new InvalidOperationException("Can't join your own PlayOffer!");
+        
+        if (existingPlayOffer.IsCancelled)
+            throw new InvalidOperationException("Can't join cancelled PlayOffer!");
+        
+        if (request.joinPlayOfferDto.AcceptedStartTime < existingPlayOffer.ProposedStartTime ||
+            request.joinPlayOfferDto.AcceptedStartTime > existingPlayOffer.ProposedEndTime)
+            throw new InvalidOperationException("Accepted start time must be within the proposed start and end time");
+        
+        if (existingOpponent.ClubId != existingPlayOffer.Creator.ClubId)
+            throw new InvalidOperationException("Opponent must be from the same club as the creator of the PlayOffer");
         
         var domainEvent = new BaseEvent
         {
@@ -40,8 +56,6 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
             },
             Timestamp = DateTime.UtcNow
         };
-        
-        existingPlayOffers.First().Apply([domainEvent]);
 
         _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();

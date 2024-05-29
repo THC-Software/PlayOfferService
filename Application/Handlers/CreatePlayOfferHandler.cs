@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using PlayOfferService.Application.Exceptions;
 using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
@@ -12,14 +13,12 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
     private readonly DbWriteContext _context;
     private readonly ClubRepository _clubRepository;
     private readonly MemberRepository _memberRepository;
-    private readonly PlayOfferRepository _playOfferRepository;
 
-    public CreatePlayOfferHandler(DbWriteContext context, ClubRepository clubRepository, MemberRepository memberRepository, PlayOfferRepository playOfferRepository)
+    public CreatePlayOfferHandler(DbWriteContext context, ClubRepository clubRepository, MemberRepository memberRepository)
     {
         _context = context;
         _clubRepository = clubRepository;
         _memberRepository = memberRepository;
-        _playOfferRepository = playOfferRepository;
     }
 
     public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
@@ -28,14 +27,11 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
         
         var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
         if(creator == null)
-        {
-            throw new ArgumentException("Creator not found");
-        }
+            throw new NotFoundException($"Member {request.playOfferDto.CreatorId} not found!");
+        
         var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
         if(club == null)
-        {
-            throw new ArgumentException("Club not found");
-        }
+            throw new ArgumentException($"Club {request.playOfferDto.ClubId} not found");
 
         var playOfferId = Guid.NewGuid();
         var domainEvent = new BaseEvent

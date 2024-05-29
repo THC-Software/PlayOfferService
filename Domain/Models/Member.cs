@@ -13,12 +13,6 @@ public class Member
 
     public void Apply(List<BaseEvent> baseEvents)
     {
-        if (Id == Guid.Empty && baseEvents.First().EventType != EventType.MEMBER_REGISTERED)
-        {
-            throw new ArgumentException("First Member event must be of type "
-                                        + nameof(EventType.MEMBER_REGISTERED));
-        }
-
         foreach (var baseEvent in baseEvents)
         {
             switch (baseEvent.EventType)
@@ -36,7 +30,7 @@ public class Member
                     Apply((MemberDeletedEvent) baseEvent.EventData);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Member!");
             }
         }
     }
@@ -45,6 +39,7 @@ public class Member
     {
         Id = domainEvent.MemberId.Id;
         ClubId = domainEvent.TennisClubId.Id;
+        Status = domainEvent.Status;
     }
     
     private void Apply(MemberLockedEvent domainEvent)
