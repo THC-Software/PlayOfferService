@@ -9,14 +9,14 @@ public class PlayOfferRepository
     private readonly DbReadContext _context;
     private readonly ClubRepository _clubRepository;
     private readonly MemberRepository _memberRepository;
-    
+
     public PlayOfferRepository(DbReadContext context, ClubRepository clubRepository, MemberRepository memberRepository)
     {
         _context = context;
         _clubRepository = clubRepository;
         _memberRepository = memberRepository;
     }
-    
+
     public async Task<IEnumerable<PlayOffer>> GetPlayOffersByIds(
         Guid? playOfferId,
         Guid? creatorId = null,
@@ -30,8 +30,8 @@ public class PlayOfferRepository
         playOffers = playOffers.Where(e =>
             e != null
             && (!playOfferId.HasValue || e.Id == playOfferId)
-            && (!creatorId.HasValue || e.Creator.Id == creatorId)
-            && (!clubId.HasValue || e.Club.Id == clubId)).ToList();
+            && (!creatorId.HasValue || e.Creator == creatorId)
+            && (!clubId.HasValue || e.Club == clubId)).ToList();
 
         return playOffers;
     }
@@ -42,7 +42,7 @@ public class PlayOfferRepository
         var appliedEvents = await _context.AppliedEvents
             .Where(e => e.EntityId == baseEvent.EntityId)
             .ToListAsync();
-        
+
         if (appliedEvents.Any(e => e.EventId == baseEvent.EventId))
         {
             Console.WriteLine("Event already applied, skipping");
@@ -74,12 +74,12 @@ public class PlayOfferRepository
 
     private async Task CreatePlayOffer(BaseEvent baseEvent)
     {
-        var existingMember = await _memberRepository.GetMemberById(((PlayOfferCreatedEvent)baseEvent.EventData).Creator.Id);
-        ((PlayOfferCreatedEvent)baseEvent.EventData).Creator = existingMember;
-        
-        var existingClub = await _clubRepository.GetClubById(((PlayOfferCreatedEvent)baseEvent.EventData).Club.Id);
-        ((PlayOfferCreatedEvent)baseEvent.EventData).Club = existingClub;
-        
+        var existingMember = await _memberRepository.GetMemberById(((PlayOfferCreatedEvent)baseEvent.EventData).Creator);
+        ((PlayOfferCreatedEvent)baseEvent.EventData).Creator = existingMember.Id;
+
+        var existingClub = await _clubRepository.GetClubById(((PlayOfferCreatedEvent)baseEvent.EventData).Club);
+        ((PlayOfferCreatedEvent)baseEvent.EventData).Club = existingClub.Id;
+
         var newPlayOffer = new PlayOffer();
         newPlayOffer.Apply([baseEvent]);
         _context.PlayOffers.Add(newPlayOffer);
@@ -89,7 +89,7 @@ public class PlayOfferRepository
     {
         var existingMember = await _memberRepository.GetMemberById(((PlayOfferJoinedEvent)baseEvent.EventData).Opponent.Id);
         ((PlayOfferJoinedEvent)baseEvent.EventData).Opponent = existingMember;
-        
+
         var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
         existingPlayOffer.Apply([baseEvent]);
     }

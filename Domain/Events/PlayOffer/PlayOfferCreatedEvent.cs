@@ -1,20 +1,19 @@
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
 
 public class PlayOfferCreatedEvent : IDomainEvent
 {
     public Guid Id { get; set; }
-    public Club Club { get; set; }
-    public Member Creator { get; set; }
+    public Guid Club { get; set; }
+    public Guid Creator { get; set; }
     public DateTime ProposedStartTime { get; set; }
     public DateTime ProposedEndTime { get; set; }
-    
-    public PlayOfferCreatedEvent(){}
+
+    public PlayOfferCreatedEvent() { }
 
     public PlayOfferCreatedEvent(
         Guid id,
-        Club club,
-        Member creator,
+        Guid club,
+        Guid creator,
         DateTime proposedStartTime,
         DateTime proposedEndTime)
     {
