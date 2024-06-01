@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace PlayOfferService.Migrations.DbRead
+namespace PlayOfferService.Migrations
 {
     /// <inheritdoc />
-    public partial class RefactorIsLockedToStatus : Migration
+    public partial class NewInitMig : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -123,7 +123,7 @@ namespace PlayOfferService.Migrations.DbRead
             migrationBuilder.InsertData(
                 table: "playOffers",
                 columns: new[] { "id", "acceptedStartTime", "clubId", "creatorId", "isCancelled", "opponentId", "proposedEndTime", "proposedStartTime", "reservationId" },
-                values: new object[] { new Guid("3655e6cd-5d91-44f9-8b0c-9548a06b6762"), null, new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"), new Guid("40c0981d-e2f8-4af3-ae6c-17f79f3ba8c2"), false, null, new DateTime(2024, 5, 29, 8, 57, 31, 906, DateTimeKind.Utc).AddTicks(4438), new DateTime(2024, 5, 29, 7, 57, 31, 906, DateTimeKind.Utc).AddTicks(4436), null });
+                values: new object[] { new Guid("bd18fca2-8708-495a-8e15-633fa33e8a7b"), null, new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"), new Guid("40c0981d-e2f8-4af3-ae6c-17f79f3ba8c2"), false, null, new DateTime(2024, 6, 1, 14, 28, 22, 322, DateTimeKind.Utc).AddTicks(9668), new DateTime(2024, 6, 1, 13, 28, 22, 322, DateTimeKind.Utc).AddTicks(9665), null });
 
             migrationBuilder.CreateIndex(
                 name: "iX_playOffers_clubId",
