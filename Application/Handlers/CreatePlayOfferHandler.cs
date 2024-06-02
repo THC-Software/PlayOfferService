@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using PlayOfferService.Application.Exceptions;
 using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
@@ -12,29 +13,38 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
     private readonly DbWriteContext _context;
     private readonly ClubRepository _clubRepository;
     private readonly MemberRepository _memberRepository;
-    private readonly PlayOfferRepository _playOfferRepository;
 
-    public CreatePlayOfferHandler(DbWriteContext context, ClubRepository clubRepository, MemberRepository memberRepository, PlayOfferRepository playOfferRepository)
+    public CreatePlayOfferHandler(DbWriteContext context, ClubRepository clubRepository, MemberRepository memberRepository)
     {
         _context = context;
         _clubRepository = clubRepository;
         _memberRepository = memberRepository;
-        _playOfferRepository = playOfferRepository;
     }
 
     public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
     {
         var playOfferDto = request.playOfferDto;
         
-        var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
-        if(creator == null)
-        {
-            throw new ArgumentException("Creator not found");
-        }
         var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
         if(club == null)
+            throw new ArgumentException($"Club {request.playOfferDto.ClubId} not found");
+        switch (club.Status)
         {
-            throw new ArgumentException("Club not found");
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't create PlayOffer while club is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't create PlayOffer in deleted club!");
+        }
+        
+        var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
+        if(creator == null)
+            throw new NotFoundException($"Member {request.playOfferDto.CreatorId} not found!");
+        switch (creator.Status)
+        {
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't create PlayOffer while member is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't create PlayOffer as a deleted member!");
         }
 
         var playOfferId = Guid.NewGuid();

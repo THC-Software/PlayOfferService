@@ -34,7 +34,7 @@ public class MemberUnitTest
         // Then
         Assert.That(member.Id, Is.EqualTo(memberId));
         Assert.That(member.ClubId, Is.EqualTo(clubId));
-        Assert.That(member.IsLocked, Is.False);
+        Assert.That(member.Status, Is.EqualTo(Status.ACTIVE));
     }
     
     [Test]
@@ -44,7 +44,7 @@ public class MemberUnitTest
         var member = new Member
         {
             Id = Guid.NewGuid(),
-            IsLocked = false
+            Status = Status.ACTIVE
         };
         var memberEvents = new List<BaseEvent>
         {
@@ -59,7 +59,7 @@ public class MemberUnitTest
         member.Apply(memberEvents);
         
         // Then
-        Assert.That(member.IsLocked, Is.True);
+        Assert.That(member.Status, Is.EqualTo(Status.LOCKED));
     }
     
     [Test]
@@ -69,7 +69,7 @@ public class MemberUnitTest
         var member = new Member
         {
             Id = Guid.NewGuid(),
-            IsLocked = true
+            Status = Status.LOCKED
         };
         var memberEvents = new List<BaseEvent>
         {
@@ -84,6 +84,31 @@ public class MemberUnitTest
         member.Apply(memberEvents);
         
         // Then
-        Assert.That(member.IsLocked, Is.False);
+        Assert.That(member.Status, Is.EqualTo(Status.ACTIVE));
+    }
+    
+    [Test]
+    public void ApplyMemberDeleteEventTest()
+    {
+        // Given
+        var member = new Member
+        {
+            Id = Guid.NewGuid(),
+            Status = Status.ACTIVE
+        };
+        var memberEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.MEMBER_DELETED,
+                EventData = new MemberDeletedEvent()
+            }
+        };
+        
+        // When
+        member.Apply(memberEvents);
+        
+        // Then
+        Assert.That(member.Status, Is.EqualTo(Status.DELETED));
     }
 }

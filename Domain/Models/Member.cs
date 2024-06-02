@@ -9,16 +9,10 @@ public class Member
     public Guid Id { get; set; }
     public Guid ClubId { get; set; }
     
-    public bool IsLocked { get; set; }
+    public Status Status { get; set; }
 
     public void Apply(List<BaseEvent> baseEvents)
     {
-        if (Id == Guid.Empty && baseEvents.First().EventType != EventType.MEMBER_REGISTERED)
-        {
-            throw new ArgumentException("First Member event must be of type "
-                                        + nameof(EventType.MEMBER_REGISTERED));
-        }
-
         foreach (var baseEvent in baseEvents)
         {
             switch (baseEvent.EventType)
@@ -33,11 +27,10 @@ public class Member
                     Apply((MemberUnlockedEvent) baseEvent.EventData);
                     break;
                 case EventType.MEMBER_DELETED:
-                    // TODO: Implement
-                    Console.WriteLine("Member deleted event not implemented yet");
+                    Apply((MemberDeletedEvent) baseEvent.EventData);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Member!");
             }
         }
     }
@@ -46,15 +39,21 @@ public class Member
     {
         Id = domainEvent.MemberId.Id;
         ClubId = domainEvent.TennisClubId.Id;
+        Status = domainEvent.Status;
     }
     
     private void Apply(MemberLockedEvent domainEvent)
     {
-        IsLocked = true;
+        Status = Status.LOCKED;
     }
     
     private void Apply(MemberUnlockedEvent domainEvent)
     {
-        IsLocked = false;
+        Status = Status.ACTIVE;
+    }
+    
+    private void Apply(MemberDeletedEvent domainEvent)
+    {
+        Status = Status.DELETED;
     }
 }

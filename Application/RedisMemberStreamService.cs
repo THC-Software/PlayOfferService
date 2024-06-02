@@ -64,7 +64,6 @@ public class RedisMemberStreamService : BackgroundService
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
         var eventInfo = jsonContent["payload"]["after"];
-        // TODO: copy eventType into eventData for deserialization, depending on event format of member microservice
         
         var eventType = eventInfo["eventType"].GetValue<string>();
         var entityType = eventInfo["entityType"].GetValue<string>();

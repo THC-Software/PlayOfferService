@@ -2,128 +2,155 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlayOfferService.Domain;
-using PlayOfferService.Repositories;
 
 #nullable disable
 
 namespace PlayOfferService.Migrations
 {
-    [DbContext(typeof(DbWriteContext))]
-    [Migration("20240430143152_ChangedNamingConventionToCamelCase")]
-    partial class ChangedNamingConventionToCamelCase
+    [DbContext(typeof(DbReadContext))]
+    partial class DbReadContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.3")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("ProductVersion", "8.0.2")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("PlayOfferService.Domain.Events.BaseEvent<PlayOfferService.Domain.Events.IDomainEvent>", b =>
+            modelBuilder.Entity("PlayOfferService.Domain.Events.BaseEvent", b =>
                 {
                     b.Property<Guid>("EventId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("eventId");
 
                     b.Property<Guid>("EntityId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("entityId");
 
                     b.Property<string>("EntityType")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("entityType");
 
                     b.Property<string>("EventData")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("eventData");
 
                     b.Property<string>("EventType")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasColumnType("text")
                         .HasColumnName("eventType");
 
                     b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("timestamp");
 
                     b.HasKey("EventId")
-                        .HasName("pK_Events");
+                        .HasName("pK_events");
 
-                    b.ToTable("Events", (string)null);
+                    b.ToTable("events", (string)null);
                 });
 
             modelBuilder.Entity("PlayOfferService.Models.Club", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.HasKey("Id")
                         .HasName("pK_clubs");
 
                     b.ToTable("clubs", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"),
+                            Status = 0
+                        });
                 });
 
             modelBuilder.Entity("PlayOfferService.Models.Member", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.Property<Guid>("ClubId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("clubId");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.HasKey("Id")
                         .HasName("pK_members");
 
-                    b.HasIndex("ClubId")
-                        .HasDatabaseName("iX_members_clubId");
-
                     b.ToTable("members", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("40c0981d-e2f8-4af3-ae6c-17f79f3ba8c2"),
+                            ClubId = new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"),
+                            Status = 0
+                        },
+                        new
+                        {
+                            Id = new Guid("ccc1c8fc-89b5-4026-b190-9d9e7e7bc18d"),
+                            ClubId = new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"),
+                            Status = 0
+                        });
                 });
 
             modelBuilder.Entity("PlayOfferService.Models.PlayOffer", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTime>("AcceptedStartTime")
-                        .HasColumnType("datetime(6)")
+                    b.Property<DateTime?>("AcceptedStartTime")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("acceptedStartTime");
 
                     b.Property<Guid>("ClubId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("clubId");
 
                     b.Property<Guid>("CreatorId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("creatorId");
 
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("isCancelled");
+
                     b.Property<Guid?>("OpponentId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("opponentId");
 
                     b.Property<DateTime>("ProposedEndTime")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("proposedEndTime");
 
                     b.Property<DateTime>("ProposedStartTime")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("proposedStartTime");
 
                     b.Property<Guid?>("ReservationId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("reservationId");
 
                     b.HasKey("Id")
@@ -142,30 +169,29 @@ namespace PlayOfferService.Migrations
                         .HasDatabaseName("iX_playOffers_reservationId");
 
                     b.ToTable("playOffers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("bd18fca2-8708-495a-8e15-633fa33e8a7b"),
+                            ClubId = new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"),
+                            CreatorId = new Guid("40c0981d-e2f8-4af3-ae6c-17f79f3ba8c2"),
+                            IsCancelled = false,
+                            ProposedEndTime = new DateTime(2024, 6, 1, 14, 28, 22, 322, DateTimeKind.Utc).AddTicks(9668),
+                            ProposedStartTime = new DateTime(2024, 6, 1, 13, 28, 22, 322, DateTimeKind.Utc).AddTicks(9665)
+                        });
                 });
 
             modelBuilder.Entity("PlayOfferService.Models.Reservation", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
 
                     b.HasKey("Id")
                         .HasName("pK_reservations");
 
                     b.ToTable("reservations", (string)null);
-                });
-
-            modelBuilder.Entity("PlayOfferService.Models.Member", b =>
-                {
-                    b.HasOne("PlayOfferService.Models.Club", "Club")
-                        .WithMany()
-                        .HasForeignKey("ClubId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fK_members_clubs_clubId");
-
-                    b.Navigation("Club");
                 });
 
             modelBuilder.Entity("PlayOfferService.Models.PlayOffer", b =>
