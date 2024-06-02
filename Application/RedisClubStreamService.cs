@@ -8,7 +8,6 @@ namespace PlayOfferService.Application;
 public class RedisClubStreamService : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private Task? _readTask;
     private readonly CancellationToken _cancellationToken;
     private readonly IDatabase _db;
     private const string StreamName = "club_service_events.public.DomainEvent";
@@ -32,7 +31,7 @@ public class RedisClubStreamService : BackgroundService
         if (!(await _db.KeyExistsAsync(StreamName)) ||
             (await _db.StreamGroupInfoAsync(StreamName)).All(x=>x.Name!=GroupName))
         {
-            await _db.StreamCreateConsumerGroupAsync(StreamName, GroupName, "0-0", true);
+            await _db.StreamCreateConsumerGroupAsync(StreamName, GroupName, "0-0");
         }
         
 

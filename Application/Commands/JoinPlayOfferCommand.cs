@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
 
-namespace PlayOfferService.Commands;
-public record JoinPlayOfferCommand(JoinPlayOfferDto joinPlayOfferDto) : IRequest<Task>
+namespace PlayOfferService.Application.Commands;
+public record JoinPlayOfferCommand(JoinPlayOfferDto JoinPlayOfferDto) : IRequest<Task>
 {
 }

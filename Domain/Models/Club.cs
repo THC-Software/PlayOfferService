@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using PlayOfferService.Domain.Events;
 
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
 public class Club
 {

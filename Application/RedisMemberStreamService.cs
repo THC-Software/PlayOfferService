@@ -8,7 +8,6 @@ namespace PlayOfferService.Application;
 public class RedisMemberStreamService : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private Task? _readTask;
     private readonly CancellationToken _cancellationToken;
     private readonly IDatabase _db;
     private const string StreamName = "club_service_events.public.DomainEvent";

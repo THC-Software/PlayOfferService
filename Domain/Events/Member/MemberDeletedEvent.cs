@@ -1,6 +1,5 @@
 namespace PlayOfferService.Domain.Events.Member;
 
-public class MemberDeletedEvent : IDomainEvent
+public class MemberDeletedEvent : DomainEvent
 {
-    
 }

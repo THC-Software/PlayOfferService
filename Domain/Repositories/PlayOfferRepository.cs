@@ -1,20 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
 
 namespace PlayOfferService.Domain.Repositories;
 
 public class PlayOfferRepository
 {
     private readonly DbReadContext _context;
-    private readonly ClubRepository _clubRepository;
-    private readonly MemberRepository _memberRepository;
 
-    public PlayOfferRepository(DbReadContext context, ClubRepository clubRepository, MemberRepository memberRepository)
+    public PlayOfferRepository(DbReadContext context)
     {
         _context = context;
-        _clubRepository = clubRepository;
-        _memberRepository = memberRepository;
     }
 
     public async Task<IEnumerable<PlayOffer>> GetPlayOffersByIds(
@@ -53,7 +49,7 @@ public class PlayOfferRepository
                 await CancelPlayOffer(baseEvent);
                 break;
             case EventType.PLAYOFFER_CREATED:
-                await CreatePlayOffer(baseEvent);
+                CreatePlayOffer(baseEvent);
                 break;
             case EventType.PLAYOFFER_JOINED:
                 await JoinPlayOffer(baseEvent);
@@ -70,7 +66,7 @@ public class PlayOfferRepository
         existingPlayOffer.Apply([baseEvent]);
     }
 
-    private async Task CreatePlayOffer(BaseEvent baseEvent)
+    private void CreatePlayOffer(BaseEvent baseEvent)
     {
         var newPlayOffer = new PlayOffer();
         newPlayOffer.Apply([baseEvent]);

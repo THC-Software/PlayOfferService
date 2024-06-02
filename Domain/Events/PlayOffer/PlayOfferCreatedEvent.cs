@@ -1,6 +1,6 @@
 using PlayOfferService.Domain.Events;
 
-public class PlayOfferCreatedEvent : IDomainEvent
+public class PlayOfferCreatedEvent : DomainEvent
 {
     public Guid Id { get; set; }
     public Guid ClubId { get; set; }

@@ -1,7 +1,7 @@
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
 
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
 public class Member
 {

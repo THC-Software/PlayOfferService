@@ -1,8 +1,9 @@
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
+using PlayOfferService.Domain.ValueObjects;
 
-namespace PlayOfferService.Tests;
+namespace PlayOfferService.Tests.UnitTests;
 
 [TestFixture]
 public class ClubUnitTest

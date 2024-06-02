@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using PlayOfferService.Domain.Events.Member;
+using PlayOfferService.Domain.Events.PlayOffer;
 
 namespace PlayOfferService.Domain.Events;
 
@@ -16,7 +17,6 @@ namespace PlayOfferService.Domain.Events;
 [JsonDerivedType(typeof(PlayOfferJoinedEvent), typeDiscriminator: "PLAYOFFER_JOINED")]
 [JsonDerivedType(typeof(PlayOfferCancelledEvent), typeDiscriminator: "PLAYOFFER_CANCELLED")]
 [JsonDerivedType(typeof(PlayOfferReservationCreatedEvent), typeDiscriminator: "PLAYOFFER_RESERVATION_CREATED")]
-public class IDomainEvent
+public class DomainEvent
 {
-    
 }

@@ -1,10 +1,10 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using PlayOfferService.Commands;
-using PlayOfferService.Models;
-using PlayOfferService.Queries;
+using PlayOfferService.Application.Commands;
+using PlayOfferService.Application.Queries;
+using PlayOfferService.Domain.Models;
 
-namespace PlayOfferService.Controllers;
+namespace PlayOfferService.Application.Controllers;
 
 [ApiController]
 [Route("api")]

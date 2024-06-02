@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
 
 namespace PlayOfferService.Domain.Repositories;
 

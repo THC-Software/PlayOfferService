@@ -1,4 +1,4 @@
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
 public class JoinPlayOfferDto
 {

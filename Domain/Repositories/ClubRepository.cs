@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
 
 namespace PlayOfferService.Domain.Repositories;
 
@@ -49,7 +49,7 @@ public class ClubRepository
         else
         {
             var existingClub = await GetClubById(baseEvent.EntityId);
-            existingClub.Apply([baseEvent]);
+            existingClub!.Apply([baseEvent]);
         }
         
         _context.AppliedEvents.Add(baseEvent);

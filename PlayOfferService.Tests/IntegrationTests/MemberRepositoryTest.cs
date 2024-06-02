@@ -1,16 +1,16 @@
 using NSubstitute;
-using NUnit.Framework.Internal;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
+using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.ValueObjects;
 
 namespace PlayOfferService.Tests.IntegrationTests;
 
 [TestFixture]
 public class MemberRepositoryTest : TestSetup
 {
-    private ClubRepository _clubRepositoryMock;
+    private ClubRepository _clubRepositoryMock = Substitute.For<ClubRepository>();
     
     [SetUp]
     public async Task MemberSetup()
@@ -87,9 +87,12 @@ public class MemberRepositoryTest : TestSetup
         Assert.That(projectedMember, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            Assert.That(projectedMember.Id, Is.EqualTo(memberId));
-            Assert.That(projectedMember.ClubId, Is.EqualTo(testClub.Id));
-            Assert.That(projectedMember.Status, Is.EqualTo(Status.ACTIVE));
+            if (projectedMember != null)
+            {
+                Assert.That(projectedMember.Id, Is.EqualTo(memberId));
+                Assert.That(projectedMember.ClubId, Is.EqualTo(testClub.Id));
+                Assert.That(projectedMember.Status, Is.EqualTo(Status.ACTIVE));
+            }
         });
     }
     

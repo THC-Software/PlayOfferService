@@ -1,7 +1,7 @@
 using MediatR;
 
-namespace PlayOfferService.Commands;
+namespace PlayOfferService.Application.Commands;
 
-public record CancelPlayOfferCommand(Guid playOfferId) : IRequest<Task>
+public record CancelPlayOfferCommand(Guid PlayOfferId) : IRequest<Task>
 {
 }

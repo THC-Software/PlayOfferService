@@ -1,8 +1,8 @@
-using NUnit.Framework;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Events.PlayOffer;
+using PlayOfferService.Domain.Models;
 
-namespace PlayOfferService.Tests;
+namespace PlayOfferService.Tests.UnitTests;
 
 [TestFixture]
 public class PlayOfferUnitTest

@@ -4,9 +4,6 @@ using PlayOfferService.Application;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Repositories;
 using System.Reflection;
-using Microsoft.Extensions.Options;
-using PlayOfferService.Application;
-using PlayOfferService.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +48,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "An ASP.NET Core Web API for managing PlayOffers",
     });
 
-    options.IncludeXmlComments(Path.Combine(System.AppContext.BaseDirectory,
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
         $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 });
 

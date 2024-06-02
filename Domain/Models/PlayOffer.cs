@@ -1,7 +1,8 @@
-using PlayOfferService.Domain.Events;
 using System.ComponentModel.DataAnnotations.Schema;
+using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.PlayOffer;
 
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
 public class PlayOffer
 {

@@ -1,6 +1,6 @@
-namespace PlayOfferService.Domain.Events;
+namespace PlayOfferService.Domain.Events.PlayOffer;
 
-public class PlayOfferCancelledEvent : IDomainEvent
+public class PlayOfferCancelledEvent : DomainEvent
 {
     public PlayOfferCancelledEvent(){}
 }

@@ -1,4 +1,4 @@
-namespace PlayOfferService.Domain.Events.Member;
+namespace PlayOfferService.Domain.ValueObjects;
 
 public class FullName
 {

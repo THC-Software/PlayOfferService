@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
 
-namespace PlayOfferService.Commands;
-public record CreatePlayOfferCommand(PlayOfferDto playOfferDto) : IRequest<Guid>
+namespace PlayOfferService.Application.Commands;
+public record CreatePlayOfferCommand(PlayOfferDto PlayOfferDto) : IRequest<Guid>
 {
 }

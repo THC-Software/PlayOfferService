@@ -1,8 +1,9 @@
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
+using PlayOfferService.Domain.ValueObjects;
 
 namespace PlayOfferService.Domain.Events.Member;
 
-public class MemberCreatedEvent : IDomainEvent
+public class MemberCreatedEvent : DomainEvent
 {
     public MemberId MemberId { get; set; }
     public FullName Name { get; set; }

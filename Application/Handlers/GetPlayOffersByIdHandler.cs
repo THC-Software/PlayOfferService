@@ -1,9 +1,9 @@
 ﻿using MediatR;
+using PlayOfferService.Application.Queries;
+using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Models;
-using PlayOfferService.Queries;
 
-namespace PlayOfferService.Handlers;
+namespace PlayOfferService.Application.Handlers;
 public class GetPlayOffersByIdHandler : IRequestHandler<GetPlayOffersByIdQuery, IEnumerable<PlayOffer>>
 {
     private readonly PlayOfferRepository _playOfferRepository;
@@ -15,6 +15,6 @@ public class GetPlayOffersByIdHandler : IRequestHandler<GetPlayOffersByIdQuery, 
 
     public async Task<IEnumerable<PlayOffer>> Handle(GetPlayOffersByIdQuery request, CancellationToken cancellationToken)
     {
-        return await _playOfferRepository.GetPlayOffersByIds(request.playOfferId, request.creatorId, request.clubId);
+        return await _playOfferRepository.GetPlayOffersByIds(request.PlayOfferId, request.CreatorId, request.ClubId);
     }
 }

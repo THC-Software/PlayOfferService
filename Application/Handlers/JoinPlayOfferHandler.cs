@@ -1,10 +1,11 @@
 using MediatR;
+using PlayOfferService.Application.Commands;
 using PlayOfferService.Application.Exceptions;
-using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.PlayOffer;
+using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Models;
 
 namespace PlayOfferService.Application.Handlers;
 
@@ -25,13 +26,13 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 
     public async Task<Task> Handle(JoinPlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.joinPlayOfferDto.PlayOfferId)).FirstOrDefault();
+        var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.JoinPlayOfferDto.PlayOfferId)).FirstOrDefault();
         if (existingPlayOffer == null)
-            throw new NotFoundException($"PlayOffer {request.joinPlayOfferDto.PlayOfferId} not found!");
+            throw new NotFoundException($"PlayOffer {request.JoinPlayOfferDto.PlayOfferId} not found!");
         
-        var existingOpponent = await _memberRepository.GetMemberById(request.joinPlayOfferDto.OpponentId);
+        var existingOpponent = await _memberRepository.GetMemberById(request.JoinPlayOfferDto.OpponentId);
         if (existingOpponent == null)
-            throw new NotFoundException($"Member {request.joinPlayOfferDto.OpponentId} not found!");
+            throw new NotFoundException($"Member {request.JoinPlayOfferDto.OpponentId} not found!");
         
         if (existingOpponent.Id == existingPlayOffer.CreatorId)
             throw new InvalidOperationException("Can't join your own PlayOffer!");
@@ -39,8 +40,8 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
         if (existingPlayOffer.IsCancelled)
             throw new InvalidOperationException("Can't join cancelled PlayOffer!");
         
-        if (request.joinPlayOfferDto.AcceptedStartTime < existingPlayOffer.ProposedStartTime ||
-            request.joinPlayOfferDto.AcceptedStartTime > existingPlayOffer.ProposedEndTime)
+        if (request.JoinPlayOfferDto.AcceptedStartTime < existingPlayOffer.ProposedStartTime ||
+            request.JoinPlayOfferDto.AcceptedStartTime > existingPlayOffer.ProposedEndTime)
             throw new InvalidOperationException("Accepted start time must be within the proposed start and end time");
         
         var existingCreator = await _memberRepository.GetMemberById(existingPlayOffer.CreatorId);
@@ -66,14 +67,14 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
         
         var domainEvent = new BaseEvent
         {
-            EntityId = request.joinPlayOfferDto.PlayOfferId,
+            EntityId = request.JoinPlayOfferDto.PlayOfferId,
             EntityType = EntityType.PLAYOFFER,
             EventId = Guid.NewGuid(),
             EventType = EventType.PLAYOFFER_JOINED,
             EventData = new PlayOfferJoinedEvent
             {
                 OpponentId = existingOpponent.Id,
-                AcceptedStartTime = request.joinPlayOfferDto.AcceptedStartTime.ToUniversalTime(),
+                AcceptedStartTime = request.JoinPlayOfferDto.AcceptedStartTime.ToUniversalTime(),
             },
             Timestamp = DateTime.UtcNow
         };

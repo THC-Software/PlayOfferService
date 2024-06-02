@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PlayOfferService.Domain;
-using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Tests;
 
