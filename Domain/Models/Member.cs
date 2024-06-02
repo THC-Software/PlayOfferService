@@ -20,13 +20,13 @@ public class Member
                     Apply((MemberCreatedEvent) baseEvent.EventData);
                     break;
                 case EventType.MEMBER_LOCKED:
-                    Apply((MemberLockedEvent) baseEvent.EventData);
+                    ApplyMemberLockedEvent();
                     break;
                 case EventType.MEMBER_UNLOCKED:
-                    Apply((MemberUnlockedEvent) baseEvent.EventData);
+                    ApplyMemberUnlockedEvent();
                     break;
                 case EventType.MEMBER_DELETED:
-                    Apply((MemberDeletedEvent) baseEvent.EventData);
+                    ApplyMemberDeletedEvent();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Member!");
@@ -41,17 +41,17 @@ public class Member
         Status = domainEvent.Status;
     }
     
-    private void Apply(MemberLockedEvent domainEvent)
+    private void ApplyMemberLockedEvent()
     {
         Status = Status.LOCKED;
     }
     
-    private void Apply(MemberUnlockedEvent domainEvent)
+    private void ApplyMemberUnlockedEvent()
     {
         Status = Status.ACTIVE;
     }
     
-    private void Apply(MemberDeletedEvent domainEvent)
+    private void ApplyMemberDeletedEvent()
     {
         Status = Status.DELETED;
     }

@@ -26,13 +26,13 @@ public class PlayOffer
             switch (baseEvent.EventType)
             {
                 case EventType.PLAYOFFER_CREATED:
-                    Apply((PlayOfferCreatedEvent)baseEvent.EventData);
+                    ApplyPlayOfferCreatedEvent((PlayOfferCreatedEvent)baseEvent.EventData);
                     break;
                 case EventType.PLAYOFFER_JOINED:
-                    Apply((PlayOfferJoinedEvent)baseEvent.EventData);
+                    ApplyPlayOfferJoinedEvent((PlayOfferJoinedEvent)baseEvent.EventData);
                     break;
                 case EventType.PLAYOFFER_CANCELLED:
-                    Apply((PlayOfferCancelledEvent)baseEvent.EventData);
+                    ApplyPlayOfferCancelledEvent();
                     break;
                 case EventType.PLAYOFFER_RESERVATION_CREATED:
                     throw new NotImplementedException();
@@ -42,7 +42,7 @@ public class PlayOffer
         }
     }
 
-    private void Apply(PlayOfferCreatedEvent domainEvent)
+    private void ApplyPlayOfferCreatedEvent(PlayOfferCreatedEvent domainEvent)
     {
         Id = domainEvent.Id;
         ClubId = domainEvent.ClubId;
@@ -52,13 +52,13 @@ public class PlayOffer
         IsCancelled = false;
     }
 
-    private void Apply(PlayOfferJoinedEvent domainEvent)
+    private void ApplyPlayOfferJoinedEvent(PlayOfferJoinedEvent domainEvent)
     {
         AcceptedStartTime = domainEvent.AcceptedStartTime;
         OpponentId = domainEvent.OpponentId;
     }
 
-    private void Apply(PlayOfferCancelledEvent domainEvent)
+    private void ApplyPlayOfferCancelledEvent()
     {
         IsCancelled = true;
     }
