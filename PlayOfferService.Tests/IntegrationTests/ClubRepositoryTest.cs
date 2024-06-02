@@ -1,5 +1,6 @@
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
+using PlayOfferService.Models;
 using PlayOfferService.Repositories;
 
 namespace PlayOfferService.Tests.IntegrationTests;
@@ -73,7 +74,7 @@ public class ClubRepositoryTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedClub.Id, Is.EqualTo(clubId));
-            Assert.That(projectedClub.IsLocked, Is.False);
+            Assert.That(projectedClub.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
     
@@ -100,7 +101,7 @@ public class ClubRepositoryTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedClub.Id, Is.EqualTo(Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa")));
-            Assert.That(projectedClub.IsLocked, Is.True);
+            Assert.That(projectedClub.Status, Is.EqualTo(Status.LOCKED));
         });
     }
 
@@ -127,7 +128,34 @@ public class ClubRepositoryTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedClub.Id, Is.EqualTo(Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac")));
-            Assert.That(projectedClub.IsLocked, Is.False);
+            Assert.That(projectedClub.Status, Is.EqualTo(Status.ACTIVE));
+        });
+    }
+    
+    [Test]
+    public async Task ClubDeletedEvent_ProjectionTest()
+    {
+        //Given
+        var clubDeletedEvent = new BaseEvent
+        {
+            EntityId = Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"),
+            EntityType = EntityType.TENNIS_CLUB,
+            EventId = Guid.NewGuid(),
+            EventType = EventType.TENNIS_CLUB_DELETED,
+            EventData = new ClubDeletedEvent()
+        };
+
+        //When
+        await TestClubRepository.UpdateEntityAsync(clubDeletedEvent);
+
+        //Then
+        var projectedClub = await TestClubRepository.GetClubById(Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"));
+
+        Assert.That(projectedClub, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(projectedClub.Id, Is.EqualTo(Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac")));
+            Assert.That(projectedClub.Status, Is.EqualTo(Status.DELETED));
         });
     }
 }

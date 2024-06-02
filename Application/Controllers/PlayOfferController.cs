@@ -34,10 +34,10 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult<IEnumerable<PlayOffer>>> GetByIdAsync([FromQuery] Guid? playOfferId, [FromQuery] Guid? creatorId, [FromQuery] Guid? clubId)
     {
-
         var result = await _mediator.Send(new GetPlayOffersByIdQuery(playOfferId, creatorId, clubId));
 
-        if (result.Count() == 0) return NoContent();
+        if (result.Count() == 0)
+            return NoContent();
 
         return Ok(result);
     }
@@ -48,7 +48,7 @@ public class PlayOfferController : ControllerBase
     ///</summary>
     ///<param name="playOfferDto">The Play Offer to create</param>
     ///<returns>The newly created Play offer</returns>
-    ///<response code="200">Returns the newly created Play offer</response>
+    ///<response code="200">Returns the id of the created Play Offer</response>
     ///<response code="400">Invalid Play Offer structure</response>
     [HttpPost]
     [ProducesResponseType(typeof(PlayOffer), StatusCodes.Status201Created)]
@@ -57,8 +57,15 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult<PlayOffer>> Create(PlayOfferDto playOfferDto)
     {
-        // TODO: Check if creatorId is valid, and retrieve clubId
-        var result = await _mediator.Send(new CreatePlayOfferCommand(playOfferDto));
+        Guid result;
+        try
+        {
+            result = await _mediator.Send(new CreatePlayOfferCommand(playOfferDto));
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
 
         return CreatedAtAction(nameof(Create), new { playOfferId = result }, result);
     }
@@ -77,9 +84,14 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult> Delete(Guid playOfferId)
     {
-        var result = await _mediator.Send(new CancelPlayOfferCommand(playOfferId));
-
-        if (result.Exception != null) return BadRequest();
+        try
+        {
+            await _mediator.Send(new CancelPlayOfferCommand(playOfferId));
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
 
         return Ok();
     }
@@ -99,14 +111,14 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult> Join(JoinPlayOfferDto joinPlayOfferDto)
     {
-
-        var playOffers = await _mediator.Send(new GetPlayOffersByIdQuery(joinPlayOfferDto.PlayOfferId, null, null));
-
-        if (playOffers == null || playOffers.Count() == 0) return BadRequest();
-
-        var result = await _mediator.Send(new JoinPlayOfferCommand(joinPlayOfferDto));
-
-        if (result.Exception != null) return BadRequest();
+        try
+        {
+            await _mediator.Send(new JoinPlayOfferCommand(joinPlayOfferDto));
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
 
         return Ok();
     }

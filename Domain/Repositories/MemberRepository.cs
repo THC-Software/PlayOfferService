@@ -15,16 +15,14 @@ public class MemberRepository
         _context = context;
     }
 
-    public virtual async Task<Member> GetMemberById(Guid? memberId)
+    public virtual async Task<Member?> GetMemberById(Guid? memberId)
     {
         var member = await _context.Members
             .Where(e => e.Id == memberId)
             .ToListAsync();
 
         if (member.Count == 0)
-        {
-            throw new ArgumentException("No member found with id " + memberId);
-        }
+            return null;
 
         return member.First();
     }
@@ -51,7 +49,7 @@ public class MemberRepository
         else
         {
             var existingMember = await GetMemberById(baseEvent.EntityId);
-            existingMember.Apply([baseEvent]);
+            existingMember?.Apply([baseEvent]);
         }
 
         _context.AppliedEvents.Add(baseEvent);

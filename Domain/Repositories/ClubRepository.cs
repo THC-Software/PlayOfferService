@@ -15,16 +15,14 @@ public class ClubRepository
         _context = context;
     }
     
-    public virtual async Task<Club> GetClubById(Guid clubId)
+    public virtual async Task<Club?> GetClubById(Guid clubId)
     {
         var club = await _context.Clubs
             .Where(e => e.Id == clubId)
             .ToListAsync();
 
         if (club.Count == 0)
-        {
-            throw new ArgumentException("No club found with id " + clubId);
-        }
+            return null;
 
         return club.First();
     }

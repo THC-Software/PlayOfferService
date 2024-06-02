@@ -30,7 +30,7 @@ public class ClubUnitTest
 
         // and Then
         Assert.That(club.Id, Is.EqualTo(clubId));
-        Assert.That(club.IsLocked, Is.False);
+        Assert.That(club.Status, Is.EqualTo(Status.ACTIVE));
     }
 
     [Test]
@@ -54,7 +54,7 @@ public class ClubUnitTest
         club.Apply(clubEvents);
 
         // Then
-        Assert.That(club.IsLocked, Is.True);
+        Assert.That(club.Status, Is.EqualTo(Status.LOCKED));
     }
 
     [Test]
@@ -64,7 +64,7 @@ public class ClubUnitTest
         var club = new Club
         {
             Id = Guid.NewGuid(),
-            IsLocked = true
+            Status = Status.LOCKED
         };
         var clubEvents = new List<BaseEvent>
         {
@@ -79,6 +79,30 @@ public class ClubUnitTest
         club.Apply(clubEvents);
 
         // Then
-        Assert.That(club.IsLocked, Is.False);
+        Assert.That(club.Status, Is.EqualTo(Status.ACTIVE));
+    }
+    
+    [Test]
+    public void ApplyClubDeletedEventTest()
+    {
+        var club = new Club
+        {
+            Id = Guid.NewGuid()
+        };
+        // Given
+        var clubEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.TENNIS_CLUB_DELETED,
+                EventData = new ClubDeletedEvent()
+            }
+        };
+
+        // When
+        club.Apply(clubEvents);
+
+        // Then
+        Assert.That(club.Status, Is.EqualTo(Status.DELETED));
     }
 }
