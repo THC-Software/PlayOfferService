@@ -3,8 +3,8 @@ using PlayOfferService.Domain.Events;
 public class PlayOfferCreatedEvent : IDomainEvent
 {
     public Guid Id { get; set; }
-    public Guid Club { get; set; }
-    public Guid Creator { get; set; }
+    public Guid ClubId { get; set; }
+    public Guid CreatorId { get; set; }
     public DateTime ProposedStartTime { get; set; }
     public DateTime ProposedEndTime { get; set; }
 
@@ -12,14 +12,14 @@ public class PlayOfferCreatedEvent : IDomainEvent
 
     public PlayOfferCreatedEvent(
         Guid id,
-        Guid club,
-        Guid creator,
+        Guid clubId,
+        Guid creatorId,
         DateTime proposedStartTime,
         DateTime proposedEndTime)
     {
         Id = id;
-        Club = club;
-        Creator = creator;
+        ClubId = clubId;
+        CreatorId = creatorId;
         ProposedStartTime = proposedStartTime;
         ProposedEndTime = proposedEndTime;
     }

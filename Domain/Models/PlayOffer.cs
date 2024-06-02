@@ -7,13 +7,13 @@ public class PlayOffer
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
-    public Guid Club { get; set; }
-    public Guid Creator { get; set; }
-    public Member? Opponent { get; set; }
+    public Guid ClubId { get; set; }
+    public Guid CreatorId { get; set; }
+    public Guid? OpponentId { get; set; }
     public DateTime ProposedStartTime { get; set; }
     public DateTime ProposedEndTime { get; set; }
     public DateTime? AcceptedStartTime { get; set; }
-    public Reservation? Reservation { get; set; }
+    public Guid? ReservationId { get; set; }
     public bool IsCancelled { get; set; }
 
     public PlayOffer() { }
@@ -44,8 +44,8 @@ public class PlayOffer
     private void Apply(PlayOfferCreatedEvent domainEvent)
     {
         Id = domainEvent.Id;
-        Club = domainEvent.Club;
-        Creator = domainEvent.Creator;
+        ClubId = domainEvent.ClubId;
+        CreatorId = domainEvent.CreatorId;
         ProposedStartTime = domainEvent.ProposedStartTime;
         ProposedEndTime = domainEvent.ProposedEndTime;
         IsCancelled = false;
@@ -54,7 +54,7 @@ public class PlayOffer
     private void Apply(PlayOfferJoinedEvent domainEvent)
     {
         AcceptedStartTime = domainEvent.AcceptedStartTime;
-        Opponent = domainEvent.Opponent;
+        OpponentId = domainEvent.OpponentId;
     }
 
     private void Apply(PlayOfferCancelledEvent domainEvent)

@@ -4,6 +4,7 @@ using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Repositories;
+using PlayOfferService.Models;
 
 namespace PlayOfferService.Handlers;
 public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Guid>
@@ -56,8 +57,8 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
             EventData = new PlayOfferCreatedEvent
             {
                 Id = playOfferId,
-                Club = club.Id,
-                Creator = creator.Id,
+                ClubId = club.Id,
+                CreatorId = creator.Id,
                 ProposedStartTime = playOfferDto.ProposedStartTime.ToUniversalTime(),
                 ProposedEndTime = playOfferDto.ProposedEndTime.ToUniversalTime()
             },

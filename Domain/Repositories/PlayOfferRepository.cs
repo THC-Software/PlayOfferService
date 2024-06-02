@@ -23,15 +23,13 @@ public class PlayOfferRepository
         Guid? clubId = null)
     {
         var playOffers = await _context.PlayOffers
-            .Include(playOffer => playOffer.Creator)
-            .Include(playOffer => playOffer.Club)
             .ToListAsync();
 
         playOffers = playOffers.Where(e =>
             e != null
             && (!playOfferId.HasValue || e.Id == playOfferId)
-            && (!creatorId.HasValue || e.Creator == creatorId)
-            && (!clubId.HasValue || e.Club == clubId)).ToList();
+            && (!creatorId.HasValue || e.CreatorId == creatorId)
+            && (!clubId.HasValue || e.ClubId == clubId)).ToList();
 
         return playOffers;
     }
@@ -74,12 +72,6 @@ public class PlayOfferRepository
 
     private async Task CreatePlayOffer(BaseEvent baseEvent)
     {
-        var existingMember = await _memberRepository.GetMemberById(((PlayOfferCreatedEvent)baseEvent.EventData).Creator);
-        ((PlayOfferCreatedEvent)baseEvent.EventData).Creator = existingMember.Id;
-
-        var existingClub = await _clubRepository.GetClubById(((PlayOfferCreatedEvent)baseEvent.EventData).Club);
-        ((PlayOfferCreatedEvent)baseEvent.EventData).Club = existingClub.Id;
-
         var newPlayOffer = new PlayOffer();
         newPlayOffer.Apply([baseEvent]);
         _context.PlayOffers.Add(newPlayOffer);
@@ -87,9 +79,6 @@ public class PlayOfferRepository
 
     private async Task JoinPlayOffer(BaseEvent baseEvent)
     {
-        var existingMember = await _memberRepository.GetMemberById(((PlayOfferJoinedEvent)baseEvent.EventData).Opponent.Id);
-        ((PlayOfferJoinedEvent)baseEvent.EventData).Opponent = existingMember;
-
         var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
         existingPlayOffer.Apply([baseEvent]);
     }

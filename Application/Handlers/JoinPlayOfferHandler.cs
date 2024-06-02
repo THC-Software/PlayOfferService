@@ -13,12 +13,14 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
     private readonly DbWriteContext _context;
     private readonly PlayOfferRepository _playOfferRepository;
     private readonly MemberRepository _memberRepository;
+    private readonly ClubRepository _clubRepository;
 
-    public JoinPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository)
+    public JoinPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository, ClubRepository clubRepository)
     {
         _context = context;
         _playOfferRepository = playOfferRepository;
         _memberRepository = memberRepository;
+        _clubRepository = clubRepository;
     }
 
     public async Task<Task> Handle(JoinPlayOfferCommand request, CancellationToken cancellationToken)
@@ -31,7 +33,7 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
         if (existingOpponent == null)
             throw new NotFoundException($"Member {request.joinPlayOfferDto.OpponentId} not found!");
         
-        if (existingOpponent.Id == existingPlayOffer.Creator.Id)
+        if (existingOpponent.Id == existingPlayOffer.CreatorId)
             throw new InvalidOperationException("Can't join your own PlayOffer!");
         
         if (existingPlayOffer.IsCancelled)
@@ -41,10 +43,12 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
             request.joinPlayOfferDto.AcceptedStartTime > existingPlayOffer.ProposedEndTime)
             throw new InvalidOperationException("Accepted start time must be within the proposed start and end time");
         
-        if (existingOpponent.ClubId != existingPlayOffer.Creator.ClubId)
+        var existingCreator = await _memberRepository.GetMemberById(existingPlayOffer.CreatorId);
+        if (existingOpponent.ClubId != existingCreator!.ClubId)
             throw new InvalidOperationException("Opponent must be from the same club as the creator of the PlayOffer");
         
-        switch (existingPlayOffer.Club.Status)
+        var existingClub = await _clubRepository.GetClubById(existingPlayOffer.ClubId);
+        switch (existingClub!.Status)
         {
             case Status.LOCKED:
                 throw new InvalidOperationException("Can't join PlayOffer while club is locked!");
@@ -68,7 +72,7 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
             EventType = EventType.PLAYOFFER_JOINED,
             EventData = new PlayOfferJoinedEvent
             {
-                Opponent = existingOpponent,
+                OpponentId = existingOpponent.Id,
                 AcceptedStartTime = request.joinPlayOfferDto.AcceptedStartTime.ToUniversalTime(),
             },
             Timestamp = DateTime.UtcNow

@@ -12,25 +12,31 @@ public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Ta
 {
     private readonly DbWriteContext _context;
     private readonly PlayOfferRepository _playOfferRepository;
+    private readonly ClubRepository _clubRepository;
     
-    public CancelPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository)
+    public CancelPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, ClubRepository clubRepository)
     {
         _context = context;
         _playOfferRepository = playOfferRepository;
+        _clubRepository = clubRepository;
     }
-
 
     public async Task<Task> Handle(CancelPlayOfferCommand request, CancellationToken cancellationToken)
     {
         var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.playOfferId)).FirstOrDefault();
         if (existingPlayOffer == null)
             throw new NotFoundException($"PlayOffer {request.playOfferId} not found!");
-        if (existingPlayOffer.Opponent != null)
+        if (existingPlayOffer.OpponentId != null)
             throw new InvalidOperationException($"PlayOffer {request.playOfferId} is already accepted and cannot be cancelled!");
         if (existingPlayOffer.IsCancelled)
             throw new InvalidOperationException($"PlayOffer {request.playOfferId} is already cancelled!");
         
-        switch (existingPlayOffer.Club.Status)
+        var existingClub = await _clubRepository.GetClubById(existingPlayOffer.ClubId);
+        if (existingClub == null)
+            throw new NotFoundException($"Club {existingPlayOffer.ClubId} not found!");
+        
+        
+        switch (existingClub.Status)
         {
             case Status.LOCKED:
                 throw new InvalidOperationException("Can't cancel PlayOffer while club is locked!");
