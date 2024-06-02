@@ -12,6 +12,7 @@ public class BaseEvent
     public EntityType EntityType { get; set; }
     public DateTime Timestamp { get; set; }
     public IDomainEvent EventData { get; set; }
+    public Guid? CorrelationId { get; set; }
     
     public BaseEvent(){}
     
