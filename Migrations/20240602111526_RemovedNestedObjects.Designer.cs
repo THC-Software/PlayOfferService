@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlayOfferService.Domain;
@@ -11,9 +12,11 @@ using PlayOfferService.Domain;
 namespace PlayOfferService.Migrations
 {
     [DbContext(typeof(DbReadContext))]
-    partial class DbReadContextModelSnapshot : ModelSnapshot
+    [Migration("20240602111526_RemovedNestedObjects")]
+    partial class RemovedNestedObjects
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27,10 +30,6 @@ namespace PlayOfferService.Migrations
                     b.Property<Guid>("EventId")
                         .HasColumnType("uuid")
                         .HasColumnName("eventId");
-
-                    b.Property<Guid?>("CorrelationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("correlationId");
 
                     b.Property<Guid>("EntityId")
                         .HasColumnType("uuid")
@@ -165,12 +164,12 @@ namespace PlayOfferService.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6fdd5f06-9099-4e7c-ad94-e184df54676b"),
+                            Id = new Guid("ec8af52d-49b5-458b-baec-ec85d048ab58"),
                             ClubId = new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"),
                             CreatorId = new Guid("40c0981d-e2f8-4af3-ae6c-17f79f3ba8c2"),
                             IsCancelled = false,
-                            ProposedEndTime = new DateTime(2024, 6, 2, 12, 39, 23, 865, DateTimeKind.Utc).AddTicks(7636),
-                            ProposedStartTime = new DateTime(2024, 6, 2, 11, 39, 23, 865, DateTimeKind.Utc).AddTicks(7634)
+                            ProposedEndTime = new DateTime(2024, 6, 2, 12, 15, 25, 414, DateTimeKind.Utc).AddTicks(639),
+                            ProposedStartTime = new DateTime(2024, 6, 2, 11, 15, 25, 414, DateTimeKind.Utc).AddTicks(635)
                         });
                 });
 

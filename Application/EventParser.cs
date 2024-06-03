@@ -28,7 +28,7 @@ public class EventParser
             Timestamp = DateTime.Parse(jsonEvent["timestamp"].GetValue<string>()).ToUniversalTime(),
             EntityId = Guid.Parse(jsonEvent["entityId"].GetValue<string>()),
             EntityType = (EntityType)Enum.Parse(typeof(EntityType), jsonEvent["entityType"].GetValue<string>()),
-            EventData = JsonSerializer.Deserialize<IDomainEvent>(newEventData, JsonSerializerOptions.Default),
+            EventData = JsonSerializer.Deserialize<DomainEvent>(newEventData, JsonSerializerOptions.Default),
         };
     }
 }

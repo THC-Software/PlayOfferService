@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
-using PlayOfferService.Repositories;
+using PlayOfferService.Domain.Models;
+using PlayOfferService.Migrations.EntityConfiguration;
 
 namespace PlayOfferService.Domain;
 
@@ -9,7 +9,6 @@ public class DbReadContext : DbContext
 {
     public DbReadContext(DbContextOptions<DbReadContext> options) : base(options)
     {
-
     }
     
     public DbSet<PlayOffer> PlayOffers { get; set; }

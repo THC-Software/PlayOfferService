@@ -1,18 +1,9 @@
-using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
+namespace PlayOfferService.Domain.Events.PlayOffer;
 
-public class PlayOfferJoinedEvent : IDomainEvent
+public class PlayOfferJoinedEvent : DomainEvent
 {
-    public Member Opponent { get; set; }
+    public Guid OpponentId { get; set; }
     public DateTime AcceptedStartTime { get; set; }
     
     public PlayOfferJoinedEvent(){}
-    
-    public PlayOfferJoinedEvent(
-        Member opponent,
-        DateTime acceptedStartTime)
-    {
-        Opponent = opponent;
-        AcceptedStartTime = acceptedStartTime;
-    }
 }

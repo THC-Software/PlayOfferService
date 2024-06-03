@@ -1,8 +1,8 @@
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
 
-namespace PlayOfferService.Domain.Events;
+namespace PlayOfferService.Domain.Events.PlayOffer;
 
-public class PlayOfferReservationCreatedEvent : IDomainEvent
+public class PlayOfferReservationCreatedEvent : DomainEvent
 {
     public Reservation Reservation { get; set; }
     

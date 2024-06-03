@@ -1,10 +1,11 @@
 using MediatR;
+using PlayOfferService.Application.Commands;
 using PlayOfferService.Application.Exceptions;
-using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.PlayOffer;
+using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Models;
 
 namespace PlayOfferService.Application.Handlers;
 
@@ -12,25 +13,31 @@ public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Ta
 {
     private readonly DbWriteContext _context;
     private readonly PlayOfferRepository _playOfferRepository;
+    private readonly ClubRepository _clubRepository;
     
-    public CancelPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository)
+    public CancelPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, ClubRepository clubRepository)
     {
         _context = context;
         _playOfferRepository = playOfferRepository;
+        _clubRepository = clubRepository;
     }
-
 
     public async Task<Task> Handle(CancelPlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.playOfferId)).FirstOrDefault();
+        var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.PlayOfferId)).FirstOrDefault();
         if (existingPlayOffer == null)
-            throw new NotFoundException($"PlayOffer {request.playOfferId} not found!");
-        if (existingPlayOffer.Opponent != null)
-            throw new InvalidOperationException($"PlayOffer {request.playOfferId} is already accepted and cannot be cancelled!");
+            throw new NotFoundException($"PlayOffer {request.PlayOfferId} not found!");
+        if (existingPlayOffer.OpponentId != null)
+            throw new InvalidOperationException($"PlayOffer {request.PlayOfferId} is already accepted and cannot be cancelled!");
         if (existingPlayOffer.IsCancelled)
-            throw new InvalidOperationException($"PlayOffer {request.playOfferId} is already cancelled!");
+            throw new InvalidOperationException($"PlayOffer {request.PlayOfferId} is already cancelled!");
         
-        switch (existingPlayOffer.Club.Status)
+        var existingClub = await _clubRepository.GetClubById(existingPlayOffer.ClubId);
+        if (existingClub == null)
+            throw new NotFoundException($"Club {existingPlayOffer.ClubId} not found!");
+        
+        
+        switch (existingClub.Status)
         {
             case Status.LOCKED:
                 throw new InvalidOperationException("Can't cancel PlayOffer while club is locked!");
@@ -40,7 +47,7 @@ public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Ta
         
         var domainEvent = new BaseEvent
         {
-            EntityId = request.playOfferId,
+            EntityId = request.PlayOfferId,
             EntityType = EntityType.PLAYOFFER,
             EventId = Guid.NewGuid(),
             EventType = EventType.PLAYOFFER_CANCELLED,

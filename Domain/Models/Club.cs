@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using PlayOfferService.Domain.Events;
 
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
 public class Club
 {
@@ -16,16 +16,16 @@ public class Club
             switch (baseEvent.EventType)
             {
                 case EventType.TENNIS_CLUB_REGISTERED:
-                    Apply((ClubCreatedEvent) baseEvent.EventData);
+                    ApplyClubCreatedEvent((ClubCreatedEvent) baseEvent.EventData);
                     break;
                 case EventType.TENNIS_CLUB_LOCKED:
-                    Apply((ClubLockedEvent) baseEvent.EventData);
+                    ApplyClubLockedEvent();
                     break;
                 case EventType.TENNIS_CLUB_UNLOCKED:
-                    Apply((ClubUnlockedEvent) baseEvent.EventData);
+                    ApplyClubUnlockedEvent();
                     break;
                 case EventType.TENNIS_CLUB_DELETED:
-                    Apply((ClubDeletedEvent) baseEvent.EventData);
+                    ApplyClubDeletedEvent();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Club!");
@@ -33,22 +33,22 @@ public class Club
         }
     }
     
-    private void Apply(ClubCreatedEvent domainEvent)
+    private void ApplyClubCreatedEvent(ClubCreatedEvent domainEvent)
     {
         Id = domainEvent.TennisClubId.Id;
     }
     
-    private void Apply(ClubLockedEvent domainEvent)
+    private void ApplyClubLockedEvent()
     {
         Status = Status.LOCKED;
     }
     
-    private void Apply(ClubUnlockedEvent domainEvent)
+    private void ApplyClubUnlockedEvent()
     {
         Status = Status.ACTIVE;
     }
     
-    private void Apply(ClubDeletedEvent domainEvent)
+    private void ApplyClubDeletedEvent()
     {
         Status = Status.DELETED;
     }

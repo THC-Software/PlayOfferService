@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PlayOfferService.Domain.Events;
 
-namespace PlayOfferService.Repositories;
+namespace PlayOfferService.Migrations.EntityConfiguration;
 
 public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent>
 {
@@ -37,7 +37,7 @@ public class BaseEventConfiguration : IEntityTypeConfiguration<BaseEvent>
         builder.Property(e => e.EventData)
             .HasConversion<string>(
                 e => JsonSerializer.Serialize<object>(e, JsonSerializerOptions.Default),
-                e => JsonSerializer.Deserialize<IDomainEvent>(e, JsonSerializerOptions.Default)
+                e => JsonSerializer.Deserialize<DomainEvent>(e, JsonSerializerOptions.Default)
             )
             .IsRequired();
     }

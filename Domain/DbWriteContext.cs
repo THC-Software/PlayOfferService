@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Repositories;
+using PlayOfferService.Migrations.EntityConfiguration;
 
 namespace PlayOfferService.Domain;
 
@@ -8,7 +8,6 @@ public class DbWriteContext : DbContext
 {
     public DbWriteContext(DbContextOptions<DbWriteContext> options) : base(options)
     {
-
     }
     
     public DbSet<BaseEvent> Events { get; set; }

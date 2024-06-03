@@ -1,8 +1,6 @@
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Repositories;
 using StackExchange.Redis;
 
 namespace PlayOfferService.Application;
@@ -10,7 +8,6 @@ namespace PlayOfferService.Application;
 public class RedisMemberStreamService : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private Task? _readTask;
     private readonly CancellationToken _cancellationToken;
     private readonly IDatabase _db;
     private const string StreamName = "club_service_events.public.DomainEvent";

@@ -1,21 +1,23 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.PlayOffer;
 
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
-public class PlayOffer {
+public class PlayOffer
+{
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
-    public Club Club { get; set; }
-    public Member Creator { get; set; }
-    public Member? Opponent { get; set; }
+    public Guid ClubId { get; set; }
+    public Guid CreatorId { get; set; }
+    public Guid? OpponentId { get; set; }
     public DateTime ProposedStartTime { get; set; }
     public DateTime ProposedEndTime { get; set; }
     public DateTime? AcceptedStartTime { get; set; }
-    public Reservation? Reservation { get; set; }
+    public Guid? ReservationId { get; set; }
     public bool IsCancelled { get; set; }
 
-    public PlayOffer() {}
+    public PlayOffer() { }
 
     public void Apply(List<BaseEvent> baseEvents)
     {
@@ -24,13 +26,13 @@ public class PlayOffer {
             switch (baseEvent.EventType)
             {
                 case EventType.PLAYOFFER_CREATED:
-                    Apply((PlayOfferCreatedEvent) baseEvent.EventData);
+                    ApplyPlayOfferCreatedEvent((PlayOfferCreatedEvent)baseEvent.EventData);
                     break;
                 case EventType.PLAYOFFER_JOINED:
-                    Apply((PlayOfferJoinedEvent) baseEvent.EventData);
+                    ApplyPlayOfferJoinedEvent((PlayOfferJoinedEvent)baseEvent.EventData);
                     break;
                 case EventType.PLAYOFFER_CANCELLED:
-                    Apply((PlayOfferCancelledEvent) baseEvent.EventData);
+                    ApplyPlayOfferCancelledEvent();
                     break;
                 case EventType.PLAYOFFER_RESERVATION_CREATED:
                     throw new NotImplementedException();
@@ -39,24 +41,24 @@ public class PlayOffer {
             }
         }
     }
-    
-    private void Apply(PlayOfferCreatedEvent domainEvent)
+
+    private void ApplyPlayOfferCreatedEvent(PlayOfferCreatedEvent domainEvent)
     {
         Id = domainEvent.Id;
-        Club = domainEvent.Club;
-        Creator = domainEvent.Creator;
+        ClubId = domainEvent.ClubId;
+        CreatorId = domainEvent.CreatorId;
         ProposedStartTime = domainEvent.ProposedStartTime;
         ProposedEndTime = domainEvent.ProposedEndTime;
         IsCancelled = false;
     }
-    
-    private void Apply(PlayOfferJoinedEvent domainEvent)
+
+    private void ApplyPlayOfferJoinedEvent(PlayOfferJoinedEvent domainEvent)
     {
         AcceptedStartTime = domainEvent.AcceptedStartTime;
-        Opponent = domainEvent.Opponent;
+        OpponentId = domainEvent.OpponentId;
     }
-    
-    private void Apply(PlayOfferCancelledEvent domainEvent)
+
+    private void ApplyPlayOfferCancelledEvent()
     {
         IsCancelled = true;
     }

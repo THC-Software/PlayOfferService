@@ -1,12 +1,12 @@
-﻿using MediatR;
+using MediatR;
+using PlayOfferService.Application.Commands;
 using PlayOfferService.Application.Exceptions;
-using PlayOfferService.Commands;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Models;
 
-namespace PlayOfferService.Handlers;
+namespace PlayOfferService.Application.Handlers;
 public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Guid>
 {
 
@@ -23,11 +23,11 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
 
     public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var playOfferDto = request.playOfferDto;
+        var playOfferDto = request.PlayOfferDto;
         
         var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
         if(club == null)
-            throw new ArgumentException($"Club {request.playOfferDto.ClubId} not found");
+            throw new ArgumentException($"Club {request.PlayOfferDto.ClubId} not found");
         switch (club.Status)
         {
             case Status.LOCKED:
@@ -38,7 +38,7 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
         
         var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
         if(creator == null)
-            throw new NotFoundException($"Member {request.playOfferDto.CreatorId} not found!");
+            throw new NotFoundException($"Member {request.PlayOfferDto.CreatorId} not found!");
         switch (creator.Status)
         {
             case Status.LOCKED:
@@ -57,8 +57,8 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
             EventData = new PlayOfferCreatedEvent
             {
                 Id = playOfferId,
-                Club = club,
-                Creator = creator,
+                ClubId = club.Id,
+                CreatorId = creator.Id,
                 ProposedStartTime = playOfferDto.ProposedStartTime.ToUniversalTime(),
                 ProposedEndTime = playOfferDto.ProposedEndTime.ToUniversalTime()
             },

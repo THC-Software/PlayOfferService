@@ -1,6 +1,6 @@
 namespace PlayOfferService.Domain.Events;
 
-public class ClubLockedEvent : IDomainEvent
+public class ClubLockedEvent : DomainEvent
 {
     
 }
