@@ -32,9 +32,17 @@ public class EventParser
         newEventData["eventType"] = jsonEvent["eventType"].GetValue<string>();
         foreach (var kvp in originalEventData.AsObject())
         {
-            newEventData[kvp.Key] = kvp.Value.DeepClone();
+            if (kvp.Value is not JsonValue && kvp.Value?["$date"] != null)
+            {
+                newEventData[kvp.Key] = DateTimeOffset.FromUnixTimeMilliseconds(kvp.Value["$date"]
+                    .GetValue<long>()).UtcDateTime;
+            }
+            else
+            {
+                newEventData[kvp.Key] = kvp.Value.DeepClone();
+            }
         }
-        
+
         return new BaseEvent
         {
             EventId = Guid.Parse(jsonEvent["eventId"].GetValue<string>()),

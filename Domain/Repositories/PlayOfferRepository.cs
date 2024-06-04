@@ -30,7 +30,7 @@ public class PlayOfferRepository
         return playOffers;
     }
     
-    public async Task<PlayOffer?> GetPlayOfferByCreatedEventId(Guid eventId)
+    public async Task<PlayOffer?> GetPlayOfferByEventId(Guid eventId)
     {
         var playOffer = await _context.AppliedEvents
             .Where(e => e.EventId == eventId)
@@ -53,6 +53,10 @@ public class PlayOfferRepository
             Console.WriteLine("Event already applied, skipping");
             return;
         }
+        
+        if (baseEvent.EntityType == EntityType.PLAYOFFER) {
+            _context.AppliedEvents.Add(baseEvent);
+        }
 
         switch (baseEvent.EventType)
         {
@@ -69,8 +73,7 @@ public class PlayOfferRepository
                 await ReservationCreated(baseEvent);
                 break;
         }
-
-        _context.AppliedEvents.Add(baseEvent);
+        
         await _context.SaveChangesAsync();
     }
 
@@ -98,7 +101,7 @@ public class PlayOfferRepository
         if (baseEvent.CorrelationId == null)
             throw new ArgumentException("CorrelationId is null for ReservationCreatedEvent");
         
-        var existingPlayOffer = await GetPlayOfferByCreatedEventId((Guid)baseEvent.CorrelationId);
+        var existingPlayOffer = await GetPlayOfferByEventId((Guid)baseEvent.CorrelationId);
         if (existingPlayOffer == null)
             throw new ArgumentException($"PlayOffer not found for ReservationCreatedEvent");
         
