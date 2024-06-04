@@ -7,6 +7,10 @@ public class Member
 {
     public Guid Id { get; set; }
     public Guid ClubId { get; set; }
+
+    public string? Email { get; set; }
+    public string? FullName { get; set; }
+    public string? ClubName { get; set; }
     
     public Status Status { get; set; }
 
