@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
 
-namespace PlayOfferService.Queries;
-public record GetPlayOffersByIdQuery(Guid? playOfferId, Guid? creatorId, Guid? clubId) : IRequest<IEnumerable<PlayOffer>>
+namespace PlayOfferService.Application.Queries;
+public record GetPlayOffersByIdQuery(Guid? PlayOfferId, Guid? CreatorId, Guid? ClubId) : IRequest<IEnumerable<PlayOffer>>
 {
 }

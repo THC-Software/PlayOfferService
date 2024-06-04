@@ -1,48 +1,83 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
-using PlayOfferService.Commands;
+using MediatR;
+using PlayOfferService.Application.Commands;
+using PlayOfferService.Application.Exceptions;
+using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
-using PlayOfferService.Repositories;
+using PlayOfferService.Domain.Events.PlayOffer;
+using PlayOfferService.Domain.Models;
+using PlayOfferService.Domain.Repositories;
 
-namespace PlayOfferService.Handlers;
+namespace PlayOfferService.Application.Handlers;
 
 public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 {
-    private readonly DatabaseContext _context;
+    private readonly DbWriteContext _context;
     private readonly PlayOfferRepository _playOfferRepository;
     private readonly MemberRepository _memberRepository;
+    private readonly ClubRepository _clubRepository;
 
-    public JoinPlayOfferHandler(DatabaseContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository)
+    public JoinPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository, ClubRepository clubRepository)
     {
         _context = context;
         _playOfferRepository = playOfferRepository;
         _memberRepository = memberRepository;
+        _clubRepository = clubRepository;
     }
 
     public async Task<Task> Handle(JoinPlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var existingPlayOffers = await _playOfferRepository.GetPlayOffersByIds(request.joinPlayOfferDto.PlayOfferId);
-        if (existingPlayOffers.ToList().Count == 0)
-            throw new ArgumentException("PlayOffer not found with id: " + request.joinPlayOfferDto.PlayOfferId);
+        var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.JoinPlayOfferDto.PlayOfferId)).FirstOrDefault();
+        if (existingPlayOffer == null)
+            throw new NotFoundException($"PlayOffer {request.JoinPlayOfferDto.PlayOfferId} not found!");
         
-        var existingOpponent = await _memberRepository.GetMemberById(request.joinPlayOfferDto.OpponentId);
+        var existingOpponent = await _memberRepository.GetMemberById(request.JoinPlayOfferDto.OpponentId);
+        if (existingOpponent == null)
+            throw new NotFoundException($"Member {request.JoinPlayOfferDto.OpponentId} not found!");
+        
+        if (existingOpponent.Id == existingPlayOffer.CreatorId)
+            throw new InvalidOperationException("Can't join your own PlayOffer!");
+        
+        if (existingPlayOffer.IsCancelled)
+            throw new InvalidOperationException("Can't join cancelled PlayOffer!");
+        
+        if (request.JoinPlayOfferDto.AcceptedStartTime < existingPlayOffer.ProposedStartTime ||
+            request.JoinPlayOfferDto.AcceptedStartTime > existingPlayOffer.ProposedEndTime)
+            throw new InvalidOperationException("Accepted start time must be within the proposed start and end time");
+        
+        var existingCreator = await _memberRepository.GetMemberById(existingPlayOffer.CreatorId);
+        if (existingOpponent.ClubId != existingCreator!.ClubId)
+            throw new InvalidOperationException("Opponent must be from the same club as the creator of the PlayOffer");
+        
+        var existingClub = await _clubRepository.GetClubById(existingPlayOffer.ClubId);
+        switch (existingClub!.Status)
+        {
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't join PlayOffer while club is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't join PlayOffer in deleted club!");
+        }
+        
+        switch (existingOpponent.Status)
+        {
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't join PlayOffer while member is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't join PlayOffer as a deleted member!");
+        }
         
         var domainEvent = new BaseEvent
         {
-            EntityId = request.joinPlayOfferDto.PlayOfferId,
+            EntityId = request.JoinPlayOfferDto.PlayOfferId,
             EntityType = EntityType.PLAYOFFER,
             EventId = Guid.NewGuid(),
             EventType = EventType.PLAYOFFER_JOINED,
             EventData = new PlayOfferJoinedEvent
             {
-                Opponent = existingOpponent,
-                AcceptedStartTime = request.joinPlayOfferDto.AcceptedStartTime.ToUniversalTime(),
+                OpponentId = existingOpponent.Id,
+                AcceptedStartTime = request.JoinPlayOfferDto.AcceptedStartTime.ToUniversalTime(),
             },
             Timestamp = DateTime.UtcNow
         };
-        
-        existingPlayOffers.First().Apply([domainEvent]);
 
         _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();

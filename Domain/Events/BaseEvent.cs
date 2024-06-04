@@ -11,7 +11,8 @@ public class BaseEvent
     public EventType EventType { get; set; }
     public EntityType EntityType { get; set; }
     public DateTime Timestamp { get; set; }
-    public IDomainEvent EventData { get; set; }
+    public DomainEvent EventData { get; set; }
+    public Guid? CorrelationId { get; set; }
     
     public BaseEvent(){}
     
@@ -21,7 +22,7 @@ public class BaseEvent
         EventType eventType,
         EntityType entityType,
         DateTime timestamp,
-        IDomainEvent eventData)
+        DomainEvent eventData)
     {
         EventId = eventId;
         EntityId = entityId;

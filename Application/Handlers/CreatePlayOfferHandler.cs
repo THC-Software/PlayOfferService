@@ -1,43 +1,54 @@
-﻿using MediatR;
-using PlayOfferService.Commands;
+using MediatR;
+using PlayOfferService.Application.Commands;
+using PlayOfferService.Application.Exceptions;
+using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
-using PlayOfferService.Repositories;
+using PlayOfferService.Domain.Models;
+using PlayOfferService.Domain.Repositories;
 
-namespace PlayOfferService.Handlers;
-public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, PlayOffer>
+namespace PlayOfferService.Application.Handlers;
+public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Guid>
 {
 
-    private readonly DatabaseContext _context;
+    private readonly DbWriteContext _context;
     private readonly ClubRepository _clubRepository;
     private readonly MemberRepository _memberRepository;
-    private readonly PlayOfferRepository _playOfferRepository;
 
-    public CreatePlayOfferHandler(DatabaseContext context, ClubRepository clubRepository, MemberRepository memberRepository, PlayOfferRepository playOfferRepository)
+    public CreatePlayOfferHandler(DbWriteContext context, ClubRepository clubRepository, MemberRepository memberRepository)
     {
         _context = context;
         _clubRepository = clubRepository;
         _memberRepository = memberRepository;
-        _playOfferRepository = playOfferRepository;
     }
 
-    public async Task<PlayOffer> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var playOfferDto = request.playOfferDto;
+        var playOfferDto = request.PlayOfferDto;
+        
+        var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
+        if(club == null)
+            throw new ArgumentException($"Club {request.PlayOfferDto.ClubId} not found");
+        switch (club.Status)
+        {
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't create PlayOffer while club is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't create PlayOffer in deleted club!");
+        }
         
         var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
         if(creator == null)
+            throw new NotFoundException($"Member {request.PlayOfferDto.CreatorId} not found!");
+        switch (creator.Status)
         {
-            throw new ArgumentException("Creator not found");
-        }
-        var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
-        if(club == null)
-        {
-            throw new ArgumentException("Club not found");
+            case Status.LOCKED:
+                throw new InvalidOperationException("Can't create PlayOffer while member is locked!");
+            case Status.DELETED:
+                throw new InvalidOperationException("Can't create PlayOffer as a deleted member!");
         }
 
         var playOfferId = Guid.NewGuid();
-        var playOfferCreatedEvent = new BaseEvent
+        var domainEvent = new BaseEvent
         {
             EntityId = playOfferId,
             EntityType = EntityType.PLAYOFFER,
@@ -46,18 +57,18 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Pl
             EventData = new PlayOfferCreatedEvent
             {
                 Id = playOfferId,
-                Club = club,
-                Creator = creator,
+                ClubId = club.Id,
+                CreatorId = creator.Id,
                 ProposedStartTime = playOfferDto.ProposedStartTime.ToUniversalTime(),
-                ProposedEndTime = playOfferDto.ProposedEndTime
+                ProposedEndTime = playOfferDto.ProposedEndTime.ToUniversalTime()
             },
             Timestamp = DateTime.Now.ToUniversalTime()
         };
 
-        _context.Events.Add(playOfferCreatedEvent);
+        _context.Events.Add(domainEvent);
         await _context.SaveChangesAsync();
 
-        return (await _playOfferRepository.GetPlayOffersByIds(playOfferId)).First();
+        return playOfferId;
     }
 
 }

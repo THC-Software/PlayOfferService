@@ -1,9 +1,13 @@
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
+using PlayOfferService.Domain.ValueObjects;
 
 namespace PlayOfferService.Domain.Events.Member;
 
-public class MemberCreatedEvent : IDomainEvent
+public class MemberCreatedEvent : DomainEvent
 {
-    public Guid MemberAccountId { get; set; }
-    public Club Club { get; set; }
+    public MemberId MemberId { get; set; }
+    public FullName Name { get; set; }
+    public string Email { get; set; }
+    public TennisClubId TennisClubId { get; set; }
+    public Status Status { get; set; }
 }

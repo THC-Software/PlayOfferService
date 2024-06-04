@@ -1,96 +1,64 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.PlayOffer;
 
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
-public class PlayOffer {
+public class PlayOffer
+{
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
-    public Club Club { get; set; }
-    public Member Creator { get; set; }
-    public Member? Opponent { get; set; }
+    public Guid ClubId { get; set; }
+    public Guid CreatorId { get; set; }
+    public Guid? OpponentId { get; set; }
     public DateTime ProposedStartTime { get; set; }
     public DateTime ProposedEndTime { get; set; }
-    public DateTime AcceptedStartTime { get; set; }
-    public Reservation? Reservation { get; set; }
+    public DateTime? AcceptedStartTime { get; set; }
+    public Guid? ReservationId { get; set; }
     public bool IsCancelled { get; set; }
 
-    public PlayOffer()
-    {
-    }
-    
-    public PlayOffer(PlayOfferDto dto)
-    {
-        Id = Guid.NewGuid();
-        Club = new Club { Id= dto.ClubId };
-        Creator = new Member { Id = dto.CreatorId, Club = Club};
-        ProposedStartTime = dto.ProposedStartTime;
-        ProposedEndTime = dto.ProposedEndTime;
-    }
-    
-    public PlayOffer(Guid id)
-    {
-        Id = id;
-    }
+    public PlayOffer() { }
 
     public void Apply(List<BaseEvent> baseEvents)
     {
-        if(Id == Guid.Empty && baseEvents.First().EventType != EventType.PLAYOFFER_CREATED)
-        {
-            throw new ArgumentException("First PlayOffer event must be of type "
-                                        + nameof(EventType.PLAYOFFER_CREATED));
-        }
-        
         foreach (var baseEvent in baseEvents)
         {
             switch (baseEvent.EventType)
             {
                 case EventType.PLAYOFFER_CREATED:
-                    Apply((PlayOfferCreatedEvent) baseEvent.EventData);
+                    ApplyPlayOfferCreatedEvent((PlayOfferCreatedEvent)baseEvent.EventData);
                     break;
                 case EventType.PLAYOFFER_JOINED:
-                    Apply((PlayOfferJoinedEvent) baseEvent.EventData);
+                    ApplyPlayOfferJoinedEvent((PlayOfferJoinedEvent)baseEvent.EventData);
                     break;
                 case EventType.PLAYOFFER_CANCELLED:
-                    Apply((PlayOfferCancelledEvent) baseEvent.EventData);
+                    ApplyPlayOfferCancelledEvent();
                     break;
                 case EventType.PLAYOFFER_RESERVATION_CREATED:
                     throw new NotImplementedException();
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Playoffer!");
             }
         }
     }
-    
-    private void Apply(PlayOfferCreatedEvent domainEvent)
+
+    private void ApplyPlayOfferCreatedEvent(PlayOfferCreatedEvent domainEvent)
     {
         Id = domainEvent.Id;
-        Club = domainEvent.Club;
-        Creator = domainEvent.Creator;
+        ClubId = domainEvent.ClubId;
+        CreatorId = domainEvent.CreatorId;
         ProposedStartTime = domainEvent.ProposedStartTime;
         ProposedEndTime = domainEvent.ProposedEndTime;
         IsCancelled = false;
     }
-    
-    private void Apply(PlayOfferJoinedEvent domainEvent)
+
+    private void ApplyPlayOfferJoinedEvent(PlayOfferJoinedEvent domainEvent)
     {
-        if (IsCancelled)
-            throw new ArgumentException("Can't join cancelled PlayOffer");
-        
-        if (domainEvent.AcceptedStartTime < ProposedStartTime || domainEvent.AcceptedStartTime > ProposedEndTime)
-            throw new ArgumentException("Accepted start time must be within the proposed start and end time");
-        
-        if (domainEvent.Opponent.Id == Creator.Id)
-            throw new ArgumentException("Creator can't join his own PlayOffer");
-        
-        if (domainEvent.Opponent.Club.Id != Club.Id)
-            throw new ArgumentException("Opponent must be from the same club as the creator of the PlayOffer");
-            
         AcceptedStartTime = domainEvent.AcceptedStartTime;
-        Opponent = domainEvent.Opponent;
+        OpponentId = domainEvent.OpponentId;
     }
-    
-    private void Apply(PlayOfferCancelledEvent domainEvent)
+
+    private void ApplyPlayOfferCancelledEvent()
     {
         IsCancelled = true;
     }

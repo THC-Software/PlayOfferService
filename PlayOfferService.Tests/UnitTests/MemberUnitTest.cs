@@ -1,9 +1,9 @@
-using NUnit.Framework;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
+using PlayOfferService.Domain.ValueObjects;
 
-namespace PlayOfferService.Tests;
+namespace PlayOfferService.Tests.UnitTests;
 
 [TestFixture]
 public class MemberUnitTest
@@ -19,14 +19,11 @@ public class MemberUnitTest
             EntityId = memberId,
             EntityType = EntityType.MEMBER,
             EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_ACCOUNT_CREATED,
+            EventType = EventType.MEMBER_REGISTERED,
             EventData = new MemberCreatedEvent
             {
-                MemberAccountId = memberId,
-                Club = new Club
-                {
-                    Id = clubId
-                }
+                MemberId = new MemberId{Id=memberId},
+                TennisClubId = new TennisClubId{Id=clubId}
             }
         };
         
@@ -36,8 +33,8 @@ public class MemberUnitTest
         
         // Then
         Assert.That(member.Id, Is.EqualTo(memberId));
-        Assert.That(member.Club.Id, Is.EqualTo(clubId));
-        Assert.That(member.IsLocked, Is.False);
+        Assert.That(member.ClubId, Is.EqualTo(clubId));
+        Assert.That(member.Status, Is.EqualTo(Status.ACTIVE));
     }
     
     [Test]
@@ -47,13 +44,13 @@ public class MemberUnitTest
         var member = new Member
         {
             Id = Guid.NewGuid(),
-            IsLocked = false
+            Status = Status.ACTIVE
         };
         var memberEvents = new List<BaseEvent>
         {
             new()
             {
-                EventType = EventType.MEMBER_ACCOUNT_LOCKED,
+                EventType = EventType.MEMBER_LOCKED,
                 EventData = new MemberLockedEvent()
             }
         };
@@ -62,7 +59,7 @@ public class MemberUnitTest
         member.Apply(memberEvents);
         
         // Then
-        Assert.That(member.IsLocked, Is.True);
+        Assert.That(member.Status, Is.EqualTo(Status.LOCKED));
     }
     
     [Test]
@@ -72,13 +69,13 @@ public class MemberUnitTest
         var member = new Member
         {
             Id = Guid.NewGuid(),
-            IsLocked = true
+            Status = Status.LOCKED
         };
         var memberEvents = new List<BaseEvent>
         {
             new()
             {
-                EventType = EventType.MEMBER_ACCOUNT_UNLOCKED,
+                EventType = EventType.MEMBER_UNLOCKED,
                 EventData = new MemberUnlockedEvent()
             }
         };
@@ -87,6 +84,31 @@ public class MemberUnitTest
         member.Apply(memberEvents);
         
         // Then
-        Assert.That(member.IsLocked, Is.False);
+        Assert.That(member.Status, Is.EqualTo(Status.ACTIVE));
+    }
+    
+    [Test]
+    public void ApplyMemberDeleteEventTest()
+    {
+        // Given
+        var member = new Member
+        {
+            Id = Guid.NewGuid(),
+            Status = Status.ACTIVE
+        };
+        var memberEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.MEMBER_DELETED,
+                EventData = new MemberDeletedEvent()
+            }
+        };
+        
+        // When
+        member.Apply(memberEvents);
+        
+        // Then
+        Assert.That(member.Status, Is.EqualTo(Status.DELETED));
     }
 }

@@ -1,28 +1,46 @@
-﻿services:
+﻿version: '3.5'
+services:
   pos_redis:
     image: redis:7.0-alpine
     restart: always
     ports:
       - "6379:6379"
-  pos_postgres:
+    networks: 
+      - global_network
+  pos_postgres_write:
     image: debezium/postgres:16-alpine
     restart: always
     environment:
       POSTGRES_USER: pos_user
       POSTGRES_PASSWORD: pos_password
-      POSTGRES_DB: pos_db
+      POSTGRES_DB: pos_write_db
     ports:
       - "5432:5432"
+    networks:
+      - global_network
+  pos_postgres_read:
+    image: debezium/postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: pos_user
+      POSTGRES_PASSWORD: pos_password
+      POSTGRES_DB: pos_read_db
+    ports:
+      - "5433:5432"
+    networks: 
+      - global_network
   pos_debezium:
     image: debezium/server
     restart: always
     ports:
       - "6380:8080"
     depends_on:
-      - pos_postgres
+      - pos_postgres_write
       - pos_redis
     volumes:
       - ./debezium-conf:/debezium/conf
+    networks:
+      - global_network
   pos_service:
     image: playofferservice
     restart: always
@@ -30,7 +48,15 @@
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - pos_postgres
+      - pos_postgres_write
+      - pos_postgres_read
     ports:
       - "8080:8080"
       - "8081:8081"
+    networks:
+      - global_network
+      
+networks:
+  global_network:
+    name: global_network
+    driver: bridge

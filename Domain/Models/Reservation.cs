@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
 public class Reservation
 {

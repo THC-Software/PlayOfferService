@@ -1,53 +1,55 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using PlayOfferService.Domain.Events;
 
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
 public class Club
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
-    public bool IsLocked { get; set; }
+    public Status Status { get; set; }
 
     public void Apply(List<BaseEvent> baseEvents)
     {
-        if (Id == Guid.Empty && baseEvents.First().EventType != EventType.TENNIS_CLUB_REGISTERED)
-        {
-            throw new ArgumentException("First Club event must be of type "
-                                        +nameof(EventType.TENNIS_CLUB_REGISTERED));
-        }
-        
         foreach (var baseEvent in baseEvents)
         {
             switch (baseEvent.EventType)
             {
                 case EventType.TENNIS_CLUB_REGISTERED:
-                    Apply((ClubCreatedEvent) baseEvent.EventData);
+                    ApplyClubCreatedEvent((ClubCreatedEvent) baseEvent.EventData);
                     break;
                 case EventType.TENNIS_CLUB_LOCKED:
-                    Apply((ClubLockedEvent) baseEvent.EventData);
+                    ApplyClubLockedEvent();
                     break;
                 case EventType.TENNIS_CLUB_UNLOCKED:
-                    Apply((ClubUnlockedEvent) baseEvent.EventData);
+                    ApplyClubUnlockedEvent();
+                    break;
+                case EventType.TENNIS_CLUB_DELETED:
+                    ApplyClubDeletedEvent();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Club!");
             }
         }
     }
     
-    private void Apply(ClubCreatedEvent domainEvent)
+    private void ApplyClubCreatedEvent(ClubCreatedEvent domainEvent)
     {
-        Id = domainEvent.TennisClubId;
+        Id = domainEvent.TennisClubId.Id;
     }
     
-    private void Apply(ClubLockedEvent domainEvent)
+    private void ApplyClubLockedEvent()
     {
-        IsLocked = true;
+        Status = Status.LOCKED;
     }
     
-    private void Apply(ClubUnlockedEvent domainEvent)
+    private void ApplyClubUnlockedEvent()
     {
-        IsLocked = false;
+        Status = Status.ACTIVE;
+    }
+    
+    private void ApplyClubDeletedEvent()
+    {
+        Status = Status.DELETED;
     }
 }

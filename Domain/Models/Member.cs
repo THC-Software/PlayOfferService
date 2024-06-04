@@ -1,56 +1,58 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.Member;
 
-namespace PlayOfferService.Models;
+namespace PlayOfferService.Domain.Models;
 
 public class Member
 {
     public Guid Id { get; set; }
-    public Club Club { get; set; }
+    public Guid ClubId { get; set; }
     
-    public bool IsLocked { get; set; }
+    public Status Status { get; set; }
 
     public void Apply(List<BaseEvent> baseEvents)
     {
-        if (Id == Guid.Empty && baseEvents.First().EventType != EventType.MEMBER_ACCOUNT_CREATED)
-        {
-            throw new ArgumentException("First Member event must be of type "
-                                        + nameof(EventType.MEMBER_ACCOUNT_CREATED));
-        }
-
         foreach (var baseEvent in baseEvents)
         {
             switch (baseEvent.EventType)
             {
-                case EventType.MEMBER_ACCOUNT_CREATED:
+                case EventType.MEMBER_REGISTERED:
                     Apply((MemberCreatedEvent) baseEvent.EventData);
                     break;
-                case EventType.MEMBER_ACCOUNT_LOCKED:
-                    Apply((MemberLockedEvent) baseEvent.EventData);
+                case EventType.MEMBER_LOCKED:
+                    ApplyMemberLockedEvent();
                     break;
-                case EventType.MEMBER_ACCOUNT_UNLOCKED:
-                    Apply((MemberUnlockedEvent) baseEvent.EventData);
+                case EventType.MEMBER_UNLOCKED:
+                    ApplyMemberUnlockedEvent();
+                    break;
+                case EventType.MEMBER_DELETED:
+                    ApplyMemberDeletedEvent();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Member!");
             }
         }
     }
     
     private void Apply(MemberCreatedEvent domainEvent)
     {
-        Id = domainEvent.MemberAccountId;
-        Club = domainEvent.Club;
+        Id = domainEvent.MemberId.Id;
+        ClubId = domainEvent.TennisClubId.Id;
+        Status = domainEvent.Status;
     }
     
-    private void Apply(MemberLockedEvent domainEvent)
+    private void ApplyMemberLockedEvent()
     {
-        IsLocked = true;
+        Status = Status.LOCKED;
     }
     
-    private void Apply(MemberUnlockedEvent domainEvent)
+    private void ApplyMemberUnlockedEvent()
     {
-        IsLocked = false;
+        Status = Status.ACTIVE;
+    }
+    
+    private void ApplyMemberDeletedEvent()
+    {
+        Status = Status.DELETED;
     }
 }

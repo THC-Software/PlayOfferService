@@ -1,6 +1,6 @@
 namespace PlayOfferService.Domain.Events.Member;
 
-public class MemberUnlockedEvent : IDomainEvent
+public class MemberUnlockedEvent : DomainEvent
 {
     
 }

@@ -1,55 +1,81 @@
 using Microsoft.EntityFrameworkCore;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Models;
+using PlayOfferService.Domain.Models;
 
-namespace PlayOfferService.Repositories;
+namespace PlayOfferService.Domain.Repositories;
 
 public class PlayOfferRepository
 {
-    private readonly DatabaseContext _context;
-    
-    public PlayOfferRepository(DatabaseContext context)
+    private readonly DbReadContext _context;
+
+    public PlayOfferRepository(DbReadContext context)
     {
         _context = context;
     }
-    
+
     public async Task<IEnumerable<PlayOffer>> GetPlayOffersByIds(
         Guid? playOfferId,
         Guid? creatorId = null,
         Guid? clubId = null)
     {
-        var playOfferCreatedEvents = await _context.Events.Where(e =>
-            e.EventType == EventType.PLAYOFFER_CREATED
-        )
+        var playOffers = await _context.PlayOffers
             .ToListAsync();
 
-        playOfferCreatedEvents = playOfferCreatedEvents.Where(e =>
+        playOffers = playOffers.Where(e =>
             e != null
-            && (!playOfferId.HasValue || e.EntityId == playOfferId)
-            && (!creatorId.HasValue || ((PlayOfferCreatedEvent)e.EventData).Creator.Id == creatorId)
-            && (!clubId.HasValue || ((PlayOfferCreatedEvent)e.EventData).Club.Id == clubId)).ToList();
-        
-        if(playOfferCreatedEvents.Count == 0)
-        {
-            return new List<PlayOffer>();
-        }
-        
-        var result = new List<PlayOffer>();
-        foreach (var group in playOfferCreatedEvents.GroupBy(e => e.EntityId))
-        {
-            Guid entityId = group.Key;
-            var eventsForPlayOffer = group.ToList();
-            eventsForPlayOffer.AddRange(await _context.Events.Where(e => e.EntityId == entityId).ToListAsync());
+            && (!playOfferId.HasValue || e.Id == playOfferId)
+            && (!creatorId.HasValue || e.CreatorId == creatorId)
+            && (!clubId.HasValue || e.ClubId == clubId)).ToList();
 
-            if (eventsForPlayOffer.Count != 0)
-            {
-                var playOffer = new PlayOffer();
-                playOffer.Apply(eventsForPlayOffer);
-                result.Add(playOffer);
-            }           
+        return playOffers;
+    }
 
+    public async Task UpdateEntityAsync(BaseEvent baseEvent)
+    {
+        Console.WriteLine("PlayOfferRepository received event: " + baseEvent.EventType);
+        var appliedEvents = await _context.AppliedEvents
+            .Where(e => e.EntityId == baseEvent.EntityId)
+            .ToListAsync();
+
+        if (appliedEvents.Any(e => e.EventId == baseEvent.EventId))
+        {
+            Console.WriteLine("Event already applied, skipping");
+            return;
         }
 
-        return result;
+        switch (baseEvent.EventType)
+        {
+            case EventType.PLAYOFFER_CANCELLED:
+                await CancelPlayOffer(baseEvent);
+                break;
+            case EventType.PLAYOFFER_CREATED:
+                CreatePlayOffer(baseEvent);
+                break;
+            case EventType.PLAYOFFER_JOINED:
+                await JoinPlayOffer(baseEvent);
+                break;
+        }
+
+        _context.AppliedEvents.Add(baseEvent);
+        await _context.SaveChangesAsync();
+    }
+
+    private async Task CancelPlayOffer(BaseEvent baseEvent)
+    {
+        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
+        existingPlayOffer.Apply([baseEvent]);
+    }
+
+    private void CreatePlayOffer(BaseEvent baseEvent)
+    {
+        var newPlayOffer = new PlayOffer();
+        newPlayOffer.Apply([baseEvent]);
+        _context.PlayOffers.Add(newPlayOffer);
+    }
+
+    private async Task JoinPlayOffer(BaseEvent baseEvent)
+    {
+        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
+        existingPlayOffer.Apply([baseEvent]);
     }
 }
