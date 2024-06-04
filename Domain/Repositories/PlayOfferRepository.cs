@@ -41,6 +41,11 @@ public class PlayOfferRepository
         return playOffer;
     }
 
+    public async Task Update()
+    {
+        await _context.SaveChangesAsync();
+    }
+
     public async Task UpdateEntityAsync(BaseEvent baseEvent)
     {
         Console.WriteLine("PlayOfferRepository received event: " + baseEvent.EventType);
@@ -52,11 +57,8 @@ public class PlayOfferRepository
         {
             Console.WriteLine("Event already applied, skipping");
             return;
-        }
-        
-        if (baseEvent.EntityType == EntityType.PLAYOFFER) {
-            _context.AppliedEvents.Add(baseEvent);
-        }
+        } 
+        _context.AppliedEvents.Add(baseEvent);
 
         switch (baseEvent.EventType)
         {
@@ -69,12 +71,27 @@ public class PlayOfferRepository
             case EventType.PLAYOFFER_JOINED:
                 await JoinPlayOffer(baseEvent);
                 break;
-            case EventType.ReservationCreatedEvent:
-                await ReservationCreated(baseEvent);
+            case EventType.PLAYOFFER_OPPONENT_REMOVED:
+                await RemoveOpponent(baseEvent);
+                break;
+            case EventType.PLAYOFFER_RESERVATION_ADDED:
+                await AddReservation(baseEvent);
                 break;
         }
         
         await _context.SaveChangesAsync();
+    }
+
+    private async Task AddReservation(BaseEvent baseEvent)
+    {
+        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
+        existingPlayOffer.Apply([baseEvent]);
+    }
+
+    private async Task RemoveOpponent(BaseEvent baseEvent)
+    {
+        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
+        existingPlayOffer.Apply([baseEvent]);
     }
 
     private async Task CancelPlayOffer(BaseEvent baseEvent)
@@ -93,18 +110,6 @@ public class PlayOfferRepository
     private async Task JoinPlayOffer(BaseEvent baseEvent)
     {
         var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
-        existingPlayOffer.Apply([baseEvent]);
-    }
-    
-    private async Task ReservationCreated(BaseEvent baseEvent)
-    {
-        if (baseEvent.CorrelationId == null)
-            throw new ArgumentException("CorrelationId is null for ReservationCreatedEvent");
-        
-        var existingPlayOffer = await GetPlayOfferByEventId((Guid)baseEvent.CorrelationId);
-        if (existingPlayOffer == null)
-            throw new ArgumentException($"PlayOffer not found for ReservationCreatedEvent");
-        
         existingPlayOffer.Apply([baseEvent]);
     }
 }

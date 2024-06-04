@@ -61,6 +61,6 @@ public class RedisPlayOfferStreamService : BackgroundService
         var jsonContent = JsonNode.Parse(dict.Values.First());
         var eventInfo = jsonContent["payload"]["after"];
         
-        return EventParser.ParseEvent(eventInfo);
+        return EventParser.ParseEvent<BaseEvent>(eventInfo);
     }
 }

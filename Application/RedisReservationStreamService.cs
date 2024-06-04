@@ -1,6 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using MediatR;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.Reservation;
 using PlayOfferService.Domain.Repositories;
 using StackExchange.Redis;
 
@@ -27,7 +29,7 @@ public class RedisReservationStreamService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
-        PlayOfferRepository playOfferRepository = scope.ServiceProvider.GetRequiredService<PlayOfferRepository>();
+        IMediator mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         if (!(await _db.KeyExistsAsync(StreamName)) ||
             (await _db.StreamGroupInfoAsync(StreamName)).All(x=>x.Name!=GroupName))
@@ -51,17 +53,14 @@ public class RedisReservationStreamService : BackgroundService
                 var parsedEvent = ParseEvent(streamEntry);
                 if (parsedEvent == null)
                     continue;
-                
-                if(parsedEvent.CorrelationId!=null)
-                    await playOfferRepository.UpdateEntityAsync(parsedEvent);
-                
-                // TODO: Add reservation projection
+
+                await mediator.Send(parsedEvent, _cancellationToken);
             }
             await Task.Delay(1000);
         }
     }
     
-    private BaseEvent? ParseEvent(StreamEntry value)
+    private ReservationBaseEvent? ParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
@@ -74,6 +73,6 @@ public class RedisReservationStreamService : BackgroundService
             return null;
         }
 
-        return EventParser.ParseEvent(eventInfo);
+        return EventParser.ParseEvent<ReservationBaseEvent>(eventInfo);
     }
 }

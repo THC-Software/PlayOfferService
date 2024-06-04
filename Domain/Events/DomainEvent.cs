@@ -17,7 +17,10 @@ namespace PlayOfferService.Domain.Events;
 [JsonDerivedType(typeof(PlayOfferCreatedEvent), typeDiscriminator: "PLAYOFFER_CREATED")]
 [JsonDerivedType(typeof(PlayOfferJoinedEvent), typeDiscriminator: "PLAYOFFER_JOINED")]
 [JsonDerivedType(typeof(PlayOfferCancelledEvent), typeDiscriminator: "PLAYOFFER_CANCELLED")]
+[JsonDerivedType(typeof(PlayOfferOpponentRemovedEvent), typeDiscriminator: "PLAYOFFER_OPPONENT_REMOVED")]
+[JsonDerivedType(typeof(PlayOfferReservationAddedEvent), typeDiscriminator: "PLAYOFFER_RESERVATION_ADDED")]
 [JsonDerivedType(typeof(ReservationCreatedEvent), typeDiscriminator: "ReservationCreatedEvent")]
+[JsonDerivedType(typeof(ReservationRejectedEvent), typeDiscriminator: "ReservationRejectedEvent")]
 public class DomainEvent
 {
 }

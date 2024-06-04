@@ -35,8 +35,11 @@ public class PlayOffer
                 case EventType.PLAYOFFER_CANCELLED:
                     ApplyPlayOfferCancelledEvent();
                     break;
-                case EventType.ReservationCreatedEvent:
-                    ApplyReservationCreatedEvent((ReservationCreatedEvent)baseEvent.EventData);
+                case EventType.PLAYOFFER_RESERVATION_ADDED:
+                    ApplyPlayOfferReservationAddedEvent((PlayOfferReservationAddedEvent)baseEvent.EventData);
+                    break;
+                case EventType.PLAYOFFER_OPPONENT_REMOVED:
+                    ApplyPlayOfferOpponentRemovedEvent();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Playoffer!");
@@ -65,8 +68,14 @@ public class PlayOffer
         IsCancelled = true;
     }
     
-    private void ApplyReservationCreatedEvent(ReservationCreatedEvent domainEvent)
+    private void ApplyPlayOfferReservationAddedEvent(PlayOfferReservationAddedEvent domainEvent)
     {
         ReservationId = domainEvent.ReservationId;
+    }
+    
+    private void ApplyPlayOfferOpponentRemovedEvent()
+    {
+        OpponentId = null;
+        AcceptedStartTime = null;
     }
 }

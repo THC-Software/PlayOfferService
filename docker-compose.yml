@@ -52,7 +52,7 @@ services:
       - pos_postgres_read
     ports:
       - "8080:8080"
-      - "8081:8081"
+      - "8082:8081"
     networks:
       - global_network
       

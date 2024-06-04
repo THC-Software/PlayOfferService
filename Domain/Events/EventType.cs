@@ -5,7 +5,8 @@ public enum EventType
     PLAYOFFER_CREATED,
     PLAYOFFER_JOINED,
     PLAYOFFER_CANCELLED,
-    ReservationCreatedEvent,
+    PLAYOFFER_OPPONENT_REMOVED,
+    PLAYOFFER_RESERVATION_ADDED,
     TENNIS_CLUB_REGISTERED,
     TENNIS_CLUB_LOCKED,
     TENNIS_CLUB_UNLOCKED,
@@ -14,4 +15,6 @@ public enum EventType
     MEMBER_LOCKED,
     MEMBER_UNLOCKED,
     MEMBER_DELETED,
+    ReservationCreatedEvent,
+    ReservationRejectedEvent
 }
