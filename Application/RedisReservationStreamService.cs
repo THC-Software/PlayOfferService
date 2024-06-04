@@ -51,7 +51,11 @@ public class RedisReservationStreamService : BackgroundService
                 var parsedEvent = ParseEvent(streamEntry);
                 if (parsedEvent == null)
                     continue;
-                await playOfferRepository.UpdateEntityAsync(parsedEvent);
+                
+                if(parsedEvent.CorrelationId!=null)
+                    await playOfferRepository.UpdateEntityAsync(parsedEvent);
+                
+                // TODO: Add reservation projection
             }
             await Task.Delay(1000);
         }
@@ -61,15 +65,11 @@ public class RedisReservationStreamService : BackgroundService
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
-        var eventInfo = jsonContent["payload"]["after"];
+        var eventInfo = JsonNode.Parse(jsonContent["payload"]["after"].GetValue<string>());
         
         var eventType = eventInfo["eventType"].GetValue<string>();
-        var entityType = eventInfo["entityType"].GetValue<string>();
         
-        if ((eventType != "MEMBER_REGISTERED"
-             && eventType != "MEMBER_DELETED"
-             && eventType != "MEMBER_LOCKED"
-             && eventType != "MEMBER_UNLOCKED") || entityType != "MEMBER")
+        if (eventType != "ReservationCreatedEvent")
         {
             return null;
         }
