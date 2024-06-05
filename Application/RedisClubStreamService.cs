@@ -52,7 +52,7 @@ public class RedisClubStreamService : BackgroundService
                 var parsedEvent = FilterandParseEvent(streamEntry);
                 if (parsedEvent == null)
                     continue;
-                await mediator.Publish(parsedEvent, _cancellationToken);
+                await mediator.Send(parsedEvent, _cancellationToken);
             }
             await Task.Delay(1000);
         }
