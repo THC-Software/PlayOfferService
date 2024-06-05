@@ -67,10 +67,14 @@ public class RedisMemberStreamService : BackgroundService
         var eventType = eventInfo["eventType"].GetValue<string>();
         var entityType = eventInfo["entityType"].GetValue<string>();
         
-        if ((eventType != "MEMBER_REGISTERED"
+        if (
+            (eventType != "MEMBER_REGISTERED"
              && eventType != "MEMBER_DELETED"
              && eventType != "MEMBER_LOCKED"
-             && eventType != "MEMBER_UNLOCKED") || entityType != "MEMBER")
+             && eventType != "MEMBER_UNLOCKED"
+             && eventType != "MEMBER_UPDATED")
+             || entityType != "MEMBER"
+            )
         {
             return null;
         }

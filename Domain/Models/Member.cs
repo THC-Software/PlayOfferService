@@ -9,8 +9,8 @@ public class Member
     public Guid ClubId { get; set; }
 
     public string? Email { get; set; }
-    public string? FullName { get; set; }
-    public string? ClubName { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     
     public Status Status { get; set; }
 
@@ -32,15 +32,31 @@ public class Member
                 case EventType.MEMBER_DELETED:
                     ApplyMemberDeletedEvent();
                     break;
+                case EventType.MEMBER_UPDATED:
+                    ApplyMemberUpdatedEvent((MemberUpdatedEvent) baseEvent.EventData);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Member!");
             }
         }
     }
-    
+
+    private void ApplyMemberUpdatedEvent(MemberUpdatedEvent baseEventData)
+    {
+        Id = baseEventData.MemberId.Id;
+        Email = baseEventData.Email;
+        FirstName = baseEventData.Name.FirstName;
+        LastName = baseEventData.Name.LastName;
+        ClubId = baseEventData.TennisClubId.Id;
+        Status = baseEventData.Status;
+    }
+
     private void Apply(MemberCreatedEvent domainEvent)
     {
         Id = domainEvent.MemberId.Id;
+        Email = domainEvent.Email;
+        FirstName = domainEvent.Name.FirstName;
+        LastName = domainEvent.Name.LastName;
         ClubId = domainEvent.TennisClubId.Id;
         Status = domainEvent.Status;
     }

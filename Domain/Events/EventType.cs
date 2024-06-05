@@ -15,6 +15,7 @@ public enum EventType
     MEMBER_LOCKED,
     MEMBER_UNLOCKED,
     MEMBER_DELETED,
+    MEMBER_UPDATED,
     ReservationCreatedEvent,
     ReservationRejectedEvent,
     ReservationLimitExceeded,
