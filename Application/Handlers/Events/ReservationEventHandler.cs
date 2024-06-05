@@ -38,10 +38,36 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
             case EventType.ReservationRejectedEvent:
                 await HandleReservationRejectedEvent(reservationEvent);
                 break;
+            case EventType.ReservationLimitExceeded:
+                await HandleReservationLimitExceededEvent(reservationEvent);
+                break;
         }
         
         await _eventRepository.AppendEvent(reservationEvent);
         await _eventRepository.Update();
+    }
+
+    private async Task HandleReservationLimitExceededEvent(TechnicalReservationEvent reservationEvent)
+    {
+        var existingPlayOffer = await _playOfferRepository.GetPlayOfferByEventId((Guid)reservationEvent.CorrelationId!);
+        if (existingPlayOffer == null)
+            return;
+        
+        var playOfferEvent = new BaseEvent
+        {
+            EventId = Guid.NewGuid(),
+            EntityId = existingPlayOffer.Id,
+            EventType = EventType.PLAYOFFER_OPPONENT_REMOVED,
+            EntityType = EntityType.PLAYOFFER,
+            Timestamp = DateTime.UtcNow,
+            CorrelationId = reservationEvent.EventId,
+            EventData = new PlayOfferOpponentRemovedEvent()
+        };
+
+        _writeContext.Events.Add(playOfferEvent);
+        await _writeContext.SaveChangesAsync();
+        
+        // TODO: Implement reservation read side projection
     }
 
     private async Task HandleReservationRejectedEvent(TechnicalReservationEvent reservationEvent)

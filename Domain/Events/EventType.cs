@@ -16,5 +16,6 @@ public enum EventType
     MEMBER_UNLOCKED,
     MEMBER_DELETED,
     ReservationCreatedEvent,
-    ReservationRejectedEvent
+    ReservationRejectedEvent,
+    ReservationLimitExceeded
 }

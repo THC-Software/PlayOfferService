@@ -21,6 +21,7 @@ namespace PlayOfferService.Domain.Events;
 [JsonDerivedType(typeof(PlayOfferReservationAddedEvent), typeDiscriminator: "PLAYOFFER_RESERVATION_ADDED")]
 [JsonDerivedType(typeof(ReservationCreatedEvent), typeDiscriminator: "ReservationCreatedEvent")]
 [JsonDerivedType(typeof(ReservationRejectedEvent), typeDiscriminator: "ReservationRejectedEvent")]
+[JsonDerivedType(typeof(ReservationLimitExceededEvent), typeDiscriminator: "ReservationLimitExceededEvent")]
 public class DomainEvent
 {
 }
