@@ -72,7 +72,9 @@ public class RedisMemberStreamService : BackgroundService
              && eventType != "MEMBER_DELETED"
              && eventType != "MEMBER_LOCKED"
              && eventType != "MEMBER_UNLOCKED"
-             && eventType != "MEMBER_UPDATED")
+             && eventType != "MEMBER_EMAIL_CHANGED"
+             && eventType != "MEMBER_FULL_NAME_CHANGED"
+             )
              || entityType != "MEMBER"
             )
         {
