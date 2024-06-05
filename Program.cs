@@ -27,6 +27,7 @@ builder.Services.AddDbContext<DbWriteContext>(options =>
 builder.Services.AddScoped<ClubRepository>();
 builder.Services.AddScoped<MemberRepository>();
 builder.Services.AddScoped<PlayOfferRepository>();
+builder.Services.AddScoped<ReadEventRepository>();
 builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 

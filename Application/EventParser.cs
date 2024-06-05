@@ -44,7 +44,7 @@ public class EventParser
             }
         }
 
-        var test = new T
+        return new T
         {
             EventId = Guid.Parse(jsonEvent["eventId"].GetValue<string>()),
             EventType = (EventType)Enum.Parse(typeof(EventType), jsonEvent["eventType"].GetValue<string>()),
@@ -53,6 +53,5 @@ public class EventParser
             EntityType = (EntityType)Enum.Parse(typeof(EntityType), jsonEvent["entityType"].GetValue<string>()),
             EventData = JsonSerializer.Deserialize<DomainEvent>(newEventData, JsonSerializerOptions.Default),
         };
-        return test;
     }
 }
