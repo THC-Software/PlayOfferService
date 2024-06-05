@@ -11,17 +11,16 @@ public class Member
     public string? Email { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
-    
+
     public Status Status { get; set; }
 
     public void Apply(List<BaseEvent> baseEvents)
     {
         foreach (var baseEvent in baseEvents)
-        {
             switch (baseEvent.EventType)
             {
                 case EventType.MEMBER_REGISTERED:
-                    Apply((MemberCreatedEvent) baseEvent.EventData);
+                    Apply((MemberCreatedEvent)baseEvent.EventData);
                     break;
                 case EventType.MEMBER_LOCKED:
                     ApplyMemberLockedEvent();
@@ -32,23 +31,27 @@ public class Member
                 case EventType.MEMBER_DELETED:
                     ApplyMemberDeletedEvent();
                     break;
-                case EventType.MEMBER_UPDATED:
-                    ApplyMemberUpdatedEvent((MemberUpdatedEvent) baseEvent.EventData);
+                case EventType.MEMBER_EMAIL_CHANGED:
+                    ApplyMemberEmailChangedEvent((MemberEmailChangedEvent)baseEvent.EventData);
+                    break;
+                case EventType.MEMBER_FULL_NAME_CHANGED:
+                    ApplyMemberFullNameChangedEvent((MemberFullNameChangedEvent)baseEvent.EventData);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Member!");
+                    throw new ArgumentOutOfRangeException(
+                        $"{nameof(baseEvent.EventType)} is not supported for the entity Member!");
             }
-        }
     }
 
-    private void ApplyMemberUpdatedEvent(MemberUpdatedEvent baseEventData)
+    private void ApplyMemberEmailChangedEvent(MemberEmailChangedEvent baseEventEventData)
     {
-        Id = baseEventData.MemberId.Id;
-        Email = baseEventData.Email;
-        FirstName = baseEventData.Name.FirstName;
-        LastName = baseEventData.Name.LastName;
-        ClubId = baseEventData.TennisClubId.Id;
-        Status = baseEventData.Status;
+        Email = baseEventEventData.Email;
+    }
+
+    private void ApplyMemberFullNameChangedEvent(MemberFullNameChangedEvent baseEventEventData)
+    {
+        FirstName = baseEventEventData.FullName.FirstName;
+        LastName = baseEventEventData.FullName.LastName;
     }
 
     private void Apply(MemberCreatedEvent domainEvent)
@@ -60,17 +63,17 @@ public class Member
         ClubId = domainEvent.TennisClubId.Id;
         Status = domainEvent.Status;
     }
-    
+
     private void ApplyMemberLockedEvent()
     {
         Status = Status.LOCKED;
     }
-    
+
     private void ApplyMemberUnlockedEvent()
     {
         Status = Status.ACTIVE;
     }
-    
+
     private void ApplyMemberDeletedEvent()
     {
         Status = Status.DELETED;
