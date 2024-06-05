@@ -1,5 +1,7 @@
 using System.Text.Json.Nodes;
+using MediatR;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Domain.Repositories;
 using StackExchange.Redis;
 
@@ -26,7 +28,7 @@ public class RedisMemberStreamService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
-        MemberRepository memberRepository = scope.ServiceProvider.GetRequiredService<MemberRepository>();
+        IMediator mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         if (!(await _db.KeyExistsAsync(StreamName)) ||
             (await _db.StreamGroupInfoAsync(StreamName)).All(x=>x.Name!=GroupName))
@@ -50,13 +52,13 @@ public class RedisMemberStreamService : BackgroundService
                 var parsedEvent = ParseEvent(streamEntry);
                 if (parsedEvent == null)
                     continue;
-                await memberRepository.UpdateEntityAsync(parsedEvent);
+                await mediator.Send(parsedEvent, _cancellationToken);
             }
             await Task.Delay(1000);
         }
     }
     
-    private BaseEvent? ParseEvent(StreamEntry value)
+    private TechnicalMemberEvent? ParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
@@ -73,6 +75,6 @@ public class RedisMemberStreamService : BackgroundService
             return null;
         }
 
-        return EventParser.ParseEvent<BaseEvent>(eventInfo);
+        return EventParser.ParseEvent<TechnicalMemberEvent>(eventInfo);
     }
 }

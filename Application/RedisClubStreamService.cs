@@ -59,7 +59,7 @@ public class RedisClubStreamService : BackgroundService
 
     }
     
-    private BaseEvent? FilterandParseEvent(StreamEntry value)
+    private TechnicalClubEvent? FilterandParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
