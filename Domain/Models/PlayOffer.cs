@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.PlayOffer;
+using PlayOfferService.Domain.Events.Reservation;
 
 namespace PlayOfferService.Domain.Models;
 
@@ -34,8 +35,12 @@ public class PlayOffer
                 case EventType.PLAYOFFER_CANCELLED:
                     ApplyPlayOfferCancelledEvent();
                     break;
-                case EventType.PLAYOFFER_RESERVATION_CREATED:
-                    throw new NotImplementedException();
+                case EventType.PLAYOFFER_RESERVATION_ADDED:
+                    ApplyPlayOfferReservationAddedEvent((PlayOfferReservationAddedEvent)baseEvent.EventData);
+                    break;
+                case EventType.PLAYOFFER_OPPONENT_REMOVED:
+                    ApplyPlayOfferOpponentRemovedEvent();
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Playoffer!");
             }
@@ -61,5 +66,16 @@ public class PlayOffer
     private void ApplyPlayOfferCancelledEvent()
     {
         IsCancelled = true;
+    }
+    
+    private void ApplyPlayOfferReservationAddedEvent(PlayOfferReservationAddedEvent domainEvent)
+    {
+        ReservationId = domainEvent.ReservationId;
+    }
+    
+    private void ApplyPlayOfferOpponentRemovedEvent()
+    {
+        OpponentId = null;
+        AcceptedStartTime = null;
     }
 }

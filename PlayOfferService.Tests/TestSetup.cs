@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Repositories;
@@ -14,7 +15,8 @@ public class TestSetup
     private PostgreSqlContainer _writeDbContainer;
     protected ClubRepository TestClubRepository;
     protected MemberRepository TestMemberRepository;
-    protected HttpClient HttpClient;
+    protected PlayOfferRepository TestPlayOfferRepository;
+    protected IMediator Mediator;
     
     [SetUp]
     public async Task Setup()
@@ -40,7 +42,6 @@ public class TestSetup
         await _writeDbContainer.StartAsync();
         
         _factory = new WebAppFactory(_readDbContainer.GetConnectionString(), _writeDbContainer.GetConnectionString());
-        HttpClient = _factory.CreateClient();
         
         var scopeFactory = _factory.Services.GetService<IServiceScopeFactory>() ??
                            throw new Exception("Scope factory not found");
@@ -57,6 +58,12 @@ public class TestSetup
 
         TestMemberRepository = scope.ServiceProvider.GetService<MemberRepository>() ??
                                throw new Exception("Could not get MemberRepository");
+        
+        TestPlayOfferRepository = scope.ServiceProvider.GetService<PlayOfferRepository>() ??
+                                 throw new Exception("Could not get PlayOfferRepository");
+        
+        Mediator = scope.ServiceProvider.GetService<IMediator>() ??
+                   throw new Exception("Could not get IMediator");
                                
         _readContext.Database.EnsureCreated();
         _writeContext.Database.EnsureCreated();
@@ -65,7 +72,6 @@ public class TestSetup
     [TearDown]
     public async Task TearDown()
     {
-        HttpClient.Dispose();
         await _factory.DisposeAsync();
         await _readContext.DisposeAsync();
         await _writeContext.DisposeAsync();

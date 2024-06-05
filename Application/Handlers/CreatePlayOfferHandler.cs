@@ -27,7 +27,7 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
         
         var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
         if(club == null)
-            throw new ArgumentException($"Club {request.PlayOfferDto.ClubId} not found");
+            throw new NotFoundException($"Club {request.PlayOfferDto.ClubId} not found");
         switch (club.Status)
         {
             case Status.LOCKED:

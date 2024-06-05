@@ -1,5 +1,4 @@
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.ValueObjects;
 

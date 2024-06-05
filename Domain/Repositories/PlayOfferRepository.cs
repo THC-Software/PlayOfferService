@@ -29,53 +29,25 @@ public class PlayOfferRepository
 
         return playOffers;
     }
-
-    public async Task UpdateEntityAsync(BaseEvent baseEvent)
+    
+    public async Task<PlayOffer?> GetPlayOfferByEventId(Guid eventId)
     {
-        Console.WriteLine("PlayOfferRepository received event: " + baseEvent.EventType);
-        var appliedEvents = await _context.AppliedEvents
-            .Where(e => e.EntityId == baseEvent.EntityId)
-            .ToListAsync();
+        var playOffer = await _context.AppliedEvents
+            .Where(e => e.EventId == eventId)
+            .Select(e => e.EntityId)
+            .SelectMany(e => _context.PlayOffers.Where(p => p.Id == e))
+            .FirstOrDefaultAsync();
 
-        if (appliedEvents.Any(e => e.EventId == baseEvent.EventId))
-        {
-            Console.WriteLine("Event already applied, skipping");
-            return;
-        }
+        return playOffer;
+    }
 
-        switch (baseEvent.EventType)
-        {
-            case EventType.PLAYOFFER_CANCELLED:
-                await CancelPlayOffer(baseEvent);
-                break;
-            case EventType.PLAYOFFER_CREATED:
-                CreatePlayOffer(baseEvent);
-                break;
-            case EventType.PLAYOFFER_JOINED:
-                await JoinPlayOffer(baseEvent);
-                break;
-        }
-
-        _context.AppliedEvents.Add(baseEvent);
+    public async Task Update()
+    {
         await _context.SaveChangesAsync();
     }
-
-    private async Task CancelPlayOffer(BaseEvent baseEvent)
+    
+    public void CreatePlayOffer(PlayOffer playOffer)
     {
-        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
-        existingPlayOffer.Apply([baseEvent]);
-    }
-
-    private void CreatePlayOffer(BaseEvent baseEvent)
-    {
-        var newPlayOffer = new PlayOffer();
-        newPlayOffer.Apply([baseEvent]);
-        _context.PlayOffers.Add(newPlayOffer);
-    }
-
-    private async Task JoinPlayOffer(BaseEvent baseEvent)
-    {
-        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
-        existingPlayOffer.Apply([baseEvent]);
+        _context.PlayOffers.Add(playOffer);
     }
 }

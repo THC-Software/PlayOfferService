@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Domain.Events.PlayOffer;
+using PlayOfferService.Domain.Events.Reservation;
 
 namespace PlayOfferService.Domain.Events;
 
@@ -16,7 +17,11 @@ namespace PlayOfferService.Domain.Events;
 [JsonDerivedType(typeof(PlayOfferCreatedEvent), typeDiscriminator: "PLAYOFFER_CREATED")]
 [JsonDerivedType(typeof(PlayOfferJoinedEvent), typeDiscriminator: "PLAYOFFER_JOINED")]
 [JsonDerivedType(typeof(PlayOfferCancelledEvent), typeDiscriminator: "PLAYOFFER_CANCELLED")]
-[JsonDerivedType(typeof(PlayOfferReservationCreatedEvent), typeDiscriminator: "PLAYOFFER_RESERVATION_CREATED")]
+[JsonDerivedType(typeof(PlayOfferOpponentRemovedEvent), typeDiscriminator: "PLAYOFFER_OPPONENT_REMOVED")]
+[JsonDerivedType(typeof(PlayOfferReservationAddedEvent), typeDiscriminator: "PLAYOFFER_RESERVATION_ADDED")]
+[JsonDerivedType(typeof(ReservationCreatedEvent), typeDiscriminator: "ReservationCreatedEvent")]
+[JsonDerivedType(typeof(ReservationRejectedEvent), typeDiscriminator: "ReservationRejectedEvent")]
+[JsonDerivedType(typeof(ReservationLimitExceededEvent), typeDiscriminator: "ReservationLimitExceededEvent")]
 public class DomainEvent
 {
 }

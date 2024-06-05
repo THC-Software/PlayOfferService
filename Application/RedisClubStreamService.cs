@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using MediatR;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Repositories;
 using StackExchange.Redis;
@@ -26,7 +27,7 @@ public class RedisClubStreamService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
-        ClubRepository clubRepository = scope.ServiceProvider.GetRequiredService<ClubRepository>();
+        IMediator mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         if (!(await _db.KeyExistsAsync(StreamName)) ||
             (await _db.StreamGroupInfoAsync(StreamName)).All(x=>x.Name!=GroupName))
@@ -51,14 +52,14 @@ public class RedisClubStreamService : BackgroundService
                 var parsedEvent = FilterandParseEvent(streamEntry);
                 if (parsedEvent == null)
                     continue;
-                await clubRepository.UpdateEntityAsync(parsedEvent);
+                await mediator.Send(parsedEvent, _cancellationToken);
             }
             await Task.Delay(1000);
         }
 
     }
     
-    private BaseEvent? FilterandParseEvent(StreamEntry value)
+    private TechnicalClubEvent? FilterandParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
@@ -75,6 +76,6 @@ public class RedisClubStreamService : BackgroundService
             return null;
         }
         
-        return EventParser.ParseEvent(eventInfo);
+        return EventParser.ParseEvent<TechnicalClubEvent>(eventInfo);
     }
 }

@@ -1,22 +1,23 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using MediatR;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Events.PlayOffer;
+using PlayOfferService.Domain.Events.Reservation;
 using PlayOfferService.Domain.Repositories;
 using StackExchange.Redis;
 
 namespace PlayOfferService.Application;
 
-public class RedisPlayOfferStreamService : BackgroundService
+public class RedisReservationStreamService : BackgroundService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly CancellationToken _cancellationToken;
     private readonly IDatabase _db;
-    private const string StreamName = "pos.public.events";
-    private const string GroupName = "pos.domain.events.group";
+    private const string StreamName = "court_service.test.baseevents";
+    private const string GroupName = "pos.reservation.events.group";
     
     
-    public RedisPlayOfferStreamService(IServiceScopeFactory serviceScopeFactory)
+    public RedisReservationStreamService(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
         var tokenSource = new CancellationTokenSource();
@@ -36,7 +37,6 @@ public class RedisPlayOfferStreamService : BackgroundService
             await _db.StreamCreateConsumerGroupAsync(StreamName, GroupName, "0-0", true);
         }
         
-
         var id = string.Empty;
         while (!_cancellationToken.IsCancellationRequested)
         {
@@ -45,24 +45,34 @@ public class RedisPlayOfferStreamService : BackgroundService
                 await _db.StreamAcknowledgeAsync(StreamName, GroupName, id);
                 id = string.Empty;
             }
-            var result = await _db.StreamReadGroupAsync(StreamName, GroupName, "pos-1", ">", 1);
+            var result = await _db.StreamReadGroupAsync(StreamName, GroupName, "pos-member", ">", 1);
             if (result.Any())
             {
                 var streamEntry = result.First();
                 id = streamEntry.Id;
                 var parsedEvent = ParseEvent(streamEntry);
+                if (parsedEvent == null)
+                    continue;
+
                 await mediator.Send(parsedEvent, _cancellationToken);
             }
             await Task.Delay(1000);
         }
     }
     
-    private TechnicalPlayOfferEvent ParseEvent(StreamEntry value)
+    private TechnicalReservationEvent? ParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
-        var eventInfo = jsonContent["payload"]["after"];
+        var eventInfo = JsonNode.Parse(jsonContent["payload"]["after"].GetValue<string>());
         
-        return EventParser.ParseEvent<TechnicalPlayOfferEvent>(eventInfo);
+        var eventType = eventInfo["eventType"].GetValue<string>();
+        
+        if (eventType != "ReservationCreatedEvent")
+        {
+            return null;
+        }
+
+        return EventParser.ParseEvent<TechnicalReservationEvent>(eventInfo);
     }
 }
