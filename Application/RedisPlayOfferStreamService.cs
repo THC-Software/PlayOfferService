@@ -1,5 +1,7 @@
 using System.Text.Json.Nodes;
+using MediatR;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.PlayOffer;
 using PlayOfferService.Domain.Repositories;
 using StackExchange.Redis;
 
@@ -26,7 +28,7 @@ public class RedisPlayOfferStreamService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
-        PlayOfferRepository playOfferRepository = scope.ServiceProvider.GetRequiredService<PlayOfferRepository>();
+        IMediator mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         if (!(await _db.KeyExistsAsync(StreamName)) ||
             (await _db.StreamGroupInfoAsync(StreamName)).All(x=>x.Name!=GroupName))
@@ -49,18 +51,18 @@ public class RedisPlayOfferStreamService : BackgroundService
                 var streamEntry = result.First();
                 id = streamEntry.Id;
                 var parsedEvent = ParseEvent(streamEntry);
-                await playOfferRepository.UpdateEntityAsync(parsedEvent);
+                await mediator.Send(parsedEvent, _cancellationToken);
             }
             await Task.Delay(1000);
         }
     }
     
-    private BaseEvent ParseEvent(StreamEntry value)
+    private TechnicalPlayOfferEvent ParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
         var eventInfo = jsonContent["payload"]["after"];
         
-        return EventParser.ParseEvent<BaseEvent>(eventInfo);
+        return EventParser.ParseEvent<TechnicalPlayOfferEvent>(eventInfo);
     }
 }

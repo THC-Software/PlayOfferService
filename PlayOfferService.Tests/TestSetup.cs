@@ -15,6 +15,7 @@ public class TestSetup
     private PostgreSqlContainer _writeDbContainer;
     protected ClubRepository TestClubRepository;
     protected MemberRepository TestMemberRepository;
+    protected PlayOfferRepository TestPlayOfferRepository;
     protected IMediator Mediator;
     
     [SetUp]
@@ -57,6 +58,9 @@ public class TestSetup
 
         TestMemberRepository = scope.ServiceProvider.GetService<MemberRepository>() ??
                                throw new Exception("Could not get MemberRepository");
+        
+        TestPlayOfferRepository = scope.ServiceProvider.GetService<PlayOfferRepository>() ??
+                                 throw new Exception("Could not get PlayOfferRepository");
         
         Mediator = scope.ServiceProvider.GetService<IMediator>() ??
                    throw new Exception("Could not get IMediator");
