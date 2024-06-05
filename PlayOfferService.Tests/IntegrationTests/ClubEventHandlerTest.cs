@@ -23,7 +23,7 @@ public class ClubEventHandlerTest : TestSetup
     {
         //Given
         var clubId = Guid.NewGuid();
-        var clubCreationEvent = new ClubBaseEvent
+        var clubCreationEvent = new TechnicalClubEvent
         {
             EntityId = clubId,
             EntityType = EntityType.TENNIS_CLUB,
@@ -53,7 +53,7 @@ public class ClubEventHandlerTest : TestSetup
     public async Task ClubLockedEvent_ProjectionTest()
     {
         //Given
-        var clubLockedEvent = new ClubBaseEvent
+        var clubLockedEvent = new TechnicalClubEvent
         {
             EntityId = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"),
             EntityType = EntityType.TENNIS_CLUB,
@@ -80,7 +80,7 @@ public class ClubEventHandlerTest : TestSetup
     public async Task ClubUnlockedEvent_ProjectionTest()
     {
         //Given
-        var clubUnlockedEvent = new ClubBaseEvent
+        var clubUnlockedEvent = new TechnicalClubEvent
         {
             EntityId = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"),
             EntityType = EntityType.TENNIS_CLUB,
@@ -107,7 +107,7 @@ public class ClubEventHandlerTest : TestSetup
     public async Task ClubDeletedEvent_ProjectionTest()
     {
         //Given
-        var clubDeletedEvent = new ClubBaseEvent
+        var clubDeletedEvent = new TechnicalClubEvent
         {
             EntityId = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"),
             EntityType = EntityType.TENNIS_CLUB,

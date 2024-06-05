@@ -76,6 +76,6 @@ public class RedisClubStreamService : BackgroundService
             return null;
         }
         
-        return EventParser.ParseEvent<BaseEvent>(eventInfo);
+        return EventParser.ParseEvent<TechnicalClubEvent>(eventInfo);
     }
 }

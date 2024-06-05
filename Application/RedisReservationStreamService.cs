@@ -60,7 +60,7 @@ public class RedisReservationStreamService : BackgroundService
         }
     }
     
-    private ReservationBaseEvent? ParseEvent(StreamEntry value)
+    private TechnicalReservationEvent? ParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
@@ -73,6 +73,6 @@ public class RedisReservationStreamService : BackgroundService
             return null;
         }
 
-        return EventParser.ParseEvent<ReservationBaseEvent>(eventInfo);
+        return EventParser.ParseEvent<TechnicalReservationEvent>(eventInfo);
     }
 }

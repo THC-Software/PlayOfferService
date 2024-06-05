@@ -7,7 +7,7 @@ using PlayOfferService.Domain.Repositories;
 
 namespace PlayOfferService.Application.Handlers.Events;
 
-public class ReservationEventHandler : IRequestHandler<ReservationBaseEvent>
+public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent>
 {
     private readonly DbWriteContext _writeContext;
     private readonly PlayOfferRepository _playOfferRepository;
@@ -18,22 +18,22 @@ public class ReservationEventHandler : IRequestHandler<ReservationBaseEvent>
         _playOfferRepository = playOfferRepository;
     }
 
-    public async Task Handle(ReservationBaseEvent baseEvent, CancellationToken cancellationToken)
+    public async Task Handle(TechnicalReservationEvent reservationEvent, CancellationToken cancellationToken)
     {
-        switch (baseEvent.EventType)
+        switch (reservationEvent.EventType)
         {
             case EventType.ReservationCreatedEvent:
-                await HandleReservationCreatedEvent(baseEvent);
+                await HandleReservationCreatedEvent(reservationEvent);
                 break;
             case EventType.ReservationRejectedEvent:
-                await HandleReservationRejectedEvent(baseEvent);
+                await HandleReservationRejectedEvent(reservationEvent);
                 break;
         }
     }
 
-    private async Task HandleReservationRejectedEvent(ReservationBaseEvent baseEvent)
+    private async Task HandleReservationRejectedEvent(TechnicalReservationEvent reservationEvent)
     {
-        var existingPlayOffer = await _playOfferRepository.GetPlayOfferByEventId((Guid)baseEvent.CorrelationId!);
+        var existingPlayOffer = await _playOfferRepository.GetPlayOfferByEventId((Guid)reservationEvent.CorrelationId!);
         if (existingPlayOffer == null)
             return;
         
@@ -44,7 +44,7 @@ public class ReservationEventHandler : IRequestHandler<ReservationBaseEvent>
             EventType = EventType.PLAYOFFER_OPPONENT_REMOVED,
             EntityType = EntityType.PLAYOFFER,
             Timestamp = DateTime.UtcNow,
-            CorrelationId = baseEvent.EventId,
+            CorrelationId = reservationEvent.EventId,
             EventData = new PlayOfferOpponentRemovedEvent()
         };
 
@@ -54,12 +54,12 @@ public class ReservationEventHandler : IRequestHandler<ReservationBaseEvent>
         // TODO: Implement reservation read side projection
     }
     
-    private async Task HandleReservationCreatedEvent(ReservationBaseEvent baseEvent)
+    private async Task HandleReservationCreatedEvent(TechnicalReservationEvent reservationEvent)
     {
         // Check if ReservationCreatedEvent is a response to a PlayOfferJoinedEvent
-        if (baseEvent.CorrelationId != null)
+        if (reservationEvent.CorrelationId != null)
         {
-            var existingPlayOffer = await _playOfferRepository.GetPlayOfferByEventId((Guid)baseEvent.CorrelationId!);
+            var existingPlayOffer = await _playOfferRepository.GetPlayOfferByEventId((Guid)reservationEvent.CorrelationId!);
             if (existingPlayOffer == null)
                 return;
         
@@ -70,8 +70,8 @@ public class ReservationEventHandler : IRequestHandler<ReservationBaseEvent>
                 EventType = EventType.PLAYOFFER_RESERVATION_ADDED,
                 EntityType = EntityType.PLAYOFFER,
                 Timestamp = DateTime.UtcNow,
-                CorrelationId = baseEvent.EventId,
-                EventData = new PlayOfferReservationAddedEvent{ReservationId = baseEvent.EntityId}
+                CorrelationId = reservationEvent.EventId,
+                EventData = new PlayOfferReservationAddedEvent{ReservationId = reservationEvent.EntityId}
             };
 
             _writeContext.Events.Add(playOfferEvent);
