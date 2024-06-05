@@ -15,6 +15,7 @@ namespace PlayOfferService.Domain.Events;
 [JsonDerivedType(typeof(MemberLockedEvent), typeDiscriminator: "MEMBER_LOCKED")]
 [JsonDerivedType(typeof(MemberUnlockedEvent), typeDiscriminator: "MEMBER_UNLOCKED")]
 [JsonDerivedType(typeof(MemberDeletedEvent), typeDiscriminator: "MEMBER_DELETED")]
+[JsonDerivedType(typeof(MemberUpdatedEvent), typeDiscriminator: "MEMBER_UPDATED")]
 [JsonDerivedType(typeof(PlayOfferCreatedEvent), typeDiscriminator: "PLAYOFFER_CREATED")]
 [JsonDerivedType(typeof(PlayOfferJoinedEvent), typeDiscriminator: "PLAYOFFER_JOINED")]
 [JsonDerivedType(typeof(PlayOfferCancelledEvent), typeDiscriminator: "PLAYOFFER_CANCELLED")]
