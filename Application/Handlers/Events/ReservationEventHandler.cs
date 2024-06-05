@@ -11,15 +11,25 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
 {
     private readonly DbWriteContext _writeContext;
     private readonly PlayOfferRepository _playOfferRepository;
+    private readonly ReadEventRepository _eventRepository;
     
-    public ReservationEventHandler(DbWriteContext context, PlayOfferRepository playOfferRepository)
+    public ReservationEventHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, ReadEventRepository eventRepository)
     {
         _writeContext = context;
         _playOfferRepository = playOfferRepository;
+        _eventRepository = eventRepository;
     }
 
     public async Task Handle(TechnicalReservationEvent reservationEvent, CancellationToken cancellationToken)
     {
+        Console.WriteLine("ReservationEventHandler received event: " + reservationEvent.EventType);
+        var existingEvent = await _writeContext.Events.FindAsync(reservationEvent.EventId);
+        if (existingEvent != null)
+        {
+            Console.WriteLine("Event already applied, skipping");
+            return;
+        }
+        
         switch (reservationEvent.EventType)
         {
             case EventType.ReservationCreatedEvent:
@@ -29,6 +39,9 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
                 await HandleReservationRejectedEvent(reservationEvent);
                 break;
         }
+        
+        await _eventRepository.AppendEvent(reservationEvent);
+        await _eventRepository.Update();
     }
 
     private async Task HandleReservationRejectedEvent(TechnicalReservationEvent reservationEvent)
