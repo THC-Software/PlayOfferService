@@ -50,7 +50,7 @@ public class RedisReservationStreamService : BackgroundService
             {
                 var streamEntry = result.First();
                 id = streamEntry.Id;
-                var parsedEvent = ParseEvent(streamEntry);
+                var parsedEvent = FilterAndParseEvent(streamEntry);
                 if (parsedEvent == null)
                     continue;
 
@@ -60,18 +60,16 @@ public class RedisReservationStreamService : BackgroundService
         }
     }
     
-    private TechnicalReservationEvent? ParseEvent(StreamEntry value)
+    private TechnicalReservationEvent? FilterAndParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
         var eventInfo = JsonNode.Parse(jsonContent["payload"]["after"].GetValue<string>());
         
-        var eventType = eventInfo["eventType"].GetValue<string>();
-        
-        if (eventType != "ReservationCreatedEvent")
-        {
+        var entityType = eventInfo["entityType"].GetValue<string>();
+        if (entityType != "Reservation")
             return null;
-        }
+        
 
         return EventParser.ParseEvent<TechnicalReservationEvent>(eventInfo);
     }
