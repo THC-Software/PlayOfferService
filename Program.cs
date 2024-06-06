@@ -39,6 +39,7 @@ if (builder.Environment.EnvironmentName != "Test")
     builder.Services.AddHostedService<RedisClubStreamService>();
     builder.Services.AddHostedService<RedisMemberStreamService>();
     builder.Services.AddHostedService<RedisReservationStreamService>();
+    builder.Services.AddHostedService<RedisCourtStreamService>();
 }
 
 // Swagger configuration

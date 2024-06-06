@@ -12,7 +12,7 @@ public class Reservation
     public Guid? ReservantId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
-    public List<Guid> ParticipantsIds { get; set; }
+    public List<Guid>? ParticipantsIds { get; set; } = [];
     public bool IsCancelled { get; set; }
     
     public void Apply (List<BaseEvent> baseEvents)
@@ -45,7 +45,7 @@ public class Reservation
         ReservantId = domainEvent.ReservantId;
         StartTime = domainEvent.Start;
         EndTime = domainEvent.End;
-        ParticipantsIds = domainEvent.ParticipantIds;
+        ParticipantsIds = domainEvent.ParticipantIds ?? [];
         IsCancelled = false;
     }
 }

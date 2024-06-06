@@ -11,7 +11,7 @@ public class RedisCourtStreamService : BackgroundService
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly CancellationToken _cancellationToken;
     private readonly IDatabase _db;
-    private const string StreamName = "court_service.test.baseevents";
+    private const string StreamName = "court_service.events.baseevents";
     private const string GroupName = "pos.courts.events.group";
     
     
@@ -63,7 +63,7 @@ public class RedisCourtStreamService : BackgroundService
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
-        var eventInfo = jsonContent["payload"]["after"];
+        var eventInfo = JsonNode.Parse(jsonContent["payload"]["after"].GetValue<string>());
         
         var eventType = eventInfo["eventType"].GetValue<string>();
         var entityType = eventInfo["entityType"].GetValue<string>();

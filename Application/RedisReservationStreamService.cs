@@ -13,7 +13,7 @@ public class RedisReservationStreamService : BackgroundService
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly CancellationToken _cancellationToken;
     private readonly IDatabase _db;
-    private const string StreamName = "court_service.test.baseevents";
+    private const string StreamName = "court_service.events.baseevents";
     private const string GroupName = "pos.reservation.events.group";
     
     
