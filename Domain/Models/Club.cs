@@ -1,5 +1,6 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.Club;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlayOfferService.Domain.Models;
 
@@ -7,6 +8,7 @@ public class Club
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
+    public string Name { get; set; }
     public Status Status { get; set; }
 
     public void Apply(List<BaseEvent> baseEvents)
@@ -16,7 +18,7 @@ public class Club
             switch (baseEvent.EventType)
             {
                 case EventType.TENNIS_CLUB_REGISTERED:
-                    ApplyClubCreatedEvent((ClubCreatedEvent) baseEvent.EventData);
+                    ApplyClubCreatedEvent((ClubCreatedEvent)baseEvent.EventData);
                     break;
                 case EventType.TENNIS_CLUB_LOCKED:
                     ApplyClubLockedEvent();
@@ -27,29 +29,37 @@ public class Club
                 case EventType.TENNIS_CLUB_DELETED:
                     ApplyClubDeletedEvent();
                     break;
+                case EventType.TENNIS_CLUB_NAME_CHANGED:
+                    ApplyClubNameChangedEvent((ClubNameChangedEvent)baseEvent.EventData);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException($"{nameof(baseEvent.EventType)} is not supported for the entity Club!");
             }
         }
     }
-    
+
     private void ApplyClubCreatedEvent(ClubCreatedEvent domainEvent)
     {
         Id = domainEvent.TennisClubId.Id;
     }
-    
+
     private void ApplyClubLockedEvent()
     {
         Status = Status.LOCKED;
     }
-    
+
     private void ApplyClubUnlockedEvent()
     {
         Status = Status.ACTIVE;
     }
-    
+
     private void ApplyClubDeletedEvent()
     {
         Status = Status.DELETED;
+    }
+
+    private void ApplyClubNameChangedEvent(ClubNameChangedEvent domainEvent)
+    {
+        Name = domainEvent.Name;
     }
 }
