@@ -1,8 +1,7 @@
-using System.Text.Json.Nodes;
 using MediatR;
 using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Repositories;
 using StackExchange.Redis;
+using System.Text.Json.Nodes;
 
 namespace PlayOfferService.Application;
 
@@ -13,8 +12,8 @@ public class RedisClubStreamService : BackgroundService
     private readonly IDatabase _db;
     private const string StreamName = "club_service_events.public.DomainEvent";
     private const string GroupName = "pos.club.events.group";
-    
-    
+
+
     public RedisClubStreamService(IServiceScopeFactory serviceScopeFactory)
     {
         _serviceScopeFactory = serviceScopeFactory;
@@ -28,13 +27,13 @@ public class RedisClubStreamService : BackgroundService
     {
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
         IMediator mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        
+
         if (!(await _db.KeyExistsAsync(StreamName)) ||
-            (await _db.StreamGroupInfoAsync(StreamName)).All(x=>x.Name!=GroupName))
+            (await _db.StreamGroupInfoAsync(StreamName)).All(x => x.Name != GroupName))
         {
             await _db.StreamCreateConsumerGroupAsync(StreamName, GroupName, "0-0");
         }
-        
+
 
         var id = string.Empty;
         while (!_cancellationToken.IsCancellationRequested)
@@ -58,24 +57,26 @@ public class RedisClubStreamService : BackgroundService
         }
 
     }
-    
+
     private TechnicalClubEvent? FilterandParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
         var eventInfo = jsonContent["payload"]["after"];
-        
+
         var eventType = eventInfo["eventType"].GetValue<string>();
         var entityType = eventInfo["entityType"].GetValue<string>();
-        
+
         if ((eventType != "TENNIS_CLUB_REGISTERED"
             && eventType != "TENNIS_CLUB_LOCKED"
             && eventType != "TENNIS_CLUB_UNLOCKED"
-            && eventType != "TENNIS_CLUB_DELETED") || entityType != "TENNIS_CLUB")
+            && eventType != "TENNIS_CLUB_DELETED"
+            && eventType != "TENNIS_CLUB_NAME_CHANGED"
+            ) || entityType != "TENNIS_CLUB")
         {
             return null;
         }
-        
+
         return EventParser.ParseEvent<TechnicalClubEvent>(eventInfo);
     }
 }

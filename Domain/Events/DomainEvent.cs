@@ -1,8 +1,9 @@
-using System.Text.Json.Serialization;
+using PlayOfferService.Domain.Events.Club;
 using PlayOfferService.Domain.Events.Court;
 using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Domain.Events.PlayOffer;
 using PlayOfferService.Domain.Events.Reservation;
+using System.Text.Json.Serialization;
 
 namespace PlayOfferService.Domain.Events;
 
@@ -11,6 +12,7 @@ namespace PlayOfferService.Domain.Events;
 [JsonDerivedType(typeof(ClubLockedEvent), typeDiscriminator: "TENNIS_CLUB_LOCKED")]
 [JsonDerivedType(typeof(ClubUnlockedEvent), typeDiscriminator: "TENNIS_CLUB_UNLOCKED")]
 [JsonDerivedType(typeof(ClubDeletedEvent), typeDiscriminator: "TENNIS_CLUB_DELETED")]
+[JsonDerivedType(typeof(ClubNameChangedEvent), typeDiscriminator: "TENNIS_CLUB_NAME_CHANGED")]
 [JsonDerivedType(typeof(MemberCreatedEvent), typeDiscriminator: "MEMBER_REGISTERED")]
 [JsonDerivedType(typeof(MemberLockedEvent), typeDiscriminator: "MEMBER_LOCKED")]
 [JsonDerivedType(typeof(MemberUnlockedEvent), typeDiscriminator: "MEMBER_UNLOCKED")]
