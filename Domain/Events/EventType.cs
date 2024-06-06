@@ -18,5 +18,7 @@ public enum EventType
     ReservationCreatedEvent,
     ReservationRejectedEvent,
     ReservationLimitExceeded,
-    ReservationCancelledEvent
+    ReservationCancelledEvent,
+    CourtCreatedEvent,
+    CourtUpdatedEvent,
 }

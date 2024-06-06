@@ -15,7 +15,7 @@ public class DbReadContext : DbContext
     public DbSet<Club> Clubs { get; set; }
     public DbSet<Member> Members { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
-    
+    public DbSet<Court> Courts { get; set; }
     public DbSet<BaseEvent> AppliedEvents { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)

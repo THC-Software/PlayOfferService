@@ -26,7 +26,7 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
     public async Task Handle(TechnicalReservationEvent reservationEvent, CancellationToken cancellationToken)
     {
         Console.WriteLine("ReservationEventHandler received event: " + reservationEvent.EventType);
-        var existingEvent = await _writeContext.Events.FindAsync(reservationEvent.EventId);
+        var existingEvent = await _eventRepository.GetEventById(reservationEvent.EventId);
         if (existingEvent != null)
         {
             Console.WriteLine("Event already applied, skipping");
