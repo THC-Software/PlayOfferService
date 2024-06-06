@@ -27,6 +27,8 @@ builder.Services.AddDbContext<DbWriteContext>(options =>
 builder.Services.AddScoped<ClubRepository>();
 builder.Services.AddScoped<MemberRepository>();
 builder.Services.AddScoped<PlayOfferRepository>();
+builder.Services.AddScoped<ReservationRepository>();
+builder.Services.AddScoped<CourtRepository>();
 builder.Services.AddScoped<ReadEventRepository>();
 builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -37,6 +39,7 @@ if (builder.Environment.EnvironmentName != "Test")
     builder.Services.AddHostedService<RedisClubStreamService>();
     builder.Services.AddHostedService<RedisMemberStreamService>();
     builder.Services.AddHostedService<RedisReservationStreamService>();
+    builder.Services.AddHostedService<RedisCourtStreamService>();
 }
 
 // Swagger configuration

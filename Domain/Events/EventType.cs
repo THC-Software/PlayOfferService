@@ -17,5 +17,8 @@ public enum EventType
     MEMBER_DELETED,
     ReservationCreatedEvent,
     ReservationRejectedEvent,
-    ReservationLimitExceeded
+    ReservationLimitExceeded,
+    ReservationCancelledEvent,
+    CourtCreatedEvent,
+    CourtUpdatedEvent,
 }

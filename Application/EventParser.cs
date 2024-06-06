@@ -33,7 +33,7 @@ public class EventParser
         newEventData["eventType"] = jsonEvent["eventType"].GetValue<string>();
         foreach (var kvp in originalEventData.AsObject())
         {
-            if (kvp.Value is not JsonValue && kvp.Value?["$date"] != null)
+            if (kvp.Value is JsonObject && kvp.Value?["$date"] != null)
             {
                 newEventData[kvp.Key] = DateTimeOffset.FromUnixTimeMilliseconds(kvp.Value["$date"]
                     .GetValue<long>()).UtcDateTime;

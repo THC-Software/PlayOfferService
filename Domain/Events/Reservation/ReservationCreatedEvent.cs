@@ -4,8 +4,6 @@ namespace PlayOfferService.Domain.Events.Reservation;
 
 public class ReservationCreatedEvent : DomainEvent
 {
-    [JsonPropertyName("reservationId")]
-    public Guid ReservationId { get; set; }
     [JsonPropertyName("start")]
     public DateTime Start { get; set; }
     [JsonPropertyName("end")]
@@ -16,6 +14,8 @@ public class ReservationCreatedEvent : DomainEvent
     public Guid? TournamentId { get; set; }
     [JsonPropertyName("participantIds")]
     public List<Guid>? ParticipantIds { get; set; }
+    [JsonPropertyName("courtIds")]
+    public List<Guid> CourtIds { get; set; }
     
     public ReservationCreatedEvent(){}
 }

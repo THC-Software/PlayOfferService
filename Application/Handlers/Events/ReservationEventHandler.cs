@@ -3,6 +3,7 @@ using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Events.PlayOffer;
 using PlayOfferService.Domain.Events.Reservation;
+using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.Repositories;
 
 namespace PlayOfferService.Application.Handlers.Events;
@@ -12,18 +13,20 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
     private readonly DbWriteContext _writeContext;
     private readonly PlayOfferRepository _playOfferRepository;
     private readonly ReadEventRepository _eventRepository;
+    private readonly ReservationRepository _reservationRepository;
     
-    public ReservationEventHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, ReadEventRepository eventRepository)
+    public ReservationEventHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, ReadEventRepository eventRepository, ReservationRepository reservationRepository)
     {
         _writeContext = context;
         _playOfferRepository = playOfferRepository;
         _eventRepository = eventRepository;
+        _reservationRepository = reservationRepository;
     }
 
     public async Task Handle(TechnicalReservationEvent reservationEvent, CancellationToken cancellationToken)
     {
         Console.WriteLine("ReservationEventHandler received event: " + reservationEvent.EventType);
-        var existingEvent = await _writeContext.Events.FindAsync(reservationEvent.EventId);
+        var existingEvent = await _eventRepository.GetEventById(reservationEvent.EventId);
         if (existingEvent != null)
         {
             Console.WriteLine("Event already applied, skipping");
@@ -41,10 +44,20 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
             case EventType.ReservationLimitExceeded:
                 await HandleReservationLimitExceededEvent(reservationEvent);
                 break;
+            case EventType.ReservationCancelledEvent:
+                await HandleReservationCancelledEvent(reservationEvent);
+                break;
         }
         
+        await _reservationRepository.Update();
         await _eventRepository.AppendEvent(reservationEvent);
         await _eventRepository.Update();
+    }
+
+    private async Task HandleReservationCancelledEvent(TechnicalReservationEvent reservationEvent)
+    {
+        var existingReservation = await _reservationRepository.GetReservationById(reservationEvent.EntityId);
+        existingReservation!.Apply([reservationEvent]);
     }
 
     private async Task HandleReservationLimitExceededEvent(TechnicalReservationEvent reservationEvent)
@@ -66,8 +79,6 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
 
         _writeContext.Events.Add(playOfferEvent);
         await _writeContext.SaveChangesAsync();
-        
-        // TODO: Implement reservation read side projection
     }
 
     private async Task HandleReservationRejectedEvent(TechnicalReservationEvent reservationEvent)
@@ -89,8 +100,6 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
 
         _writeContext.Events.Add(playOfferEvent);
         await _writeContext.SaveChangesAsync();
-        
-        // TODO: Implement reservation read side projection
     }
     
     private async Task HandleReservationCreatedEvent(TechnicalReservationEvent reservationEvent)
@@ -116,7 +125,9 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
             _writeContext.Events.Add(playOfferEvent);
             await _writeContext.SaveChangesAsync();
         }
-        
-        // TODO: Implement reservation read side projection
+
+        var reservation = new Reservation();
+        reservation.Apply([reservationEvent]);
+        _reservationRepository.CreateReservation(reservation);
     }
 }

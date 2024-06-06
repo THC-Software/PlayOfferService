@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlayOfferService.Domain;
@@ -12,9 +13,11 @@ using PlayOfferService.Domain;
 namespace PlayOfferService.Migrations
 {
     [DbContext(typeof(DbReadContext))]
-    partial class DbReadContextModelSnapshot : ModelSnapshot
+    [Migration("20240606112435_AddedCourtModel")]
+    partial class AddedCourtModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -187,12 +190,12 @@ namespace PlayOfferService.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("c0f37db0-4c51-4bd3-86ab-48d6c78eb9c2"),
+                            Id = new Guid("92ed1e90-1031-4999-8958-c6140cf4ea56"),
                             ClubId = new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"),
                             CreatorId = new Guid("40c0981d-e2f8-4af3-ae6c-17f79f3ba8c2"),
                             IsCancelled = false,
-                            ProposedEndTime = new DateTime(2024, 6, 6, 19, 10, 3, 28, DateTimeKind.Utc).AddTicks(4637),
-                            ProposedStartTime = new DateTime(2024, 6, 6, 18, 10, 3, 28, DateTimeKind.Utc).AddTicks(4634)
+                            ProposedEndTime = new DateTime(2024, 6, 6, 12, 24, 35, 25, DateTimeKind.Utc).AddTicks(9886),
+                            ProposedStartTime = new DateTime(2024, 6, 6, 11, 24, 35, 25, DateTimeKind.Utc).AddTicks(9883)
                         });
                 });
 
@@ -216,6 +219,7 @@ namespace PlayOfferService.Migrations
                         .HasColumnName("isCancelled");
 
                     b.Property<List<Guid>>("ParticipantsIds")
+                        .IsRequired()
                         .HasColumnType("uuid[]")
                         .HasColumnName("participantsIds");
 

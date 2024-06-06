@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlayOfferService.Domain;
@@ -12,9 +13,11 @@ using PlayOfferService.Domain;
 namespace PlayOfferService.Migrations
 {
     [DbContext(typeof(DbReadContext))]
-    partial class DbReadContextModelSnapshot : ModelSnapshot
+    [Migration("20240606085906_ExpandedReservationModel")]
+    partial class ExpandedReservationModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,27 +86,6 @@ namespace PlayOfferService.Migrations
                             Id = new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"),
                             Status = 0
                         });
-                });
-
-            modelBuilder.Entity("PlayOfferService.Domain.Models.Court", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("ClubId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("clubId");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id")
-                        .HasName("pK_courts");
-
-                    b.ToTable("courts", (string)null);
                 });
 
             modelBuilder.Entity("PlayOfferService.Domain.Models.Member", b =>
@@ -187,12 +169,12 @@ namespace PlayOfferService.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("c0f37db0-4c51-4bd3-86ab-48d6c78eb9c2"),
+                            Id = new Guid("781d0a5e-608d-4765-be03-4e9759fbf8be"),
                             ClubId = new Guid("06b812a7-5131-4510-82ff-bffac33e0f3e"),
                             CreatorId = new Guid("40c0981d-e2f8-4af3-ae6c-17f79f3ba8c2"),
                             IsCancelled = false,
-                            ProposedEndTime = new DateTime(2024, 6, 6, 19, 10, 3, 28, DateTimeKind.Utc).AddTicks(4637),
-                            ProposedStartTime = new DateTime(2024, 6, 6, 18, 10, 3, 28, DateTimeKind.Utc).AddTicks(4634)
+                            ProposedEndTime = new DateTime(2024, 6, 6, 9, 59, 5, 597, DateTimeKind.Utc).AddTicks(5737),
+                            ProposedStartTime = new DateTime(2024, 6, 6, 8, 59, 5, 597, DateTimeKind.Utc).AddTicks(5734)
                         });
                 });
 
@@ -216,6 +198,7 @@ namespace PlayOfferService.Migrations
                         .HasColumnName("isCancelled");
 
                     b.Property<List<Guid>>("ParticipantsIds")
+                        .IsRequired()
                         .HasColumnType("uuid[]")
                         .HasColumnName("participantsIds");
 
