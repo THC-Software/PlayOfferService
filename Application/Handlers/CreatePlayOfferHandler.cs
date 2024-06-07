@@ -10,13 +10,13 @@ namespace PlayOfferService.Application.Handlers;
 public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Guid>
 {
 
-    private readonly DbWriteContext _context;
+    private readonly WriteEventRepository _writeEventRepository;
     private readonly ClubRepository _clubRepository;
     private readonly MemberRepository _memberRepository;
 
-    public CreatePlayOfferHandler(DbWriteContext context, ClubRepository clubRepository, MemberRepository memberRepository)
+    public CreatePlayOfferHandler(WriteEventRepository writeEventRepository, ClubRepository clubRepository, MemberRepository memberRepository)
     {
-        _context = context;
+        _writeEventRepository = writeEventRepository;
         _clubRepository = clubRepository;
         _memberRepository = memberRepository;
     }
@@ -65,8 +65,8 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
             Timestamp = DateTime.Now.ToUniversalTime()
         };
 
-        _context.Events.Add(domainEvent);
-        await _context.SaveChangesAsync();
+        await _writeEventRepository.AppendEvent(domainEvent);
+        await _writeEventRepository.Update();
 
         return playOfferId;
     }

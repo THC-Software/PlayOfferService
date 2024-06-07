@@ -11,13 +11,13 @@ namespace PlayOfferService.Application.Handlers;
 
 public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Task>
 {
-    private readonly DbWriteContext _context;
+    private readonly WriteEventRepository _writeEventRepository;
     private readonly PlayOfferRepository _playOfferRepository;
     private readonly ClubRepository _clubRepository;
     
-    public CancelPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, ClubRepository clubRepository)
+    public CancelPlayOfferHandler(WriteEventRepository writeEventRepository, PlayOfferRepository playOfferRepository, ClubRepository clubRepository)
     {
-        _context = context;
+        _writeEventRepository = writeEventRepository;
         _playOfferRepository = playOfferRepository;
         _clubRepository = clubRepository;
     }
@@ -55,8 +55,8 @@ public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Ta
             Timestamp = DateTime.UtcNow
         };
         
-        _context.Events.Add(domainEvent);
-        await _context.SaveChangesAsync();
+        await _writeEventRepository.AppendEvent(domainEvent);
+        await _writeEventRepository.Update();
         
         return Task.CompletedTask;
     }
