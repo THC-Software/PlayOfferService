@@ -112,4 +112,67 @@ public class MemberUnitTest
         // Then
         Assert.That(member.Status, Is.EqualTo(Status.DELETED));
     }
+
+    [Test]
+    public void ApplyMemberNameChangedEventTest()
+    {
+        // Given
+        var member = new Member
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "John",
+            LastName = "Doe"
+        };
+
+        var memberEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.MEMBER_FULL_NAME_CHANGED,
+                EventData = new MemberFullNameChangedEvent
+                {
+                    FullName = new FullName { FirstName = "Jane", LastName = "Doe" }
+                }
+            }
+        };
+
+        // When
+        member.Apply(memberEvents);
+
+        // Then
+        Assert.That(member.FirstName, Is.EqualTo("Jane"));
+        Assert.That(member.LastName, Is.EqualTo("Doe"));
+    }
+
+    [Test]
+    public void ApplyMemberEmailChangedEvent()
+    {
+        // Given
+        var member = new Member
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "John",
+            LastName = "Doe",
+            Email = "test@test.test"
+        };
+
+        var memberEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.MEMBER_EMAIL_CHANGED,
+                EventData = new MemberEmailChangedEvent
+                {
+                    Email = "changedEmail@com.com"
+                }
+
+            }
+        };
+
+        //When
+        member.Apply(memberEvents);
+
+        //Then
+        Assert.That(member.Email, Is.EqualTo("changedEmail@com.com"));
+    }
 }
