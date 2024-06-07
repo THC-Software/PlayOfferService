@@ -14,21 +14,23 @@ public class ClubEventHandlerTest : TestSetup
             new()
             {
                 Id = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"),
+                Name = "Test Club 1",
                 Status = Status.ACTIVE
             },
             new()
             {
                 Id = Guid.Parse("2db387f0-5792-4cb5-91a6-6317437b3432"),
+                Name = "Test Club 2",
                 Status = Status.ACTIVE
             }
         };
-        
+
         foreach (var club in existingClubs)
         {
             TestClubRepository.CreateClub(club);
         }
         await TestClubRepository.Update();
-        
+
         var existingPlayOffers = new List<PlayOffer>
         {
             new()
@@ -50,15 +52,15 @@ public class ClubEventHandlerTest : TestSetup
                 IsCancelled = false
             },
         };
-        
+
         foreach (var playOffer in existingPlayOffers)
         {
             TestPlayOfferRepository.CreatePlayOffer(playOffer);
         }
-        
+
         await TestPlayOfferRepository.Update();
     }
-    
+
     [Test]
     public async Task ClubCreatedEvent_ProjectionTest()
     {
@@ -72,16 +74,17 @@ public class ClubEventHandlerTest : TestSetup
             EventType = EventType.TENNIS_CLUB_REGISTERED,
             EventData = new ClubCreatedEvent
             {
-                TennisClubId = new TennisClubId {Id = clubId}
+                TennisClubId = new TennisClubId { Id = clubId },
+                Name = "Test Club",
             }
         };
-        
+
         //When
         await Mediator.Send(clubCreationEvent);
-        
+
         //Then
         var projectedClub = await TestClubRepository.GetClubById(clubId);
-        
+
         Assert.That(projectedClub, Is.Not.Null);
         Assert.Multiple(() =>
         {
@@ -89,7 +92,7 @@ public class ClubEventHandlerTest : TestSetup
             Assert.That(projectedClub.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
-    
+
     [Test]
     public async Task ClubLockedEvent_ProjectionTest()
     {
@@ -102,23 +105,23 @@ public class ClubEventHandlerTest : TestSetup
             EventType = EventType.TENNIS_CLUB_LOCKED,
             EventData = new ClubLockedEvent()
         };
-        
+
         //When
         await Mediator.Send(clubLockedEvent);
-        
+
         //Then
         var projectedClub = await TestClubRepository.GetClubById(Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"));
-        
+
         Assert.That(projectedClub, Is.Not.Null);
         Assert.Multiple(() =>
         {
             Assert.That(projectedClub!.Id, Is.EqualTo(Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa")));
             Assert.That(projectedClub.Status, Is.EqualTo(Status.LOCKED));
         });
-        
+
         var playOfferEvents = await TestWriteEventRepository.GetEventByEntityId(Guid.Parse("d9afd6dd-8836-47dd-86be-3467a7db0fe5"));
         Assert.That(playOfferEvents, Has.Count.EqualTo(1));
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(playOfferEvents.First().EntityId, Is.EqualTo(Guid.Parse("d9afd6dd-8836-47dd-86be-3467a7db0fe5")));
@@ -126,7 +129,7 @@ public class ClubEventHandlerTest : TestSetup
             Assert.That(playOfferEvents.First().CorrelationId, Is.EqualTo(Guid.Parse("ee90c3ee-3b4b-4ccb-8933-739795a7253a")));
         });
     }
-    
+
     [Test]
     public async Task ClubUnlockedEvent_ProjectionTest()
     {
@@ -153,7 +156,7 @@ public class ClubEventHandlerTest : TestSetup
             Assert.That(projectedClub.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
-    
+
     [Test]
     public async Task ClubDeletedEvent_ProjectionTest()
     {
@@ -179,10 +182,10 @@ public class ClubEventHandlerTest : TestSetup
             Assert.That(projectedClub!.Id, Is.EqualTo(Guid.Parse("2db387f0-5792-4cb5-91a6-6317437b3432")));
             Assert.That(projectedClub.Status, Is.EqualTo(Status.DELETED));
         });
-        
+
         var playOfferEvents = await TestWriteEventRepository.GetEventByEntityId(Guid.Parse("9ee6d9d7-d4a6-4904-a20b-be026de53c4f"));
         Assert.That(playOfferEvents, Has.Count.EqualTo(1));
-        
+
         Assert.Multiple(() =>
         {
             Assert.That(playOfferEvents.First().EntityId, Is.EqualTo(Guid.Parse("9ee6d9d7-d4a6-4904-a20b-be026de53c4f")));

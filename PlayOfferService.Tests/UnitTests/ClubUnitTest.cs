@@ -1,4 +1,5 @@
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.Club;
 using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.ValueObjects;
 
@@ -20,7 +21,7 @@ public class ClubUnitTest
             EventType = EventType.TENNIS_CLUB_REGISTERED,
             EventData = new ClubCreatedEvent
             {
-                TennisClubId = new TennisClubId{Id=clubId}
+                TennisClubId = new TennisClubId { Id = clubId }
             }
         };
 
@@ -81,7 +82,7 @@ public class ClubUnitTest
         // Then
         Assert.That(club.Status, Is.EqualTo(Status.ACTIVE));
     }
-    
+
     [Test]
     public void ApplyClubDeletedEventTest()
     {
@@ -105,4 +106,33 @@ public class ClubUnitTest
         // Then
         Assert.That(club.Status, Is.EqualTo(Status.DELETED));
     }
+
+    [Test]
+    public void ApplyClubNameChangedEventTest()
+    {
+        // Given
+        var club = new Club
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test Club"
+        };
+        var clubEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.TENNIS_CLUB_NAME_CHANGED,
+                EventData = new ClubNameChangedEvent
+                {
+                    Name = "New Club Name"
+                }
+            }
+        };
+
+        // When
+        club.Apply(clubEvents);
+
+        // Then
+        Assert.That(club.Name, Is.EqualTo("New Club Name"));
+    }
+
 }
