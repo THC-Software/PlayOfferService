@@ -1,6 +1,7 @@
 using MediatR;
 using PlayOfferService.Application.Exceptions;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.PlayOffer;
 using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.Repositories;
 
@@ -9,18 +10,22 @@ namespace PlayOfferService.Application.Handlers.Events;
 public class ClubEventHandler : IRequestHandler<TechnicalClubEvent>
 {
     private readonly ClubRepository _clubRepository;
-    private readonly ReadEventRepository _eventRepository;
+    private readonly ReadEventRepository _readEventRepository;
+    private readonly WriteEventRepository _writeEventRepository;
+    private readonly PlayOfferRepository _playOfferRepository;
     
-    public ClubEventHandler(ClubRepository clubRepository, ReadEventRepository eventRepository)
+    public ClubEventHandler(ClubRepository clubRepository, ReadEventRepository readEventRepository, WriteEventRepository writeEventRepository, PlayOfferRepository playOfferRepository)
     {
         _clubRepository = clubRepository;
-        _eventRepository = eventRepository;
+        _readEventRepository = readEventRepository;
+        _writeEventRepository = writeEventRepository;
+        _playOfferRepository = playOfferRepository;
     }
     
     public async Task Handle(TechnicalClubEvent clubEvent, CancellationToken cancellationToken)
     {
         Console.WriteLine("ClubEventHandler received event: " + clubEvent.EventType);
-        var existingEvent = await _eventRepository.GetEventById(clubEvent.EventId);
+        var existingEvent = await _readEventRepository.GetEventById(clubEvent.EventId);
         if (existingEvent != null)
         {
             Console.WriteLine("Event already applied, skipping");
@@ -44,12 +49,14 @@ public class ClubEventHandler : IRequestHandler<TechnicalClubEvent>
         }
         
         await _clubRepository.Update();
-        await _eventRepository.AppendEvent(clubEvent);
-        await _eventRepository.Update();
+        await _readEventRepository.AppendEvent(clubEvent);
+        await _readEventRepository.Update();
     }
 
     private async Task HandleTennisClubDeletedEvent(TechnicalClubEvent clubEvent)
     {
+        await CreatePlayOfferCancelledEventsByClubId(clubEvent);
+        
         var existingClub = await _clubRepository.GetClubById(clubEvent.EntityId);
         existingClub!.Apply([clubEvent]);
     }
@@ -62,6 +69,8 @@ public class ClubEventHandler : IRequestHandler<TechnicalClubEvent>
 
     private async Task HandleTennisClubLockedEvent(TechnicalClubEvent clubEvent)
     {
+        await CreatePlayOfferCancelledEventsByClubId(clubEvent);
+        
         var existingClub = await _clubRepository.GetClubById(clubEvent.EntityId);
         existingClub!.Apply([clubEvent]);
     }
@@ -71,5 +80,29 @@ public class ClubEventHandler : IRequestHandler<TechnicalClubEvent>
         var newClub = new Club();
         newClub.Apply([clubEvent]);
         _clubRepository.CreateClub(newClub);
+    }
+    
+    private async Task CreatePlayOfferCancelledEventsByClubId(TechnicalClubEvent clubEvent)
+    {
+        // Get all play offers by club id
+        var existingPlayOffer = await _playOfferRepository.GetPlayOffersByIds(null, null, clubEvent.EntityId);
+        
+        // Create PlayOfferCancelled events for each play offer
+        foreach (var playOffer in existingPlayOffer)
+        {
+            var cancelledEvent = new BaseEvent
+            {
+                EventId = Guid.NewGuid(),
+                EventType = EventType.PLAYOFFER_CANCELLED,
+                EntityType = EntityType.PLAYOFFER,
+                EntityId = playOffer.Id,
+                Timestamp = DateTime.UtcNow,
+                EventData = new PlayOfferCancelledEvent(),
+                CorrelationId = clubEvent.EventId
+            };
+            
+            await _writeEventRepository.AppendEvent(cancelledEvent);
+        }
+        await _writeEventRepository.Update();
     }
 }
