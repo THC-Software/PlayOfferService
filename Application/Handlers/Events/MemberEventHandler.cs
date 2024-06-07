@@ -13,7 +13,7 @@ public class MemberEventHandler : IRequestHandler<TechnicalMemberEvent>
     private readonly ReadEventRepository _eventRepository;
     private readonly WriteEventRepository _writeEventRepository;
     private readonly PlayOfferRepository _playOfferRepository;
-    
+
     public MemberEventHandler(MemberRepository memberRepository, ReadEventRepository eventRepository, PlayOfferRepository playOfferRepository, WriteEventRepository writeEventRepository)
     {
         _memberRepository = memberRepository;
@@ -21,7 +21,7 @@ public class MemberEventHandler : IRequestHandler<TechnicalMemberEvent>
         _playOfferRepository = playOfferRepository;
         _writeEventRepository = writeEventRepository;
     }
-    
+
     public async Task Handle(TechnicalMemberEvent memberEvent, CancellationToken cancellationToken)
     {
         Console.WriteLine("MemberEventHandler received event: " + memberEvent.EventType);
@@ -31,7 +31,7 @@ public class MemberEventHandler : IRequestHandler<TechnicalMemberEvent>
             Console.WriteLine("Event already applied, skipping");
             return;
         }
-        
+
         switch (memberEvent.EventType)
         {
             case EventType.MEMBER_REGISTERED:
@@ -46,8 +46,14 @@ public class MemberEventHandler : IRequestHandler<TechnicalMemberEvent>
             case EventType.MEMBER_DELETED:
                 await HandleMemberDeletedEvent(memberEvent);
                 break;
+            case EventType.MEMBER_FULL_NAME_CHANGED:
+                await HandleMemberFullNameChangedEvent(memberEvent);
+                break;
+            case EventType.MEMBER_EMAIL_CHANGED:
+                await HandleMemberEmailChangedEvent(memberEvent);
+                break;
         }
-        
+
         await _memberRepository.Update();
         await _eventRepository.AppendEvent(memberEvent);
         await _eventRepository.Update();
@@ -56,7 +62,7 @@ public class MemberEventHandler : IRequestHandler<TechnicalMemberEvent>
     private async Task HandleMemberDeletedEvent(TechnicalMemberEvent memberEvent)
     {
         await CreatePlayOfferCancelledEventsByCreatorId(memberEvent);
-        
+
         var existingMember = await _memberRepository.GetMemberById(memberEvent.EntityId);
         existingMember!.Apply([memberEvent]);
     }
@@ -70,7 +76,7 @@ public class MemberEventHandler : IRequestHandler<TechnicalMemberEvent>
     private async Task HandleMemberLockedEvent(TechnicalMemberEvent memberEvent)
     {
         await CreatePlayOfferCancelledEventsByCreatorId(memberEvent);
-        
+
         var existingMember = await _memberRepository.GetMemberById(memberEvent.EntityId);
         existingMember!.Apply([memberEvent]);
     }
@@ -86,7 +92,7 @@ public class MemberEventHandler : IRequestHandler<TechnicalMemberEvent>
     {
         // Get all play offers by creator id
         var existingPlayOffer = await _playOfferRepository.GetPlayOffersByIds(null, memberEvent.EntityId);
-        
+
         // Create PlayOfferCancelled events for each play offer
         foreach (var playOffer in existingPlayOffer)
         {
@@ -100,9 +106,21 @@ public class MemberEventHandler : IRequestHandler<TechnicalMemberEvent>
                 EventData = new PlayOfferCancelledEvent(),
                 CorrelationId = memberEvent.EventId
             };
-            
+
             await _writeEventRepository.AppendEvent(cancelledEvent);
         }
         await _writeEventRepository.Update();
+    }
+
+    private async Task HandleMemberFullNameChangedEvent(TechnicalMemberEvent memberEvent)
+    {
+        var existingMember = await _memberRepository.GetMemberById(memberEvent.EntityId);
+        existingMember!.Apply([memberEvent]);
+    }
+
+    private async Task HandleMemberEmailChangedEvent(TechnicalMemberEvent memberEvent)
+    {
+        var existingMember = await _memberRepository.GetMemberById(memberEvent.EntityId);
+        existingMember!.Apply([memberEvent]);
     }
 }
