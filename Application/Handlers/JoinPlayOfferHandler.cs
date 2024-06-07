@@ -11,14 +11,14 @@ namespace PlayOfferService.Application.Handlers;
 
 public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 {
-    private readonly DbWriteContext _context;
+    private readonly WriteEventRepository _writeEventRepository;
     private readonly PlayOfferRepository _playOfferRepository;
     private readonly MemberRepository _memberRepository;
     private readonly ClubRepository _clubRepository;
 
-    public JoinPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository, ClubRepository clubRepository)
+    public JoinPlayOfferHandler(WriteEventRepository writeEventRepository, PlayOfferRepository playOfferRepository, MemberRepository memberRepository, ClubRepository clubRepository)
     {
-        _context = context;
+        _writeEventRepository = writeEventRepository;
         _playOfferRepository = playOfferRepository;
         _memberRepository = memberRepository;
         _clubRepository = clubRepository;
@@ -79,8 +79,8 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
             Timestamp = DateTime.UtcNow
         };
 
-        _context.Events.Add(domainEvent);
-        await _context.SaveChangesAsync();
+        await _writeEventRepository.AppendEvent(domainEvent);
+        await _writeEventRepository.Update();
 
         return Task.CompletedTask;
     }
