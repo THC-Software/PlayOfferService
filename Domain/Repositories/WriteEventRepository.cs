@@ -26,6 +26,15 @@ public class WriteEventRepository
         return events.First();
     }
     
+    public virtual async Task<List<BaseEvent>> GetEventByEntityId(Guid entityId)
+    {
+        var events = await _context.Events
+            .Where(e => e.EntityId == entityId)
+            .ToListAsync();
+
+        return events;
+    }
+    
     public virtual async Task AppendEvent(BaseEvent baseEvent)
     {
         _context.Events.Add(baseEvent);

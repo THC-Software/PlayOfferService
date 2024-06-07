@@ -56,6 +56,36 @@ public class WriteEventRepositoryTest : TestSetup
             Assert.That(eventData.ProposedEndTime, Is.EqualTo(DateTime.UtcNow.AddHours(3)).Within(1).Seconds);
         });
     }
+    
+    [Test]
+    public async Task GetExistingEventByEntityIdTest()
+    {
+        // Given
+        var entityId = Guid.Parse("e77304ae-421f-445c-a0e6-bfee24e6ba60");
+
+        // When
+        var baseEvents = await TestWriteEventRepository.GetEventByEntityId(entityId);
+
+        // Then
+        Assert.That(baseEvents, Has.Count.EqualTo(1));
+        var baseEvent = baseEvents.First();
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(baseEvent!.EntityId, Is.EqualTo(Guid.Parse("e77304ae-421f-445c-a0e6-bfee24e6ba60")));
+            Assert.That(baseEvent.EntityType, Is.EqualTo(EntityType.PLAYOFFER));
+            Assert.That(baseEvent.EventId, Is.EqualTo(Guid.Parse("3b84c030-5d1e-462e-8989-a8bb1407a41c")));
+            Assert.That(baseEvent.EventType, Is.EqualTo(EventType.PLAYOFFER_CREATED));
+            Assert.That(baseEvent.Timestamp, Is.EqualTo(DateTime.UtcNow).Within(1).Seconds);
+            Assert.That(baseEvent.EventData, Is.TypeOf<PlayOfferCreatedEvent>());
+            var eventData = baseEvent.EventData as PlayOfferCreatedEvent;
+            Assert.That(eventData!.Id, Is.EqualTo(Guid.Parse("e77304ae-421f-445c-a0e6-bfee24e6ba60")));
+            Assert.That(eventData.ClubId, Is.EqualTo(Guid.Parse("b5aa9ecc-09a8-49ec-8d98-305b9a3ff772")));
+            Assert.That(eventData.CreatorId, Is.EqualTo(Guid.Parse("be7cb6a5-612f-4aa3-9f6e-2c25d812ed49")));
+            Assert.That(eventData.ProposedStartTime, Is.EqualTo(DateTime.UtcNow.AddHours(1)).Within(1).Seconds);
+            Assert.That(eventData.ProposedEndTime, Is.EqualTo(DateTime.UtcNow.AddHours(3)).Within(1).Seconds);
+        });
+    }
 
     [Test]
     public async Task GetNonExistingEventByIdTest()
