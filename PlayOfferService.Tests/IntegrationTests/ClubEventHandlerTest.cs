@@ -12,12 +12,13 @@ public class ClubEventHandlerTest : TestSetup
         var existingClub = new Club
         {
             Id = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"),
+            Name = "Existing Club",
             Status = Status.ACTIVE
         };
         TestClubRepository.CreateClub(existingClub);
         await TestClubRepository.Update();
     }
-    
+
     [Test]
     public async Task ClubCreatedEvent_ProjectionTest()
     {
@@ -31,16 +32,17 @@ public class ClubEventHandlerTest : TestSetup
             EventType = EventType.TENNIS_CLUB_REGISTERED,
             EventData = new ClubCreatedEvent
             {
-                TennisClubId = new TennisClubId {Id = clubId}
+                TennisClubId = new TennisClubId { Id = clubId },
+                Name = "Test Club",
             }
         };
-        
+
         //When
         await Mediator.Send(clubCreationEvent);
-        
+
         //Then
         var projectedClub = await TestClubRepository.GetClubById(clubId);
-        
+
         Assert.That(projectedClub, Is.Not.Null);
         Assert.Multiple(() =>
         {
@@ -48,7 +50,7 @@ public class ClubEventHandlerTest : TestSetup
             Assert.That(projectedClub.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
-    
+
     [Test]
     public async Task ClubLockedEvent_ProjectionTest()
     {
@@ -61,13 +63,13 @@ public class ClubEventHandlerTest : TestSetup
             EventType = EventType.TENNIS_CLUB_LOCKED,
             EventData = new ClubLockedEvent()
         };
-        
+
         //When
         await Mediator.Send(clubLockedEvent);
-        
+
         //Then
         var projectedClub = await TestClubRepository.GetClubById(Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"));
-        
+
         Assert.That(projectedClub, Is.Not.Null);
         Assert.Multiple(() =>
         {
@@ -75,7 +77,7 @@ public class ClubEventHandlerTest : TestSetup
             Assert.That(projectedClub.Status, Is.EqualTo(Status.LOCKED));
         });
     }
-    
+
     [Test]
     public async Task ClubUnlockedEvent_ProjectionTest()
     {
@@ -102,7 +104,7 @@ public class ClubEventHandlerTest : TestSetup
             Assert.That(projectedClub.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
-    
+
     [Test]
     public async Task ClubDeletedEvent_ProjectionTest()
     {

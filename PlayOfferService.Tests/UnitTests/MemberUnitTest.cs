@@ -22,21 +22,22 @@ public class MemberUnitTest
             EventType = EventType.MEMBER_REGISTERED,
             EventData = new MemberCreatedEvent
             {
-                MemberId = new MemberId{Id=memberId},
-                TennisClubId = new TennisClubId{Id=clubId}
+                MemberId = new MemberId { Id = memberId },
+                Name = new FullName { FirstName = "John", LastName = "Doe" },
+                TennisClubId = new TennisClubId { Id = clubId }
             }
         };
-        
+
         // When
         var member = new Member();
         member.Apply([memberCreationEvent]);
-        
+
         // Then
         Assert.That(member.Id, Is.EqualTo(memberId));
         Assert.That(member.ClubId, Is.EqualTo(clubId));
         Assert.That(member.Status, Is.EqualTo(Status.ACTIVE));
     }
-    
+
     [Test]
     public void ApplyMemberLockEventTest()
     {
@@ -54,14 +55,14 @@ public class MemberUnitTest
                 EventData = new MemberLockedEvent()
             }
         };
-        
+
         // When
         member.Apply(memberEvents);
-        
+
         // Then
         Assert.That(member.Status, Is.EqualTo(Status.LOCKED));
     }
-    
+
     [Test]
     public void ApplyMemberUnlockEventTest()
     {
@@ -79,14 +80,14 @@ public class MemberUnitTest
                 EventData = new MemberUnlockedEvent()
             }
         };
-        
+
         // When
         member.Apply(memberEvents);
-        
+
         // Then
         Assert.That(member.Status, Is.EqualTo(Status.ACTIVE));
     }
-    
+
     [Test]
     public void ApplyMemberDeleteEventTest()
     {
@@ -104,10 +105,10 @@ public class MemberUnitTest
                 EventData = new MemberDeletedEvent()
             }
         };
-        
+
         // When
         member.Apply(memberEvents);
-        
+
         // Then
         Assert.That(member.Status, Is.EqualTo(Status.DELETED));
     }

@@ -19,7 +19,7 @@ public class MemberEventHandlerTest : TestSetup
         TestMemberRepository.CreateMember(existingMember);
         await TestMemberRepository.Update();
     }
-    
+
     [Test]
     public async Task MemberCreatedEvent_ProjectionTest()
     {
@@ -33,17 +33,18 @@ public class MemberEventHandlerTest : TestSetup
             EventType = EventType.MEMBER_REGISTERED,
             EventData = new MemberCreatedEvent
             {
-                MemberId = new MemberId{Id=memberId},
-                TennisClubId = new TennisClubId{Id=Guid.Parse("bf7f59db-e2bf-4a4f-95fe-baeabe948b81")}
+                MemberId = new MemberId { Id = memberId },
+                Name = new FullName { FirstName = "Test", LastName = "Member" },
+                TennisClubId = new TennisClubId { Id = Guid.Parse("bf7f59db-e2bf-4a4f-95fe-baeabe948b81") }
             }
         };
-        
+
         //When
         await Mediator.Send(memberCreatedEvent);
-        
+
         //Then
         var projectedMember = await TestMemberRepository.GetMemberById(memberId);
-        
+
         Assert.That(projectedMember, Is.Not.Null);
         Assert.Multiple(() =>
         {
@@ -52,7 +53,7 @@ public class MemberEventHandlerTest : TestSetup
             Assert.That(projectedMember.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
-    
+
     [Test]
     public async Task MemberLockEvent_ProjectionTest()
     {
@@ -66,13 +67,13 @@ public class MemberEventHandlerTest : TestSetup
             EventType = EventType.MEMBER_LOCKED,
             EventData = new MemberLockedEvent()
         };
-        
+
         //When
         await Mediator.Send(memberLockEvent);
-        
+
         //Then
         var projectedMember = await TestMemberRepository.GetMemberById(existingMember.Id);
-        
+
         Assert.That(projectedMember, Is.Not.Null);
         Assert.Multiple(() =>
         {
@@ -80,7 +81,7 @@ public class MemberEventHandlerTest : TestSetup
             Assert.That(projectedMember.Status, Is.EqualTo(Status.LOCKED));
         });
     }
-    
+
     [Test]
     public async Task MemberUnlockEvent_ProjectionTest()
     {
@@ -94,13 +95,13 @@ public class MemberEventHandlerTest : TestSetup
             EventType = EventType.MEMBER_UNLOCKED,
             EventData = new MemberUnlockedEvent()
         };
-        
+
         //When
         await Mediator.Send(memberUnlockEvent);
-        
+
         //Then
         var projectedMember = await TestMemberRepository.GetMemberById(existingMember.Id);
-        
+
         Assert.That(projectedMember, Is.Not.Null);
         Assert.Multiple(() =>
         {
@@ -108,7 +109,7 @@ public class MemberEventHandlerTest : TestSetup
             Assert.That(projectedMember.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
-    
+
     [Test]
     public async Task MemberDeletedEvent_ProjectionTest()
     {
@@ -122,13 +123,13 @@ public class MemberEventHandlerTest : TestSetup
             EventType = EventType.MEMBER_DELETED,
             EventData = new MemberDeletedEvent()
         };
-        
+
         //When
         await Mediator.Send(memberDeleteEvent);
-        
+
         //Then
         var projectedMember = await TestMemberRepository.GetMemberById(existingMember.Id);
-        
+
         Assert.That(projectedMember, Is.Not.Null);
         Assert.Multiple(() =>
         {

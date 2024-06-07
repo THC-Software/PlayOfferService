@@ -41,6 +41,7 @@ public class Club
     private void ApplyClubCreatedEvent(ClubCreatedEvent domainEvent)
     {
         Id = domainEvent.TennisClubId.Id;
+        Name = domainEvent.Name;
     }
 
     private void ApplyClubLockedEvent()
