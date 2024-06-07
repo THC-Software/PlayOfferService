@@ -30,6 +30,7 @@ builder.Services.AddScoped<PlayOfferRepository>();
 builder.Services.AddScoped<ReservationRepository>();
 builder.Services.AddScoped<CourtRepository>();
 builder.Services.AddScoped<ReadEventRepository>();
+builder.Services.AddScoped<WriteEventRepository>();
 builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 

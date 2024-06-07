@@ -18,6 +18,8 @@ public class TestSetup
     protected PlayOfferRepository TestPlayOfferRepository;
     protected ReservationRepository TestReservationRepository;
     protected CourtRepository TestCourtRepository;
+    protected ReadEventRepository TestReadEventRepository;
+    protected WriteEventRepository TestWriteEventRepository;
     protected IMediator Mediator;
     
     [SetUp]
@@ -69,6 +71,12 @@ public class TestSetup
         
         TestCourtRepository = scope.ServiceProvider.GetService<CourtRepository>() ??
                               throw new Exception("Could not get CourtRepository");
+        
+        TestReadEventRepository = scope.ServiceProvider.GetService<ReadEventRepository>() ??
+                                  throw new Exception("Could not get ReadEventRepository");
+        
+        TestWriteEventRepository = scope.ServiceProvider.GetService<WriteEventRepository>() ??
+                                   throw new Exception("Could not get WriteEventRepository");
         
         Mediator = scope.ServiceProvider.GetService<IMediator>() ??
                    throw new Exception("Could not get IMediator");

@@ -3,20 +3,20 @@ using PlayOfferService.Domain.Events;
 
 namespace PlayOfferService.Domain.Repositories;
 
-public class ReadEventRepository
+public class WriteEventRepository
 {
-    private readonly DbReadContext _context;
+    private readonly DbWriteContext _context;
     
-    public ReadEventRepository(){}
+    public WriteEventRepository(){}
     
-    public ReadEventRepository(DbReadContext context)
+    public WriteEventRepository(DbWriteContext context)
     {
         _context = context;
     }
     
     public virtual async Task<BaseEvent?> GetEventById(Guid eventId)
     {
-        var events = await _context.AppliedEvents
+        var events = await _context.Events
             .Where(e => e.EventId == eventId)
             .ToListAsync();
 
@@ -28,7 +28,7 @@ public class ReadEventRepository
     
     public virtual async Task AppendEvent(BaseEvent baseEvent)
     {
-        _context.AppliedEvents.Add(baseEvent);
+        _context.Events.Add(baseEvent);
     }
     
     public virtual async Task Update()
