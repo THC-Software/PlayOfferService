@@ -34,6 +34,7 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult<IEnumerable<PlayOffer>>> GetByIdAsync([FromQuery] Guid? playOfferId, [FromQuery] Guid? creatorId, [FromQuery] Guid? clubId)
     {
+        //TODO: refactor after jwt implementation to show own play
         var result = await _mediator.Send(new GetPlayOffersByIdQuery(playOfferId, creatorId, clubId));
 
         if (result.Count() == 0)
@@ -41,6 +42,38 @@ public class PlayOfferController : ControllerBase
 
         return Ok(result);
     }
+    
+    ///<summary>
+    ///Get all Play offers created by a member with a matching name
+    ///</summary>
+    ///<param name="creatorName">Name of the creator in the format '[FirstName] [LastName]', '[FirstName]' or '[LastName]'</param>
+    ///<returns>A list of Play offers with a matching id</returns>
+    ///<response code="200">Returns a List of Play offers with creator matching the query params</response>
+    ///<response code="204">No Play offers with matching creator was found</response>
+    [HttpGet]
+    [Route("/search")]
+    [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    public async Task<ActionResult<IEnumerable<PlayOffer>>> GetByCreatorNameAsync([FromQuery] string creatorName)
+    {
+        IEnumerable<PlayOffer> result;
+        try
+        {
+            result = await _mediator.Send(new GetPlayOffersByCreatorNameQuery(creatorName));
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
+        if (result.Count() == 0)
+            return NoContent();
+
+        return Ok(result);
+    }
+    
 
 
     ///<summary>

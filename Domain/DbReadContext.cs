@@ -28,8 +28,8 @@ public class DbReadContext : DbContext
         var testMemberIds = new List<Guid> { Guid.Parse("40c0981d-e2f8-4af3-ae6c-17f79f3ba8c2"), Guid.Parse("ccc1c8fc-89b5-4026-b190-9d9e7e7bc18d") };
 
         var testMembers = new List<Object>{
-            new {Id = testMemberIds[0], ClubId = testClub.Id, Status = Status.ACTIVE},
-            new {Id = testMemberIds[1], ClubId = testClub.Id, Status = Status.ACTIVE}
+            new {Id = testMemberIds[0], ClubId = testClub.Id, Status = Status.ACTIVE, FirstName = "Hans", LastName="Müller", Email="hans@müller.de"},
+            new {Id = testMemberIds[1], ClubId = testClub.Id, Status = Status.ACTIVE, FirstName = "Friedrich", LastName="Bäcker", Email="friedrich@bäcker.at"}
         };
 
         // Need to directly specify foreign keys for seeding
