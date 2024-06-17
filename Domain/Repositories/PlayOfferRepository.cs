@@ -40,6 +40,11 @@ public class PlayOfferRepository
 
         return playOffer;
     }
+    
+    public async Task<List<PlayOffer>> GetAllPlayOffers()
+    {
+        return await _context.PlayOffers.ToListAsync();
+    }
 
     public async Task Update()
     {

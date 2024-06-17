@@ -23,6 +23,21 @@ public class ReservationEventHandlerTest : TestSetup
         };
         TestReservationRepository.CreateReservation(existingReservation);
         await TestReservationRepository.Update();
+
+        var existingPlayOffer = new PlayOffer
+        {
+            Id = Guid.Parse("f515dc74-46ad-4a7b-b4f2-8dfda4b7506f"),
+            ClubId = Guid.Parse("6031061f-86c6-459b-9260-5b4772bae9d3"),
+            CreatorId = Guid.Parse("844b93a3-fce8-4d8f-8a8d-38da07a9c11f"),
+            ProposedStartTime = DateTime.UtcNow,
+            ProposedEndTime = DateTime.UtcNow.AddHours(3),
+            AcceptedStartTime = DateTime.UtcNow.AddHours(1),
+            ReservationId = Guid.Parse("da9ff928-cfb2-4b98-9388-937905556706"),
+            OpponentId = Guid.Parse("13158d40-c04f-49e8-aa0c-b2473145ceaf"),
+            IsCancelled = false
+        };
+        TestPlayOfferRepository.CreatePlayOffer(existingPlayOffer);
+        await TestPlayOfferRepository.Update();
     }
     
     [Test]
@@ -83,6 +98,10 @@ public class ReservationEventHandlerTest : TestSetup
         await Mediator.Send(reservationCancelledEvent);
         
         // Then
+        var playOfferEvents = await TestWriteEventRepository.GetEventByEntityId(Guid.Parse("f515dc74-46ad-4a7b-b4f2-8dfda4b7506f"));
+        Assert.That(playOfferEvents, Has.Count.EqualTo(1));
+        Assert.That(playOfferEvents[0].EventType, Is.EqualTo(EventType.PLAYOFFER_CANCELLED));
+        
         var projectedReservation = await TestReservationRepository.GetReservationById(reservationCancelledEvent.EntityId);
         
         Assert.That(projectedReservation, Is.Not.Null);
