@@ -41,10 +41,13 @@ public class PlayOfferRepository
         return playOffer;
     }
     
-    public async Task<List<PlayOffer>> GetAllPlayOffers()
+    public async Task<PlayOffer?> GetPlayOfferByReservationId(Guid reservationId)
     {
-        return await _context.PlayOffers.ToListAsync();
+        return await _context.PlayOffers
+            .Where(e => e.ReservationId == reservationId)
+            .FirstOrDefaultAsync();
     }
+
 
     public async Task Update()
     {

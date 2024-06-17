@@ -56,16 +56,13 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
 
     private async Task HandleReservationCancelledEvent(TechnicalReservationEvent reservationEvent)
     {
-        var existingPlayOffers = await _playOfferRepository.GetAllPlayOffers();
-        foreach (var playOffer in existingPlayOffers)
+        var existingPlayOffer = await _playOfferRepository.GetPlayOfferByReservationId(reservationEvent.EntityId);
+        if (existingPlayOffer != null)
         {
-            if(playOffer.ReservationId != reservationEvent.EntityId)
-                continue;
-            
             var playOfferEvent = new BaseEvent
             {
                 EventId = Guid.NewGuid(),
-                EntityId = playOffer.Id,
+                EntityId = existingPlayOffer.Id,
                 EventType = EventType.PLAYOFFER_CANCELLED,
                 EntityType = EntityType.PLAYOFFER,
                 Timestamp = DateTime.UtcNow,
@@ -74,8 +71,8 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
             };
             
             await _writeEventRepository.AppendEvent(playOfferEvent);
+            await _writeEventRepository.Update();
         }
-        await _writeEventRepository.Update();
         
         var existingReservation = await _reservationRepository.GetReservationById(reservationEvent.EntityId);
         existingReservation!.Apply([reservationEvent]);

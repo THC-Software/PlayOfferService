@@ -13,6 +13,7 @@ public class PlayOfferRepositoryTest : TestSetup
                 Id = Guid.Parse("d79f0bd6-c7ec-44e5-a02f-26e1567b0992"),
                 ClubId = Guid.Parse("34f13619-14b5-4244-a74b-6a8ba210a0b1"),
                 CreatorId = Guid.Parse("9b30e631-3ad8-4437-a934-94252d6294c4"),
+                ReservationId = Guid.Parse("b5fab7b7-63f1-4847-a71c-ae37dbfed029")
             },
             new()
             {
@@ -94,6 +95,20 @@ public class PlayOfferRepositoryTest : TestSetup
             Assert.That(playOffers[1].Id, Is.EqualTo(Guid.Parse("d79f0bd6-c7ec-44e5-a02f-26e1567b0992")));
             Assert.That(playOffers[0].Id, Is.EqualTo(Guid.Parse("d71ad67e-fa99-4ef2-b3ee-c6be640607a8")));
         });
+    }
+    
+    [Test]
+    public async Task GetPlayOfferByReservationIdTest()
+    {
+        //Given
+        var reservationId = Guid.Parse("b5fab7b7-63f1-4847-a71c-ae37dbfed029");
+        
+        //When
+        var playOffer = await TestPlayOfferRepository.GetPlayOfferByReservationId(reservationId);
+        
+        //Then
+        Assert.That(playOffer, Is.Not.Null);
+        Assert.That(playOffer!.Id, Is.EqualTo(Guid.Parse("d79f0bd6-c7ec-44e5-a02f-26e1567b0992")));
     }
     
     [Test]
