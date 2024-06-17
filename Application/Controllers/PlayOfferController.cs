@@ -55,7 +55,7 @@ public class PlayOfferController : ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public async Task<ActionResult<IEnumerable<PlayOffer>>> GetByParticipantIdAsync([FromQuery] Guid participantId)
+    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByParticipantIdAsync([FromQuery] Guid participantId)
     {
         //TODO: refactor after jwt implementation to get participantId from token
         var result = await _mediator.Send(new GetPlayOffersByParticipantIdQuery(participantId));
@@ -79,9 +79,9 @@ public class PlayOfferController : ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public async Task<ActionResult<IEnumerable<PlayOffer>>> GetByCreatorNameAsync([FromQuery] string creatorName)
+    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByCreatorNameAsync([FromQuery] string creatorName)
     {
-        IEnumerable<PlayOffer> result;
+        IEnumerable<PlayOfferDto> result;
         try
         {
             result = await _mediator.Send(new GetPlayOffersByCreatorNameQuery(creatorName));
