@@ -14,6 +14,11 @@ public class MemberRepository
     {
         _context = context;
     }
+    
+    public virtual async Task<List<Member>> GetAllMembers()
+    {
+        return await _context.Members.ToListAsync();
+    }
 
     public virtual async Task<Member?> GetMemberById(Guid? memberId)
     {

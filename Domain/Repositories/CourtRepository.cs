@@ -14,6 +14,11 @@ public class CourtRepository
         _context = context;
     }
     
+    public async Task<List<Court>> GetAllCourts()
+    {
+        return await _context.Courts.ToListAsync();
+    }
+    
     public virtual async Task<Court?> GetCourtById(Guid? courtId)
     {
         var courts = await _context.Courts

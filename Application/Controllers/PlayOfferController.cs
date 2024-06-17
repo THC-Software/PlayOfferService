@@ -27,11 +27,11 @@ public class PlayOfferController : ControllerBase
     ///<response code="204">No Play offer with matching properties was found</response>
     [HttpGet]
     [Route("club")]
-    [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<PlayOfferDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public async Task<ActionResult<IEnumerable<PlayOffer>>> GetByClubIdAsync([FromQuery] Guid clubId)
+    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByClubIdAsync([FromQuery] Guid clubId)
     {
         //TODO: refactor after jwt implementation to get clubId from token
         var result = await _mediator.Send(new GetPlayOffersByClubIdQuery(clubId));

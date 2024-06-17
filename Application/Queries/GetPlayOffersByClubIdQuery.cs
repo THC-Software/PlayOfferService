@@ -2,6 +2,6 @@
 using PlayOfferService.Domain.Models;
 
 namespace PlayOfferService.Application.Queries;
-public record GetPlayOffersByClubIdQuery(Guid ClubId) : IRequest<IEnumerable<PlayOffer>>
+public record GetPlayOffersByClubIdQuery(Guid ClubId) : IRequest<IEnumerable<PlayOfferDto>>
 {
 }
