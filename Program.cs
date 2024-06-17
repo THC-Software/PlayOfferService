@@ -66,17 +66,15 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "PlayofferService API v1");
 });
 
-// Create the database if it doesn't exist
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
-    var readDbContext = services.GetRequiredService<DbReadContext>();
-    var writeDbContext = services.GetRequiredService<DbWriteContext>();
-    
-    readDbContext.Database.EnsureCreated();
-    writeDbContext.Database.EnsureCreated();
-}
+
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var readDbContext = services.GetRequiredService<DbReadContext>();
+var writeDbContext = services.GetRequiredService<DbWriteContext>();
+
+readDbContext.Database.EnsureCreated();
+writeDbContext.Database.EnsureCreated();
+
 
 app.UseHttpsRedirection();
 
