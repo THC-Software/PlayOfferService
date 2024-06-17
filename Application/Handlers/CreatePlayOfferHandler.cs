@@ -23,11 +23,11 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
 
     public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var playOfferDto = request.PlayOfferDto;
+        var playOfferDto = request.CreatePlayOfferDto;
         
         var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
         if(club == null)
-            throw new NotFoundException($"Club {request.PlayOfferDto.ClubId} not found");
+            throw new NotFoundException($"Club {request.CreatePlayOfferDto.ClubId} not found");
         switch (club.Status)
         {
             case Status.LOCKED:
@@ -38,7 +38,7 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
         
         var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
         if(creator == null)
-            throw new NotFoundException($"Member {request.PlayOfferDto.CreatorId} not found!");
+            throw new NotFoundException($"Member {request.CreatePlayOfferDto.CreatorId} not found!");
         switch (creator.Status)
         {
             case Status.LOCKED:
