@@ -19,7 +19,7 @@ public class RedisClubStreamService : BackgroundService
         _serviceScopeFactory = serviceScopeFactory;
         var tokenSource = new CancellationTokenSource();
         _cancellationToken = tokenSource.Token;
-        var muxer = ConnectionMultiplexer.Connect("pos_redis");
+        var muxer = ConnectionMultiplexer.Connect("redis");
         _db = muxer.GetDatabase();
     }
 

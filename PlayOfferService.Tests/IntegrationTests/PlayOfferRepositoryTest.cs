@@ -26,6 +26,7 @@ public class PlayOfferRepositoryTest : TestSetup
                 Id = Guid.Parse("d71ad67e-fa99-4ef2-b3ee-c6be640607a8"),
                 ClubId = Guid.Parse("34f13619-14b5-4244-a74b-6a8ba210a0b1"),
                 CreatorId = Guid.Parse("9b30e631-3ad8-4437-a934-94252d6294c4"),
+                OpponentId = Guid.Parse("4fe95e2d-a943-444e-99aa-396d141b03ec"),
             }
         };
         foreach (var playOffer in existingPlayOffers)
@@ -98,17 +99,38 @@ public class PlayOfferRepositoryTest : TestSetup
     }
     
     [Test]
-    public async Task GetPlayOfferByReservationIdTest()
+
+    public async Task GetPlayOffersByOpponentIdTest()
     {
         //Given
-        var reservationId = Guid.Parse("b5fab7b7-63f1-4847-a71c-ae37dbfed029");
+        var opponentId = Guid.Parse("4fe95e2d-a943-444e-99aa-396d141b03ec");
         
         //When
-        var playOffer = await TestPlayOfferRepository.GetPlayOfferByReservationId(reservationId);
+        var playOffers = (await TestPlayOfferRepository.GetPlayOffersByIds(null,null,null,opponentId)).ToList();
         
         //Then
-        Assert.That(playOffer, Is.Not.Null);
-        Assert.That(playOffer!.Id, Is.EqualTo(Guid.Parse("d79f0bd6-c7ec-44e5-a02f-26e1567b0992")));
+        Assert.That(playOffers, Is.Not.Null);
+        Assert.That(playOffers, Has.Count.EqualTo(1));
+        Assert.That(playOffers.First().Id, Is.EqualTo(Guid.Parse("d71ad67e-fa99-4ef2-b3ee-c6be640607a8")));
+    }
+
+    [Test]
+    public async Task GetPlayOffersByParticipantId()
+    {
+        //Given
+        var participantId = Guid.Parse("4fe95e2d-a943-444e-99aa-396d141b03ec");
+        
+        //When
+        var playOffers = (await TestPlayOfferRepository.GetPlayOffersByParticipantId(participantId)).ToList();
+        
+        //Then
+        Assert.That(playOffers, Is.Not.Null);
+        Assert.That(playOffers, Has.Count.EqualTo(2));
+        Assert.Multiple(() =>
+        {
+            Assert.That(playOffers[0].Id, Is.EqualTo(Guid.Parse("9b0e6c95-1a00-49a0-9414-f83ed0eb388f")));
+            Assert.That(playOffers[1].Id, Is.EqualTo(Guid.Parse("d71ad67e-fa99-4ef2-b3ee-c6be640607a8")));
+        });
     }
     
     [Test]

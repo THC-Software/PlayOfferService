@@ -32,6 +32,11 @@ public class ClubRepository
         return club.First();
     }
     
+    public virtual async Task<IEnumerable<Club>> GetAllClubs()
+    {
+        return await _context.Clubs.ToListAsync();
+    }
+    
     public virtual void CreateClub(Club club)
     {
         _context.Clubs.Add(club);

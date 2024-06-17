@@ -14,6 +14,11 @@ public class ReservationRepository
         _context = context;
     }
     
+    public async Task<List<Reservation>> GetAllReservations()
+    {
+        return await _context.Reservations.ToListAsync();
+    }
+    
     public virtual async Task<Reservation?> GetReservationById(Guid? reservationId)
     {
         var reservation = await _context.Reservations
