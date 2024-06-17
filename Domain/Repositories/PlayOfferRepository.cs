@@ -16,7 +16,8 @@ public class PlayOfferRepository
     public async Task<IEnumerable<PlayOffer>> GetPlayOffersByIds(
         Guid? playOfferId,
         Guid? creatorId = null,
-        Guid? clubId = null)
+        Guid? clubId = null,
+        Guid? opponentId = null)
     {
         var playOffers = await _context.PlayOffers
             .ToListAsync();
@@ -25,7 +26,16 @@ public class PlayOfferRepository
             e != null
             && (!playOfferId.HasValue || e.Id == playOfferId)
             && (!creatorId.HasValue || e.CreatorId == creatorId)
-            && (!clubId.HasValue || e.ClubId == clubId)).ToList();
+            && (!clubId.HasValue || e.ClubId == clubId)
+            && (!opponentId.HasValue || e.OpponentId == opponentId)
+            ).ToList();
+
+        return playOffers;
+    }
+    
+    public async Task<List<PlayOffer>> GetPlayOffersByParticipantId(Guid participantId)
+    {
+        var playOffers = await _context.PlayOffers.Where(e => e.CreatorId == participantId || e.OpponentId == participantId).ToListAsync();
 
         return playOffers;
     }

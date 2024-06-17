@@ -1,6 +1,6 @@
 namespace PlayOfferService.Domain.Models;
 
-public class PlayOfferDto
+public class CreatePlayOfferDto
 {
     public Guid ClubId { get; set; }
     public Guid CreatorId { get; set; }

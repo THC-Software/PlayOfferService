@@ -16,13 +16,19 @@ public class MemberEventHandlerTest : TestSetup
             {
                 Id = Guid.Parse("971c48ff-42f4-4dc5-94ad-42e3c155b07b"),
                 ClubId = Guid.Parse("bf7f59db-e2bf-4a4f-95fe-baeabe948b81"),
-                Status = Status.ACTIVE
+                Status = Status.ACTIVE,
+                FirstName = "Sebastian",
+                LastName = "Schmidt",
+                Email = "seb@stian.com"
             },
             new()
             {
                 Id = Guid.Parse("c559d8ad-67be-4739-afb0-94460d7bb100"),
                 ClubId = Guid.Parse("8ad9ddaa-8ce6-4655-b2da-fb3419f93a67"),
-                Status = Status.ACTIVE
+                Status = Status.ACTIVE,
+                FirstName = "Lisa",
+                LastName = "Müller",
+                Email = "lisa@müller.com"
             }
         };
         
@@ -77,7 +83,8 @@ public class MemberEventHandlerTest : TestSetup
             {
                 MemberId = new MemberId { Id = memberId },
                 Name = new FullName { FirstName = "Test", LastName = "Member" },
-                TennisClubId = new TennisClubId { Id = Guid.Parse("bf7f59db-e2bf-4a4f-95fe-baeabe948b81") }
+                TennisClubId = new TennisClubId { Id = Guid.Parse("bf7f59db-e2bf-4a4f-95fe-baeabe948b81") },
+                Email = "test@member.de",
             }
         };
 

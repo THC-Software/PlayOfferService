@@ -1,0 +1,45 @@
+﻿using MediatR;
+using PlayOfferService.Application.Queries;
+using PlayOfferService.Domain.Models;
+using PlayOfferService.Domain.Repositories;
+
+namespace PlayOfferService.Application.Handlers;
+public class GetPlayOffersByParticipantIdHandler : IRequestHandler<GetPlayOffersByParticipantIdQuery, IEnumerable<PlayOfferDto>>
+{
+    private readonly PlayOfferRepository _playOfferRepository;
+    private readonly MemberRepository _memberRepository;
+    private readonly ClubRepository _clubRepository;
+    private readonly ReservationRepository _reservationRepository;
+    private readonly CourtRepository _courtRepository;
+
+    public GetPlayOffersByParticipantIdHandler(PlayOfferRepository playOfferRepository, MemberRepository memberRepository, ClubRepository clubRepository, ReservationRepository reservationRepository, CourtRepository courtRepository)
+    {
+        _playOfferRepository = playOfferRepository;
+        _memberRepository = memberRepository;
+        _clubRepository = clubRepository;
+        _reservationRepository = reservationRepository;
+        _courtRepository = courtRepository;
+    }
+
+    public async Task<IEnumerable<PlayOfferDto>> Handle(GetPlayOffersByParticipantIdQuery request, CancellationToken cancellationToken)
+    {
+        var playOffers =  await _playOfferRepository.GetPlayOffersByParticipantId(request.ParticipantId);
+        
+        var clubDto = (await _clubRepository.GetAllClubs()).Select(club => new ClubDto(club)).ToList();
+        var memberDtos = (await _memberRepository.GetAllMembers()).Select(member => new MemberDto(member)).ToList();
+        var courtDtos = (await _courtRepository.GetAllCourts()).Select(court => new CourtDto(court)).ToList();
+        var reservationDtos = (await _reservationRepository.GetAllReservations()).Select(reservation => new ReservationDto(reservation, courtDtos)).ToList();
+        
+        var playOfferDtos = new List<PlayOfferDto>();
+        foreach (var playOffer in playOffers)
+        {
+            var club = clubDto.First(club => club.Id == playOffer.ClubId);
+            var creator = memberDtos.First(member => member.Id == playOffer.CreatorId);
+            var opponent = memberDtos.FirstOrDefault(member => member.Id == playOffer.OpponentId);
+            var reservation = reservationDtos.FirstOrDefault(reservation => reservation.Id == playOffer.ReservationId);
+            playOfferDtos.Add(new PlayOfferDto(playOffer, club, creator, opponent, reservation));
+        }
+
+        return playOfferDtos;
+    }
+}

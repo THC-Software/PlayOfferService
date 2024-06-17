@@ -19,34 +19,90 @@ public class PlayOfferController : ControllerBase
     }
 
     ///<summary>
-    ///Retrieve all Play Offers matching the query params
+    ///Retrieve all Play Offers of a club with a matching id
     ///</summary>
-    ///<param name="playOfferId">The id of the play offer</param>
-    ///<param name="creatorId">The id of the creator of the play offer</param>
     ///<param name="clubId">The id of the club of the play offer</param>
-    ///<returns>Play offer with a matching id</returns>
-    ///<response code="200">Returns a Play offer matching the query params</response>
+    ///<returns>Play offers with a matching club id</returns>
+    ///<response code="200">Returns a list of Play offers matching the query params</response>
     ///<response code="204">No Play offer with matching properties was found</response>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
+    [Route("club")]
+    [ProducesResponseType(typeof(IEnumerable<PlayOfferDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public async Task<ActionResult<IEnumerable<PlayOffer>>> GetByIdAsync([FromQuery] Guid? playOfferId, [FromQuery] Guid? creatorId, [FromQuery] Guid? clubId)
+    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByClubIdAsync([FromQuery] Guid clubId)
     {
-        var result = await _mediator.Send(new GetPlayOffersByIdQuery(playOfferId, creatorId, clubId));
+        //TODO: refactor after jwt implementation to get clubId from token
+        var result = await _mediator.Send(new GetPlayOffersByClubIdQuery(clubId));
 
         if (result.Count() == 0)
             return NoContent();
 
         return Ok(result);
     }
+    
+    ///<summary>
+    ///Retrieve all Play Offers of a participating member
+    ///</summary>
+    ///<param name="participantId">The id of the member participating in the play offer</param>
+    ///<returns>List of Play offers with where given member is creator or opponent</returns>
+    ///<response code="200">Returns a list of Play offers matching the query params</response>
+    ///<response code="204">No Play offer with matching properties was found</response>
+    [HttpGet]
+    [Route("participant")]
+    [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByParticipantIdAsync([FromQuery] Guid participantId)
+    {
+        //TODO: refactor after jwt implementation to get participantId from token
+        var result = await _mediator.Send(new GetPlayOffersByParticipantIdQuery(participantId));
+
+        if (result.Count() == 0)
+            return NoContent();
+
+        return Ok(result);
+    }
+    
+    ///<summary>
+    ///Get all Play offers created by a member with a matching name
+    ///</summary>
+    ///<param name="creatorName">Name of the creator in the format '[FirstName] [LastName]', '[FirstName]' or '[LastName]'</param>
+    ///<returns>A list of Play offers with a matching id</returns>
+    ///<response code="200">Returns a List of Play offers with creator matching the query params</response>
+    ///<response code="204">No Play offers with matching creator was found</response>
+    [HttpGet]
+    [Route("search")]
+    [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByCreatorNameAsync([FromQuery] string creatorName)
+    {
+        IEnumerable<PlayOfferDto> result;
+        try
+        {
+            result = await _mediator.Send(new GetPlayOffersByCreatorNameQuery(creatorName));
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
+        if (result.Count() == 0)
+            return NoContent();
+
+        return Ok(result);
+    }
+    
 
 
     ///<summary>
     ///Create a new Play Offer
     ///</summary>
-    ///<param name="playOfferDto">The Play Offer to create</param>
+    ///<param name="createPlayOfferDto">The Play Offer to create</param>
     ///<returns>The newly created Play offer</returns>
     ///<response code="200">Returns the id of the created Play Offer</response>
     ///<response code="400">Invalid Play Offer structure</response>
@@ -55,12 +111,12 @@ public class PlayOfferController : ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public async Task<ActionResult<PlayOffer>> Create(PlayOfferDto playOfferDto)
+    public async Task<ActionResult<PlayOffer>> Create(CreatePlayOfferDto createPlayOfferDto)
     {
         Guid result;
         try
         {
-            result = await _mediator.Send(new CreatePlayOfferCommand(playOfferDto));
+            result = await _mediator.Send(new CreatePlayOfferCommand(createPlayOfferDto));
         }
         catch (Exception e)
         {
@@ -104,7 +160,7 @@ public class PlayOfferController : ControllerBase
     ///<response code="200">The opponentId was added to the Play Offer with the matching playOfferId</response>
     ///<response code="400">No playOffer with a matching playOfferId found</response>
     [HttpPost]
-    [Route("/join")]
+    [Route("join")]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
