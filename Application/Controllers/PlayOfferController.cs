@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlayOfferService.Application.Commands;
+using PlayOfferService.Application.Exceptions;
 using PlayOfferService.Application.Queries;
 using PlayOfferService.Domain.Models;
 
@@ -103,24 +104,31 @@ public class PlayOfferController : ControllerBase
 
 
     ///<summary>
-    ///Create a new Play Offer
+    ///Create a new Play Offer for the logged in user
     ///</summary>
     ///<param name="createPlayOfferDto">The Play Offer to create</param>
     ///<returns>The newly created Play offer</returns>
     ///<response code="200">Returns the id of the created Play Offer</response>
     ///<response code="400">Invalid Play Offer structure</response>
+    ///<response code="401">Only members can create Play Offers</response>
     [HttpPost]
+    [Authorize]
     [ProducesResponseType(typeof(PlayOffer), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
     public async Task<ActionResult<PlayOffer>> Create(CreatePlayOfferDto createPlayOfferDto)
     {
-        //TODO: Implement member/admin authorization
+        if (User.Claims.First(c => c.Type == "groups").Value != "MEMBER")
+            return Unauthorized("Only members can create Play Offers!");
+        
+        var creatorId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var clubId = Guid.Parse(User.FindFirst("tennisClubId")!.Value);
+        
         Guid result;
         try
         {
-            result = await _mediator.Send(new CreatePlayOfferCommand(createPlayOfferDto));
+            result = await _mediator.Send(new CreatePlayOfferCommand(createPlayOfferDto, creatorId, clubId));
         }
         catch (Exception e)
         {
@@ -131,23 +139,33 @@ public class PlayOfferController : ControllerBase
     }
 
     ///<summary>
-    ///Cancels a Play Offer with a matching id
+    ///Cancels a Play Offer with a matching id of the logged in user
     ///</summary>
     ///<param name="playOfferId">The id of the Play Offer to cancel</param>
     ///<returns>Nothing</returns>
     ///<response code="200">The Play Offer with the matching id was cancelled</response>
     ///<response code="400">No Play Offer with matching id found</response>
+    ///<response code="401">Only creator can cancel Play Offers</response>
     [HttpDelete]
+    [Authorize]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
     public async Task<ActionResult> Delete(Guid playOfferId)
     {
-        //TODO: Implement member/admin authorization
+        if (User.Claims.First(c => c.Type == "groups").Value != "MEMBER")
+            return Unauthorized("Only members can cancel Play Offers!");
+        
+        var memberId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
         try
         {
-            await _mediator.Send(new CancelPlayOfferCommand(playOfferId));
+            await _mediator.Send(new CancelPlayOfferCommand(playOfferId, memberId));
+        }
+        catch (AuthorizationException e)
+        {
+            return Unauthorized(e.Message);
         }
         catch (Exception e)
         {
@@ -158,13 +176,15 @@ public class PlayOfferController : ControllerBase
     }
 
     ///<summary>
-    ///Adds a given opponentId to a Play Offer and creates a reservation
+    ///Logged in user joins a Play Offer with a matching playOfferId
     ///</summary>
     ///<param name="joinPlayOfferDto">The opponentId to add to the Play Offer with the matching playOfferId</param>
     ///<returns>Nothing</returns>
     ///<response code="200">The opponentId was added to the Play Offer with the matching playOfferId</response>
     ///<response code="400">No playOffer with a matching playOfferId found</response>
+    ///<response code="401">Only members can join Play Offers</response>
     [HttpPost]
+    [Authorize]
     [Route("join")]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
@@ -172,10 +192,13 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult> Join(JoinPlayOfferDto joinPlayOfferDto)
     {
-        //TODO: Implement member/admin authorization
+        if (User.Claims.First(c => c.Type == "groups").Value != "MEMBER")
+            return Unauthorized("Only members can join Play Offers!");
+        
+        var memberId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         try
         {
-            await _mediator.Send(new JoinPlayOfferCommand(joinPlayOfferDto));
+            await _mediator.Send(new JoinPlayOfferCommand(joinPlayOfferDto, memberId));
         }
         catch (Exception e)
         {

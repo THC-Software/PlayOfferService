@@ -2,6 +2,6 @@
 using PlayOfferService.Domain.Models;
 
 namespace PlayOfferService.Application.Commands;
-public record JoinPlayOfferCommand(JoinPlayOfferDto JoinPlayOfferDto) : IRequest<Task>
+public record JoinPlayOfferCommand(JoinPlayOfferDto JoinPlayOfferDto, Guid MemberId) : IRequest<Task>
 {
 }

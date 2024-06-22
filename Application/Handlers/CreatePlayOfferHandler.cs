@@ -25,9 +25,9 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
     {
         var playOfferDto = request.CreatePlayOfferDto;
         
-        var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
+        var club = await _clubRepository.GetClubById(request.ClubId);
         if(club == null)
-            throw new NotFoundException($"Club {request.CreatePlayOfferDto.ClubId} not found");
+            throw new NotFoundException($"Club {request.ClubId} not found");
         switch (club.Status)
         {
             case Status.LOCKED:
@@ -36,9 +36,9 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
                 throw new InvalidOperationException("Can't create PlayOffer in deleted club!");
         }
         
-        var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
+        var creator = await _memberRepository.GetMemberById(request.CreatorId);
         if(creator == null)
-            throw new NotFoundException($"Member {request.CreatePlayOfferDto.CreatorId} not found!");
+            throw new NotFoundException($"Member {request.CreatorId} not found!");
         switch (creator.Status)
         {
             case Status.LOCKED:

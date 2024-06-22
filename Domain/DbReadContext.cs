@@ -37,7 +37,7 @@ public class DbReadContext : DbContext
         {
             Id = Guid.NewGuid(),
             ClubId = testClub.Id,
-            CreatorId = testMemberIds[0],
+            CreatorId = testMemberIds[1],
             ProposedStartTime = DateTime.UtcNow,
             ProposedEndTime = DateTime.UtcNow.AddHours(1),
             IsCancelled = false
