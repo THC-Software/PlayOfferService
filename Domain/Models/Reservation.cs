@@ -8,7 +8,7 @@ public class Reservation
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
-    public List<Guid> CourtIds { get; set; }
+    public Guid CourtId { get; set; }
     public Guid? ReservantId { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
@@ -41,7 +41,7 @@ public class Reservation
         var domainEvent = (ReservationCreatedEvent) baseEvent.EventData;
         
         Id = baseEvent.EntityId;
-        CourtIds = domainEvent.CourtIds;
+        CourtId = domainEvent.CourtId;
         ReservantId = domainEvent.ReservantId;
         StartTime = domainEvent.Start;
         EndTime = domainEvent.End;
