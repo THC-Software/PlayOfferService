@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using PlayOfferService.Application.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 

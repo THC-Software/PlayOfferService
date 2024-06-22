@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +20,12 @@ public class PlayOfferController : ControllerBase
         _mediator = mediator;
     }
 
-    ///<summary>
-    ///Retrieve all Play Offers of a club with a matching id
-    ///</summary>
-    ///<param name="clubId">The id of the club of the play offer</param>
-    ///<returns>Play offers with a matching club id</returns>
-    ///<response code="200">Returns a list of Play offers matching the query params</response>
-    ///<response code="204">No Play offer with matching properties was found</response>
+    /// <summary>
+    /// Retrieve all Play Offers of the logged in users club
+    /// </summary>
+    /// <returns>Play offers with a matching club id</returns>
+    /// <response code="200">Returns a list of Play offers matching the query params</response>
+    /// <response code="204">No Play offer with matching properties was found</response>
     [HttpGet]
     [Authorize]
     [Route("club")]
@@ -33,9 +33,9 @@ public class PlayOfferController : ControllerBase
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByClubIdAsync([FromQuery] Guid clubId)
+    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByClubIdAsync()
     {
-        //TODO: refactor after jwt implementation to get clubId from token
+        var clubId = Guid.Parse(User.Claims.First(c => c.Type == "tennisClubId").Value);
         var result = await _mediator.Send(new GetPlayOffersByClubIdQuery(clubId));
 
         if (result.Count() == 0)
@@ -45,21 +45,21 @@ public class PlayOfferController : ControllerBase
     }
     
     ///<summary>
-    ///Retrieve all Play Offers of a participating member
+    ///Retrieve all Play Offers of a logged in user
     ///</summary>
-    ///<param name="participantId">The id of the member participating in the play offer</param>
     ///<returns>List of Play offers with where given member is creator or opponent</returns>
     ///<response code="200">Returns a list of Play offers matching the query params</response>
     ///<response code="204">No Play offer with matching properties was found</response>
     [HttpGet]
+    [Authorize]
     [Route("participant")]
     [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByParticipantIdAsync([FromQuery] Guid participantId)
+    public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByParticipantIdAsync()
     {
-        //TODO: refactor after jwt implementation to get participantId from token
+        var participantId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
         var result = await _mediator.Send(new GetPlayOffersByParticipantIdQuery(participantId));
 
         if (result.Count() == 0)
@@ -76,6 +76,7 @@ public class PlayOfferController : ControllerBase
     ///<response code="200">Returns a List of Play offers with creator matching the query params</response>
     ///<response code="204">No Play offers with matching creator was found</response>
     [HttpGet]
+    [Authorize]
     [Route("search")]
     [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
@@ -115,6 +116,7 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult<PlayOffer>> Create(CreatePlayOfferDto createPlayOfferDto)
     {
+        //TODO: Implement member/admin authorization
         Guid result;
         try
         {
@@ -142,6 +144,7 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult> Delete(Guid playOfferId)
     {
+        //TODO: Implement member/admin authorization
         try
         {
             await _mediator.Send(new CancelPlayOfferCommand(playOfferId));
@@ -169,6 +172,7 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult> Join(JoinPlayOfferDto joinPlayOfferDto)
     {
+        //TODO: Implement member/admin authorization
         try
         {
             await _mediator.Send(new JoinPlayOfferCommand(joinPlayOfferDto));
