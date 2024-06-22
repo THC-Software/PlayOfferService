@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlayOfferService.Application.Commands;
 using PlayOfferService.Application.Queries;
@@ -26,6 +27,7 @@ public class PlayOfferController : ControllerBase
     ///<response code="200">Returns a list of Play offers matching the query params</response>
     ///<response code="204">No Play offer with matching properties was found</response>
     [HttpGet]
+    [Authorize]
     [Route("club")]
     [ProducesResponseType(typeof(IEnumerable<PlayOfferDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
