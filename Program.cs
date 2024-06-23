@@ -12,11 +12,6 @@ using PlayOfferService.Application.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var publicKey = File.ReadAllText("publicKeyDev.pem");
-var rsa = RSA.Create();
-rsa.ImportFromPem(publicKey);
-var jwtKey = new RsaSecurityKey(rsa);
-
 var readConnectionString = "Host=pos_postgres_read;Database=pos_read_db;Username=pos_user;Password=pos_password";
 var writeConnectionString = "Host=pos_postgres_write;Database=pos_write_db;Username=pos_user;Password=pos_password;";
 builder.Services.AddDbContext<DbReadContext>(options =>
@@ -51,20 +46,24 @@ if (builder.Environment.EnvironmentName != "Test")
     builder.Services.AddHostedService<RedisMemberStreamService>();
     builder.Services.AddHostedService<RedisReservationStreamService>();
     builder.Services.AddHostedService<RedisCourtStreamService>();
-}
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
+    
+    var publicKey = File.ReadAllText("publicKeyDev.pem");
+    var rsa = RSA.Create();
+    rsa.ImportFromPem(publicKey);
+    var jwtKey = new RsaSecurityKey(rsa);
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = false,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = jwtKey,
-        };
-    });
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = jwtKey,
+            };
+        });
+}
 
 // Swagger configuration
 builder.Services.AddEndpointsApiExplorer();
