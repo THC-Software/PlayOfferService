@@ -38,7 +38,11 @@ public class GetPlayOffersByCreatorNameHandler : IRequestHandler<GetPlayOffersBy
         var clubDto = (await _clubRepository.GetAllClubs()).Select(club => new ClubDto(club)).ToList();
         var memberDtos = (await _memberRepository.GetAllMembers()).Select(member => new MemberDto(member)).ToList();
         var courtDtos = (await _courtRepository.GetAllCourts()).Select(court => new CourtDto(court)).ToList();
-        var reservationDtos = (await _reservationRepository.GetAllReservations()).Select(reservation => new ReservationDto(reservation, courtDtos)).ToList();
+        var reservationDtos = (await _reservationRepository.GetAllReservations())
+            .Select(reservation => new ReservationDto(
+                reservation,
+                courtDtos.First(courtDto => courtDto.Id == reservation.CourtId)))
+            .ToList();
         
         var playOfferDtos = new List<PlayOfferDto>();
         foreach (var playOffer in playOffers)

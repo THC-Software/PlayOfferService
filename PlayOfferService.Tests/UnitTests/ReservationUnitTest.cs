@@ -18,7 +18,7 @@ public class ReservationUnitTest
             EventType = EventType.ReservationCreatedEvent,
             EventData = new ReservationCreatedEvent
             {
-                CourtIds = [Guid.Parse("b67599e8-f8d7-4956-bbfc-be70c69d7b4b")],
+                CourtId = Guid.Parse("b67599e8-f8d7-4956-bbfc-be70c69d7b4b"),
                 ReservantId = Guid.Parse("fd834838-748a-435c-a3a4-a4e93b2d4f40"),
                 Start = DateTime.UtcNow,
                 End = DateTime.UtcNow.AddHours(1),
@@ -35,7 +35,7 @@ public class ReservationUnitTest
         Assert.Multiple(() =>
         {
             Assert.That(reservation.Id, Is.EqualTo(Guid.Parse("b68ff7a7-94a0-4807-80bc-7b5a0a75264f")));
-            Assert.That(reservation.CourtIds, Is.EqualTo(new List<Guid> {Guid.Parse("b67599e8-f8d7-4956-bbfc-be70c69d7b4b")}));
+            Assert.That(reservation.CourtId, Is.EqualTo(Guid.Parse("b67599e8-f8d7-4956-bbfc-be70c69d7b4b")));
             Assert.That(reservation.ReservantId, Is.EqualTo(Guid.Parse("fd834838-748a-435c-a3a4-a4e93b2d4f40")));
             Assert.That(reservation.StartTime, Is.EqualTo(DateTime.UtcNow).Within(1).Seconds);
             Assert.That(reservation.EndTime, Is.EqualTo(DateTime.UtcNow.AddHours(1)).Within(1).Seconds);
@@ -51,7 +51,7 @@ public class ReservationUnitTest
         var givenReservation = new Reservation
         {
             Id = Guid.NewGuid(),
-            CourtIds = new List<Guid> {Guid.NewGuid()},
+            CourtId = Guid.NewGuid(),
             ReservantId = Guid.NewGuid(),
             StartTime = DateTime.UtcNow,
             EndTime = DateTime.UtcNow.AddHours(1),

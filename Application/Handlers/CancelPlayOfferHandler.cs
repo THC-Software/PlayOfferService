@@ -27,6 +27,9 @@ public class CancelPlayOfferHandler : IRequestHandler<CancelPlayOfferCommand, Ta
         var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.PlayOfferId)).FirstOrDefault();
         if (existingPlayOffer == null)
             throw new NotFoundException($"PlayOffer {request.PlayOfferId} not found!");
+        if (existingPlayOffer.CreatorId != request.MemberId)
+            throw new AuthorizationException($"PlayOffer {request.PlayOfferId} can only be cancelled by creator!");
+        
         if (existingPlayOffer.OpponentId != null)
             throw new InvalidOperationException($"PlayOffer {request.PlayOfferId} is already accepted and cannot be cancelled!");
         if (existingPlayOffer.IsCancelled)

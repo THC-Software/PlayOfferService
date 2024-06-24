@@ -4,6 +4,11 @@ using PlayOfferService.Application;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Repositories;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using PlayOfferService.Application.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +46,23 @@ if (builder.Environment.EnvironmentName != "Test")
     builder.Services.AddHostedService<RedisMemberStreamService>();
     builder.Services.AddHostedService<RedisReservationStreamService>();
     builder.Services.AddHostedService<RedisCourtStreamService>();
+    
+    var publicKey = File.ReadAllText("publicKeyDev.pem");
+    var rsa = RSA.Create();
+    rsa.ImportFromPem(publicKey);
+    var jwtKey = new RsaSecurityKey(rsa);
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = jwtKey,
+            };
+        });
 }
 
 // Swagger configuration
@@ -56,6 +78,34 @@ builder.Services.AddSwaggerGen(options =>
 
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
         $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+    
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+
+            },
+            new List<string>()
+        }
+    });
 });
 
 var app = builder.Build();
@@ -78,6 +128,7 @@ writeDbContext.Database.EnsureCreated();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

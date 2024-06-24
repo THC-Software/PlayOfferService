@@ -14,7 +14,7 @@ public class ReservationEventHandlerTest : TestSetup
         var existingReservation = new Reservation
         {
             Id = Guid.Parse("da9ff928-cfb2-4b98-9388-937905556706"),
-            CourtIds = new List<Guid> {Guid.Parse("5b0ae85c-97fa-4e2d-900f-c5d9239f64b5")},
+            CourtId = Guid.Parse("5b0ae85c-97fa-4e2d-900f-c5d9239f64b5"),
             ReservantId = Guid.Parse("844b93a3-fce8-4d8f-8a8d-38da07a9c11f"),
             StartTime = DateTime.UtcNow,
             EndTime = DateTime.UtcNow.AddHours(1),
@@ -52,7 +52,7 @@ public class ReservationEventHandlerTest : TestSetup
             EventType = EventType.ReservationCreatedEvent,
             EventData = new ReservationCreatedEvent
             {
-                CourtIds = [Guid.Parse("e23e04e1-392e-4907-a96e-9adaec407078")],
+                CourtId = Guid.Parse("e23e04e1-392e-4907-a96e-9adaec407078"),
                 ReservantId = Guid.Parse("0f26a0e3-a23b-425d-b54c-f6952c357198"),
                 Start = DateTime.UtcNow,
                 End = DateTime.UtcNow.AddHours(1),
@@ -72,7 +72,7 @@ public class ReservationEventHandlerTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedReservation!.Id, Is.EqualTo(Guid.Parse("96e78720-94e2-413e-84e4-795daefa040f")));
-            Assert.That(projectedReservation.CourtIds, Is.EqualTo(new List<Guid> {Guid.Parse("e23e04e1-392e-4907-a96e-9adaec407078")}));
+            Assert.That(projectedReservation.CourtId, Is.EqualTo(Guid.Parse("e23e04e1-392e-4907-a96e-9adaec407078")));
             Assert.That(projectedReservation.ReservantId, Is.EqualTo(Guid.Parse("0f26a0e3-a23b-425d-b54c-f6952c357198")));
             Assert.That(projectedReservation.StartTime, Is.EqualTo(DateTime.UtcNow).Within(1).Seconds);
             Assert.That(projectedReservation.EndTime, Is.EqualTo(DateTime.UtcNow.AddHours(1)).Within(1).Seconds);
@@ -108,7 +108,7 @@ public class ReservationEventHandlerTest : TestSetup
         Assert.Multiple(() =>
         {
             Assert.That(projectedReservation!.Id, Is.EqualTo(Guid.Parse("da9ff928-cfb2-4b98-9388-937905556706")));
-            Assert.That(projectedReservation.CourtIds, Is.EqualTo(new List<Guid> {Guid.Parse("5b0ae85c-97fa-4e2d-900f-c5d9239f64b5")}));
+            Assert.That(projectedReservation.CourtId, Is.EqualTo(Guid.Parse("5b0ae85c-97fa-4e2d-900f-c5d9239f64b5")));
             Assert.That(projectedReservation.ReservantId, Is.EqualTo(Guid.Parse("844b93a3-fce8-4d8f-8a8d-38da07a9c11f")));
             Assert.That(projectedReservation.StartTime, Is.EqualTo(DateTime.UtcNow).Within(1).Seconds);
             Assert.That(projectedReservation.EndTime, Is.EqualTo(DateTime.UtcNow.AddHours(1)).Within(1).Seconds);

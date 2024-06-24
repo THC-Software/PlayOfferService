@@ -30,9 +30,9 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
         if (existingPlayOffer == null)
             throw new NotFoundException($"PlayOffer {request.JoinPlayOfferDto.PlayOfferId} not found!");
         
-        var existingOpponent = await _memberRepository.GetMemberById(request.JoinPlayOfferDto.OpponentId);
+        var existingOpponent = await _memberRepository.GetMemberById(request.MemberId);
         if (existingOpponent == null)
-            throw new NotFoundException($"Member {request.JoinPlayOfferDto.OpponentId} not found!");
+            throw new NotFoundException($"Member {request.MemberId} not found!");
         
         if (existingOpponent.Id == existingPlayOffer.CreatorId)
             throw new InvalidOperationException("Can't join your own PlayOffer!");
