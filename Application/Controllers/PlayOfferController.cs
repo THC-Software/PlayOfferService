@@ -10,7 +10,7 @@ using PlayOfferService.Domain.Models;
 namespace PlayOfferService.Application.Controllers;
 
 [ApiController]
-[Route("api")]
+[Route("api/playoffers")]
 public class PlayOfferController : ControllerBase
 {
     
