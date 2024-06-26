@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pos-postgres-write
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pos-postgres-write
+  template:
+    metadata:
+      labels:
+        app: pos-postgres-write
+    spec:
+      containers:
+        - name: pos-postgres-write
+          image: debezium/postgres:16-alpine
+          env:
+            - name: POSTGRES_USER
+              value: pos_user
+            - name: POSTGRES_PASSWORD
+              value: pos_password
+            - name: POSTGRES_DB
+              value: pos_write_db
+          ports:
+            - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pos-postgres-write
+spec:
+  selector:
+    app: pos-postgres-write
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

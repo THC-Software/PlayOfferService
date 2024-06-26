@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pos-postgres-read
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pos-postgres-read
+  template:
+    metadata:
+      labels:
+        app: pos-postgres-read
+    spec:
+      containers:
+        - name: pos-postgres-read
+          image: debezium/postgres:16-alpine
+          env:
+            - name: POSTGRES_USER
+              value: pos_user
+            - name: POSTGRES_PASSWORD
+              value: pos_password
+            - name: POSTGRES_DB
+              value: pos_read_db
+          ports:
+            - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pos-postgres-read
+spec:
+  selector:
+    app: pos-postgres-read
+  ports:
+    - protocol: TCP
+      port: 5433
+      targetPort: 5432
