@@ -26,6 +26,9 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 
     public async Task<Task> Handle(JoinPlayOfferCommand request, CancellationToken cancellationToken)
     {
+        var transaction = _writeEventRepository.StartTransaction();
+        var excpectedEventCount = _writeEventRepository.GetEventCount(request.JoinPlayOfferDto.PlayOfferId) + 1;
+        
         var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.JoinPlayOfferDto.PlayOfferId)).FirstOrDefault();
         if (existingPlayOffer == null)
             throw new NotFoundException($"PlayOffer {request.JoinPlayOfferDto.PlayOfferId} not found!");
@@ -81,6 +84,14 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 
         await _writeEventRepository.AppendEvent(domainEvent);
         await _writeEventRepository.Update();
+        
+        var eventCount = _writeEventRepository.GetEventCount(request.JoinPlayOfferDto.PlayOfferId);
+        
+        if (eventCount != excpectedEventCount)
+        {
+            transaction.Rollback();
+            throw new InvalidOperationException("Concurrent modification detected!");
+        }
 
         return Task.CompletedTask;
     }
