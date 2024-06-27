@@ -11,14 +11,14 @@ namespace PlayOfferService.Application.Handlers;
 
 public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 {
-    private readonly DbWriteContext _context;
+    private readonly WriteEventRepository _writeEventRepository;
     private readonly PlayOfferRepository _playOfferRepository;
     private readonly MemberRepository _memberRepository;
     private readonly ClubRepository _clubRepository;
 
-    public JoinPlayOfferHandler(DbWriteContext context, PlayOfferRepository playOfferRepository, MemberRepository memberRepository, ClubRepository clubRepository)
+    public JoinPlayOfferHandler(WriteEventRepository writeEventRepository, PlayOfferRepository playOfferRepository, MemberRepository memberRepository, ClubRepository clubRepository)
     {
-        _context = context;
+        _writeEventRepository = writeEventRepository;
         _playOfferRepository = playOfferRepository;
         _memberRepository = memberRepository;
         _clubRepository = clubRepository;
@@ -26,13 +26,16 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
 
     public async Task<Task> Handle(JoinPlayOfferCommand request, CancellationToken cancellationToken)
     {
+        var transaction = _writeEventRepository.StartTransaction();
+        var excpectedEventCount = _writeEventRepository.GetEventCount(request.JoinPlayOfferDto.PlayOfferId) + 1;
+        
         var existingPlayOffer = (await _playOfferRepository.GetPlayOffersByIds(request.JoinPlayOfferDto.PlayOfferId)).FirstOrDefault();
         if (existingPlayOffer == null)
             throw new NotFoundException($"PlayOffer {request.JoinPlayOfferDto.PlayOfferId} not found!");
         
-        var existingOpponent = await _memberRepository.GetMemberById(request.JoinPlayOfferDto.OpponentId);
+        var existingOpponent = await _memberRepository.GetMemberById(request.MemberId);
         if (existingOpponent == null)
-            throw new NotFoundException($"Member {request.JoinPlayOfferDto.OpponentId} not found!");
+            throw new NotFoundException($"Member {request.MemberId} not found!");
         
         if (existingOpponent.Id == existingPlayOffer.CreatorId)
             throw new InvalidOperationException("Can't join your own PlayOffer!");
@@ -79,8 +82,16 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
             Timestamp = DateTime.UtcNow
         };
 
-        _context.Events.Add(domainEvent);
-        await _context.SaveChangesAsync();
+        await _writeEventRepository.AppendEvent(domainEvent);
+        await _writeEventRepository.Update();
+        
+        var eventCount = _writeEventRepository.GetEventCount(request.JoinPlayOfferDto.PlayOfferId);
+        
+        if (eventCount != excpectedEventCount)
+        {
+            transaction.Rollback();
+            throw new InvalidOperationException("Concurrent modification detected!");
+        }
 
         return Task.CompletedTask;
     }

@@ -1,5 +1,7 @@
 using System.Text.Json.Nodes;
+using MediatR;
 using PlayOfferService.Domain.Events;
+using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Domain.Repositories;
 using StackExchange.Redis;
 
@@ -19,14 +21,14 @@ public class RedisMemberStreamService : BackgroundService
         _serviceScopeFactory = serviceScopeFactory;
         var tokenSource = new CancellationTokenSource();
         _cancellationToken = tokenSource.Token;
-        var muxer = ConnectionMultiplexer.Connect("pos_redis");
+        var muxer = ConnectionMultiplexer.Connect("redis");
         _db = muxer.GetDatabase();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using IServiceScope scope = _serviceScopeFactory.CreateScope();
-        MemberRepository memberRepository = scope.ServiceProvider.GetRequiredService<MemberRepository>();
+        IMediator mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
         if (!(await _db.KeyExistsAsync(StreamName)) ||
             (await _db.StreamGroupInfoAsync(StreamName)).All(x=>x.Name!=GroupName))
@@ -50,13 +52,13 @@ public class RedisMemberStreamService : BackgroundService
                 var parsedEvent = ParseEvent(streamEntry);
                 if (parsedEvent == null)
                     continue;
-                await memberRepository.UpdateEntityAsync(parsedEvent);
+                await mediator.Send(parsedEvent, _cancellationToken);
             }
             await Task.Delay(1000);
         }
     }
     
-    private BaseEvent? ParseEvent(StreamEntry value)
+    private TechnicalMemberEvent? ParseEvent(StreamEntry value)
     {
         var dict = value.Values.ToDictionary(x => x.Name.ToString(), x => x.Value.ToString());
         var jsonContent = JsonNode.Parse(dict.Values.First());
@@ -65,14 +67,20 @@ public class RedisMemberStreamService : BackgroundService
         var eventType = eventInfo["eventType"].GetValue<string>();
         var entityType = eventInfo["entityType"].GetValue<string>();
         
-        if ((eventType != "MEMBER_REGISTERED"
+        if (
+            (eventType != "MEMBER_REGISTERED"
              && eventType != "MEMBER_DELETED"
              && eventType != "MEMBER_LOCKED"
-             && eventType != "MEMBER_UNLOCKED") || entityType != "MEMBER")
+             && eventType != "MEMBER_UNLOCKED"
+             && eventType != "MEMBER_EMAIL_CHANGED"
+             && eventType != "MEMBER_FULL_NAME_CHANGED"
+             )
+             || entityType != "MEMBER"
+            )
         {
             return null;
         }
 
-        return EventParser.ParseEvent(eventInfo);
+        return EventParser.ParseEvent<TechnicalMemberEvent>(eventInfo);
     }
 }

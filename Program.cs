@@ -4,6 +4,11 @@ using PlayOfferService.Application;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Repositories;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using PlayOfferService.Application.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +32,10 @@ builder.Services.AddDbContext<DbWriteContext>(options =>
 builder.Services.AddScoped<ClubRepository>();
 builder.Services.AddScoped<MemberRepository>();
 builder.Services.AddScoped<PlayOfferRepository>();
+builder.Services.AddScoped<ReservationRepository>();
+builder.Services.AddScoped<CourtRepository>();
+builder.Services.AddScoped<ReadEventRepository>();
+builder.Services.AddScoped<WriteEventRepository>();
 builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
@@ -35,6 +44,25 @@ if (builder.Environment.EnvironmentName != "Test")
     builder.Services.AddHostedService<RedisPlayOfferStreamService>();
     builder.Services.AddHostedService<RedisClubStreamService>();
     builder.Services.AddHostedService<RedisMemberStreamService>();
+    builder.Services.AddHostedService<RedisReservationStreamService>();
+    builder.Services.AddHostedService<RedisCourtStreamService>();
+    
+    var publicKey = File.ReadAllText("publicKeyDev.pem");
+    var rsa = RSA.Create();
+    rsa.ImportFromPem(publicKey);
+    var jwtKey = new RsaSecurityKey(rsa);
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateLifetime = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = jwtKey,
+            };
+        });
 }
 
 // Swagger configuration
@@ -50,6 +78,34 @@ builder.Services.AddSwaggerGen(options =>
 
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory,
         $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+    
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+
+            },
+            new List<string>()
+        }
+    });
 });
 
 var app = builder.Build();
@@ -60,20 +116,19 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "PlayofferService API v1");
 });
 
-// Create the database if it doesn't exist
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var services = scope.ServiceProvider;
-    var readDbContext = services.GetRequiredService<DbReadContext>();
-    var writeDbContext = services.GetRequiredService<DbWriteContext>();
-    
-    readDbContext.Database.EnsureCreated();
-    writeDbContext.Database.EnsureCreated();
-}
+
+using var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var readDbContext = services.GetRequiredService<DbReadContext>();
+var writeDbContext = services.GetRequiredService<DbWriteContext>();
+
+readDbContext.Database.EnsureCreated();
+writeDbContext.Database.EnsureCreated();
+
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

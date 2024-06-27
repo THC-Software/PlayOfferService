@@ -3,7 +3,8 @@ namespace PlayOfferService.Domain.Events;
 public enum EntityType
 {
     PLAYOFFER,
-    RESERVATION,
+    Reservation,
+    Court,
     MEMBER,
     TENNIS_CLUB
 }

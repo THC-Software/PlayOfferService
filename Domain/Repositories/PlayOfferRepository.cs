@@ -16,7 +16,8 @@ public class PlayOfferRepository
     public async Task<IEnumerable<PlayOffer>> GetPlayOffersByIds(
         Guid? playOfferId,
         Guid? creatorId = null,
-        Guid? clubId = null)
+        Guid? clubId = null,
+        Guid? opponentId = null)
     {
         var playOffers = await _context.PlayOffers
             .ToListAsync();
@@ -25,57 +26,46 @@ public class PlayOfferRepository
             e != null
             && (!playOfferId.HasValue || e.Id == playOfferId)
             && (!creatorId.HasValue || e.CreatorId == creatorId)
-            && (!clubId.HasValue || e.ClubId == clubId)).ToList();
+            && (!clubId.HasValue || e.ClubId == clubId)
+            && (!opponentId.HasValue || e.OpponentId == opponentId)
+            ).ToList();
 
         return playOffers;
     }
-
-    public async Task UpdateEntityAsync(BaseEvent baseEvent)
+    
+    public async Task<List<PlayOffer>> GetPlayOffersByParticipantId(Guid participantId)
     {
-        Console.WriteLine("PlayOfferRepository received event: " + baseEvent.EventType);
-        var appliedEvents = await _context.AppliedEvents
-            .Where(e => e.EntityId == baseEvent.EntityId)
-            .ToListAsync();
+        var playOffers = await _context.PlayOffers.Where(e => e.CreatorId == participantId || e.OpponentId == participantId).ToListAsync();
 
-        if (appliedEvents.Any(e => e.EventId == baseEvent.EventId))
-        {
-            Console.WriteLine("Event already applied, skipping");
-            return;
-        }
+        return playOffers;
+    }
+    
+    public async Task<PlayOffer?> GetPlayOfferByEventId(Guid eventId)
+    {
+        var playOffer = await _context.AppliedEvents
+            .Where(e => e.EventId == eventId)
+            .Select(e => e.EntityId)
+            .SelectMany(e => _context.PlayOffers.Where(p => p.Id == e))
+            .FirstOrDefaultAsync();
 
-        switch (baseEvent.EventType)
-        {
-            case EventType.PLAYOFFER_CANCELLED:
-                await CancelPlayOffer(baseEvent);
-                break;
-            case EventType.PLAYOFFER_CREATED:
-                CreatePlayOffer(baseEvent);
-                break;
-            case EventType.PLAYOFFER_JOINED:
-                await JoinPlayOffer(baseEvent);
-                break;
-        }
+        return playOffer;
+    }
+    
+    public async Task<PlayOffer?> GetPlayOfferByReservationId(Guid reservationId)
+    {
+        return await _context.PlayOffers
+            .Where(e => e.ReservationId == reservationId)
+            .FirstOrDefaultAsync();
+    }
 
-        _context.AppliedEvents.Add(baseEvent);
+
+    public async Task Update()
+    {
         await _context.SaveChangesAsync();
     }
-
-    private async Task CancelPlayOffer(BaseEvent baseEvent)
+    
+    public void CreatePlayOffer(PlayOffer playOffer)
     {
-        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
-        existingPlayOffer.Apply([baseEvent]);
-    }
-
-    private void CreatePlayOffer(BaseEvent baseEvent)
-    {
-        var newPlayOffer = new PlayOffer();
-        newPlayOffer.Apply([baseEvent]);
-        _context.PlayOffers.Add(newPlayOffer);
-    }
-
-    private async Task JoinPlayOffer(BaseEvent baseEvent)
-    {
-        var existingPlayOffer = (await GetPlayOffersByIds(baseEvent.EntityId)).First();
-        existingPlayOffer.Apply([baseEvent]);
+        _context.PlayOffers.Add(playOffer);
     }
 }

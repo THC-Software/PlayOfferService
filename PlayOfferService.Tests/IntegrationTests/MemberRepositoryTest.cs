@@ -1,182 +1,138 @@
-using NSubstitute;
-using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Domain.Models;
-using PlayOfferService.Domain.Repositories;
-using PlayOfferService.Domain.ValueObjects;
 
 namespace PlayOfferService.Tests.IntegrationTests;
 
 [TestFixture]
 public class MemberRepositoryTest : TestSetup
 {
-    private ClubRepository _clubRepositoryMock = Substitute.For<ClubRepository>();
-    
     [SetUp]
     public async Task MemberSetup()
     {
-        var testClub = new Club { Id = Guid.NewGuid(), Status = Status.ACTIVE };
-        _clubRepositoryMock = Substitute.For<ClubRepository>();
-        _clubRepositoryMock.GetClubById(Guid.NewGuid()).ReturnsForAnyArgs(testClub);
-        
-        var memberCreationEvent = new BaseEvent
+        var existingMember = new Member
         {
-            EntityId = Guid.Parse("16a1a213-f684-4e08-b9ef-61b372c59bf4"),
-            EntityType = EntityType.MEMBER,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_REGISTERED,
-            EventData = new MemberCreatedEvent
-            {
-                MemberId = new MemberId{Id=Guid.Parse("16a1a213-f684-4e08-b9ef-61b372c59bf4")},
-                TennisClubId = new TennisClubId{Id=testClub.Id}
-            }
+            Id = Guid.Parse("8bbb752a-784c-4fb1-9484-0522b4fb78d9"),
+            ClubId = Guid.Parse("b0dd93aa-4b7d-4d36-89ed-be056976ca84"),
+            FirstName = "Max",
+            LastName = "Mustermann",
+            Email = "maxi@musti.at",
+            Status = Status.ACTIVE
         };
-        await TestMemberRepository.UpdateEntityAsync(memberCreationEvent);
-        
-        var lockedMemberCreationEvent = new BaseEvent
-        {
-            EntityId = Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"),
-            EntityType = EntityType.MEMBER,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_REGISTERED,
-            EventData = new MemberCreatedEvent
-            {
-                MemberId = new MemberId{Id=Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d")},
-                TennisClubId = new TennisClubId{Id=testClub.Id}
-            }
-        };
-        var memberLockEvent = new BaseEvent
-        {
-            EntityId = Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"),
-            EntityType = EntityType.MEMBER,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_LOCKED,
-            EventData = new MemberLockedEvent()
-        };
-        await TestMemberRepository.UpdateEntityAsync(lockedMemberCreationEvent);
-        await TestMemberRepository.UpdateEntityAsync(memberLockEvent);
-        
+        TestMemberRepository.CreateMember(existingMember);
+        await TestMemberRepository.Update();
     }
     
     [Test]
-    public async Task MemberCreatedEvent_ProjectionTest()
+    public async Task GetExistingMemberByIdTest()
     {
         //Given
-        var testClub = await _clubRepositoryMock.GetClubById(Guid.NewGuid());
+        var memberId = Guid.Parse("8bbb752a-784c-4fb1-9484-0522b4fb78d9");
         
+        //When
+        var member = await TestMemberRepository.GetMemberById(memberId);
+        
+        //Then
+        Assert.That(member, Is.Not.Null);
+        Assert.That(member!.Id, Is.EqualTo(memberId));
+    }
+    
+    [Test]
+    public async Task GetNonExistingMemberByIdTest()
+    {
+        //Given
         var memberId = Guid.NewGuid();
-        var memberCreatedEvent = new BaseEvent
+        
+        //When
+        var member = await TestMemberRepository.GetMemberById(memberId);
+        
+        //Then
+        Assert.That(member, Is.Null);
+    }
+    
+    [Test]
+    public async Task CreateMemberTest()
+    {
+        //Given
+        var memberId = Guid.NewGuid();
+        var newMember = new Member
         {
-            EntityId = memberId,
-            EntityType = EntityType.MEMBER,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_REGISTERED,
-            EventData = new MemberCreatedEvent
-            {
-                MemberId = new MemberId{Id=memberId},
-                TennisClubId = new TennisClubId{Id=testClub!.Id}
-            }
+            Id = memberId,
+            ClubId = Guid.Parse("b0dd93aa-4b7d-4d36-89ed-be056976ca84"),
+            Status = Status.ACTIVE,
+            FirstName = "David",
+            LastName = "Doe",
+            Email = "david@doe.com"
         };
         
         //When
-        await TestMemberRepository.UpdateEntityAsync(memberCreatedEvent);
+        TestMemberRepository.CreateMember(newMember);
+        await TestMemberRepository.Update();
         
         //Then
-        var projectedMember = await TestMemberRepository.GetMemberById(memberId);
+        var member = await TestMemberRepository.GetMemberById(memberId);
         
-        Assert.That(projectedMember, Is.Not.Null);
+        Assert.That(member, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            if (projectedMember != null)
-            {
-                Assert.That(projectedMember.Id, Is.EqualTo(memberId));
-                Assert.That(projectedMember.ClubId, Is.EqualTo(testClub.Id));
-                Assert.That(projectedMember.Status, Is.EqualTo(Status.ACTIVE));
-            }
+            Assert.That(member!.Id, Is.EqualTo(memberId));
+            Assert.That(member.ClubId, Is.EqualTo(Guid.Parse("b0dd93aa-4b7d-4d36-89ed-be056976ca84")));
+            Assert.That(member.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
     
     [Test]
-    public async Task MemberLockEvent_ProjectionTest()
+    public async Task GetExistingMemberByFullNameTest()
     {
         //Given
-        var existingMember = await TestMemberRepository.GetMemberById(Guid.Parse("16a1a213-f684-4e08-b9ef-61b372c59bf4"));
-        var memberLockEvent = new BaseEvent
-        {
-            EntityId = existingMember!.Id,
-            EntityType = EntityType.MEMBER,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_LOCKED,
-            EventData = new MemberLockedEvent()
-        };
+        var creatorName = "Max Mustermann";
         
         //When
-        await TestMemberRepository.UpdateEntityAsync(memberLockEvent);
+        var members = await TestMemberRepository.GetMemberByName(creatorName);
         
         //Then
-        var projectedMember = await TestMemberRepository.GetMemberById(existingMember.Id);
-        
-        Assert.That(projectedMember, Is.Not.Null);
+        Assert.That(members, Is.Not.Null);
+        Assert.That(members.Count, Is.EqualTo(1));
         Assert.Multiple(() =>
         {
-            Assert.That(projectedMember!.Id, Is.EqualTo(existingMember.Id));
-            Assert.That(projectedMember.Status, Is.EqualTo(Status.LOCKED));
+            Assert.That(members[0].FirstName, Is.EqualTo("Max"));
+            Assert.That(members[0].LastName, Is.EqualTo("Mustermann"));
         });
     }
     
     [Test]
-    public async Task MemberUnlockEvent_ProjectionTest()
+    public async Task GetExistingMemberByFirstNameTest()
     {
         //Given
-        var existingMember = await TestMemberRepository.GetMemberById(Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"));
-        var memberUnlockEvent = new BaseEvent
-        {
-            EntityId = existingMember!.Id,
-            EntityType = EntityType.MEMBER,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_UNLOCKED,
-            EventData = new MemberUnlockedEvent()
-        };
+        var creatorName = "ax";
         
         //When
-        await TestMemberRepository.UpdateEntityAsync(memberUnlockEvent);
+        var members = await TestMemberRepository.GetMemberByName(creatorName);
         
         //Then
-        var projectedMember = await TestMemberRepository.GetMemberById(existingMember.Id);
-        
-        Assert.That(projectedMember, Is.Not.Null);
+        Assert.That(members, Is.Not.Null);
+        Assert.That(members.Count, Is.EqualTo(1));
         Assert.Multiple(() =>
         {
-            Assert.That(projectedMember!.Id, Is.EqualTo(existingMember.Id));
-            Assert.That(projectedMember.Status, Is.EqualTo(Status.ACTIVE));
+            Assert.That(members[0].FirstName, Is.EqualTo("Max"));
+            Assert.That(members[0].LastName, Is.EqualTo("Mustermann"));
         });
     }
     
     [Test]
-    public async Task MemberDeletedEvent_ProjectionTest()
+    public async Task GetExistingMemberByLastNameTest()
     {
         //Given
-        var existingMember = await TestMemberRepository.GetMemberById(Guid.Parse("d920f6c9-e328-4e84-be64-0a586269f89d"));
-        var memberDeleteEvent = new BaseEvent
-        {
-            EntityId = existingMember!.Id,
-            EntityType = EntityType.MEMBER,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.MEMBER_DELETED,
-            EventData = new MemberDeletedEvent()
-        };
+        var creatorName = "ustermann";
         
         //When
-        await TestMemberRepository.UpdateEntityAsync(memberDeleteEvent);
+        var members = await TestMemberRepository.GetMemberByName(creatorName);
         
         //Then
-        var projectedMember = await TestMemberRepository.GetMemberById(existingMember.Id);
-        
-        Assert.That(projectedMember, Is.Not.Null);
+        Assert.That(members, Is.Not.Null);
+        Assert.That(members.Count, Is.EqualTo(1));
         Assert.Multiple(() =>
         {
-            Assert.That(projectedMember!.Id, Is.EqualTo(existingMember.Id));
-            Assert.That(projectedMember.Status, Is.EqualTo(Status.DELETED));
+            Assert.That(members[0].FirstName, Is.EqualTo("Max"));
+            Assert.That(members[0].LastName, Is.EqualTo("Mustermann"));
         });
     }
 }

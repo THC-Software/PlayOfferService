@@ -22,21 +22,22 @@ public class MemberUnitTest
             EventType = EventType.MEMBER_REGISTERED,
             EventData = new MemberCreatedEvent
             {
-                MemberId = new MemberId{Id=memberId},
-                TennisClubId = new TennisClubId{Id=clubId}
+                MemberId = new MemberId { Id = memberId },
+                Name = new FullName { FirstName = "John", LastName = "Doe" },
+                TennisClubId = new TennisClubId { Id = clubId }
             }
         };
-        
+
         // When
         var member = new Member();
         member.Apply([memberCreationEvent]);
-        
+
         // Then
         Assert.That(member.Id, Is.EqualTo(memberId));
         Assert.That(member.ClubId, Is.EqualTo(clubId));
         Assert.That(member.Status, Is.EqualTo(Status.ACTIVE));
     }
-    
+
     [Test]
     public void ApplyMemberLockEventTest()
     {
@@ -54,14 +55,14 @@ public class MemberUnitTest
                 EventData = new MemberLockedEvent()
             }
         };
-        
+
         // When
         member.Apply(memberEvents);
-        
+
         // Then
         Assert.That(member.Status, Is.EqualTo(Status.LOCKED));
     }
-    
+
     [Test]
     public void ApplyMemberUnlockEventTest()
     {
@@ -79,14 +80,14 @@ public class MemberUnitTest
                 EventData = new MemberUnlockedEvent()
             }
         };
-        
+
         // When
         member.Apply(memberEvents);
-        
+
         // Then
         Assert.That(member.Status, Is.EqualTo(Status.ACTIVE));
     }
-    
+
     [Test]
     public void ApplyMemberDeleteEventTest()
     {
@@ -104,11 +105,74 @@ public class MemberUnitTest
                 EventData = new MemberDeletedEvent()
             }
         };
-        
+
         // When
         member.Apply(memberEvents);
-        
+
         // Then
         Assert.That(member.Status, Is.EqualTo(Status.DELETED));
+    }
+
+    [Test]
+    public void ApplyMemberNameChangedEventTest()
+    {
+        // Given
+        var member = new Member
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "John",
+            LastName = "Doe"
+        };
+
+        var memberEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.MEMBER_FULL_NAME_CHANGED,
+                EventData = new MemberFullNameChangedEvent
+                {
+                    FullName = new FullName { FirstName = "Jane", LastName = "Doe" }
+                }
+            }
+        };
+
+        // When
+        member.Apply(memberEvents);
+
+        // Then
+        Assert.That(member.FirstName, Is.EqualTo("Jane"));
+        Assert.That(member.LastName, Is.EqualTo("Doe"));
+    }
+
+    [Test]
+    public void ApplyMemberEmailChangedEvent()
+    {
+        // Given
+        var member = new Member
+        {
+            Id = Guid.NewGuid(),
+            FirstName = "John",
+            LastName = "Doe",
+            Email = "test@test.test"
+        };
+
+        var memberEvents = new List<BaseEvent>
+        {
+            new()
+            {
+                EventType = EventType.MEMBER_EMAIL_CHANGED,
+                EventData = new MemberEmailChangedEvent
+                {
+                    Email = "changedEmail@com.com"
+                }
+
+            }
+        };
+
+        //When
+        member.Apply(memberEvents);
+
+        //Then
+        Assert.That(member.Email, Is.EqualTo("changedEmail@com.com"));
     }
 }

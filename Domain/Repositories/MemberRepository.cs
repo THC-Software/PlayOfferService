@@ -14,6 +14,11 @@ public class MemberRepository
     {
         _context = context;
     }
+    
+    public virtual async Task<List<Member>> GetAllMembers()
+    {
+        return await _context.Members.ToListAsync();
+    }
 
     public virtual async Task<Member?> GetMemberById(Guid? memberId)
     {
@@ -26,33 +31,34 @@ public class MemberRepository
 
         return member.First();
     }
-
-    public async Task UpdateEntityAsync(BaseEvent baseEvent)
+    
+    public virtual async Task<List<Member>> GetMemberByName(string creatorName)
     {
-        Console.WriteLine("MemberRepository received event: " + baseEvent.EventType);
-        var appliedEvents = await _context.AppliedEvents
-            .Where(e => e.EntityId == baseEvent.EntityId)
-            .ToListAsync();
-        
-        if (appliedEvents.Any(e => e.EventId == baseEvent.EventId))
-        {
-            Console.WriteLine("Event already applied, skipping");
-            return;
-        }
-        
-        if (baseEvent.EventType == EventType.MEMBER_REGISTERED)
-        {
-            var newMember = new Member();
-            newMember.Apply([baseEvent]);
-            _context.Members.Add(newMember);
-        }
-        else
-        {
-            var existingMember = await GetMemberById(baseEvent.EntityId);
-            existingMember?.Apply([baseEvent]);
-        }
+        var firstAndLastName = creatorName.Split(" ");
 
-        _context.AppliedEvents.Add(baseEvent);
+        var members = new List<Member>();
+        if (firstAndLastName.Length == 2)
+        {
+            members = await _context.Members
+                .Where(e => e.FirstName.ToLower().Contains(firstAndLastName[0].ToLower()) && e.LastName.ToLower().Contains(firstAndLastName[1].ToLower()))
+                .ToListAsync();
+        } else if (firstAndLastName.Length == 1)
+        {
+            members = await _context.Members
+                .Where(e => e.FirstName.ToLower().Contains(firstAndLastName[0].ToLower()) || e.LastName.ToLower().Contains(firstAndLastName[0].ToLower()))
+                .ToListAsync();
+        }
+        
+        return members;
+    }
+    
+    public virtual void CreateMember(Member member)
+    {
+        _context.Members.Add(member);
+    }
+
+    public virtual async Task Update()
+    {
         await _context.SaveChangesAsync();
     }
 }

@@ -1,33 +1,34 @@
 using MediatR;
 using PlayOfferService.Application.Commands;
 using PlayOfferService.Application.Exceptions;
-using PlayOfferService.Domain;
 using PlayOfferService.Domain.Events;
 using PlayOfferService.Domain.Models;
 using PlayOfferService.Domain.Repositories;
 
 namespace PlayOfferService.Application.Handlers;
+
 public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Guid>
 {
-
-    private readonly DbWriteContext _context;
     private readonly ClubRepository _clubRepository;
     private readonly MemberRepository _memberRepository;
 
-    public CreatePlayOfferHandler(DbWriteContext context, ClubRepository clubRepository, MemberRepository memberRepository)
+    private readonly WriteEventRepository _writeEventRepository;
+
+    public CreatePlayOfferHandler(WriteEventRepository writeEventRepository, ClubRepository clubRepository,
+        MemberRepository memberRepository)
     {
-        _context = context;
+        _writeEventRepository = writeEventRepository;
         _clubRepository = clubRepository;
         _memberRepository = memberRepository;
     }
 
     public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
     {
-        var playOfferDto = request.PlayOfferDto;
-        
-        var club = await _clubRepository.GetClubById(playOfferDto.ClubId);
-        if(club == null)
-            throw new ArgumentException($"Club {request.PlayOfferDto.ClubId} not found");
+        var playOfferDto = request.CreatePlayOfferDto;
+
+        var club = await _clubRepository.GetClubById(request.ClubId);
+        if (club == null)
+            throw new NotFoundException($"Club {request.ClubId} not found");
         switch (club.Status)
         {
             case Status.LOCKED:
@@ -35,10 +36,10 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
             case Status.DELETED:
                 throw new InvalidOperationException("Can't create PlayOffer in deleted club!");
         }
-        
-        var creator = await _memberRepository.GetMemberById(playOfferDto.CreatorId);
-        if(creator == null)
-            throw new NotFoundException($"Member {request.PlayOfferDto.CreatorId} not found!");
+
+        var creator = await _memberRepository.GetMemberById(request.CreatorId);
+        if (creator == null)
+            throw new NotFoundException($"Member {request.CreatorId} not found!");
         switch (creator.Status)
         {
             case Status.LOCKED:
@@ -65,10 +66,22 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
             Timestamp = DateTime.Now.ToUniversalTime()
         };
 
-        _context.Events.Add(domainEvent);
-        await _context.SaveChangesAsync();
+        var transaction = _writeEventRepository.StartTransaction();
+        var excpectedEventCount = _writeEventRepository.GetEventCount(playOfferId) + 1;
+
+        await _writeEventRepository.AppendEvent(domainEvent);
+        await _writeEventRepository.Update();
+
+        var eventCount = _writeEventRepository.GetEventCount(playOfferId);
+
+        if (eventCount != excpectedEventCount)
+        {
+            transaction.Rollback();
+            throw new InvalidOperationException("Concurrent modification detected!");
+        }
+
+        transaction.Commit();
 
         return playOfferId;
     }
-
 }

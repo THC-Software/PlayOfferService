@@ -1,7 +1,4 @@
-using PlayOfferService.Domain.Events;
-using PlayOfferService.Domain.Events.Member;
 using PlayOfferService.Domain.Models;
-using PlayOfferService.Domain.ValueObjects;
 
 namespace PlayOfferService.Tests.IntegrationTests;
 
@@ -11,151 +8,66 @@ public class ClubRepositoryTest : TestSetup
     [SetUp]
     public async Task ClubSetup()
     {
-        var clubCreationEvent = new BaseEvent
+        var existingClub = new Club
         {
-            EntityId = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"),
-            EntityType = EntityType.TENNIS_CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_REGISTERED,
-            EventData = new ClubCreatedEvent
-            {
-                TennisClubId = new TennisClubId {Id = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa")}
-            }
+            Id = Guid.Parse("67bc285f-1b28-40f9-8b9e-564b3d9c1297"),
+            Name = "Test Club",
+            Status = Status.ACTIVE
         };
-        
-        var lockedClubCreationEvent = new BaseEvent
-        {
-            EntityId = Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"),
-            EntityType = EntityType.TENNIS_CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_REGISTERED,
-            EventData = new ClubCreatedEvent
-            {
-                TennisClubId = new TennisClubId{Id=Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac")}
-            }
-        };
-        var clubLockedEvent = new BaseEvent
-        {
-            EntityId = Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"),
-            EntityType = EntityType.TENNIS_CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_LOCKED,
-            EventData = new ClubLockedEvent()
-        };
-        await TestClubRepository.UpdateEntityAsync(clubCreationEvent);
-        await TestClubRepository.UpdateEntityAsync(lockedClubCreationEvent);
-        await TestClubRepository.UpdateEntityAsync(clubLockedEvent);
+        TestClubRepository.CreateClub(existingClub);
+        await TestClubRepository.Update();
     }
-    
+
     [Test]
-    public async Task ClubCreatedEvent_ProjectionTest()
+    public async Task GetExistingClubByIdTest()
+    {
+        //Given
+        var clubId = Guid.Parse("67bc285f-1b28-40f9-8b9e-564b3d9c1297");
+
+        //When
+        var club = await TestClubRepository.GetClubById(clubId);
+
+        //Then
+        Assert.That(club, Is.Not.Null);
+        Assert.That(club!.Id, Is.EqualTo(clubId));
+    }
+
+    [Test]
+    public async Task GetNonExistingClubByIdTest()
     {
         //Given
         var clubId = Guid.NewGuid();
-        var clubCreationEvent = new BaseEvent
-        {
-            EntityId = clubId,
-            EntityType = EntityType.TENNIS_CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_REGISTERED,
-            EventData = new ClubCreatedEvent
-            {
-                TennisClubId = new TennisClubId{Id=clubId}
-            }
-        };
-        
+
         //When
-        await TestClubRepository.UpdateEntityAsync(clubCreationEvent);
-        
+        var club = await TestClubRepository.GetClubById(clubId);
+
         //Then
-        var projectedClub = await TestClubRepository.GetClubById(clubId);
-        
-        Assert.That(projectedClub, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(projectedClub!.Id, Is.EqualTo(clubId));
-            Assert.That(projectedClub.Status, Is.EqualTo(Status.ACTIVE));
-        });
-    }
-    
-    [Test]
-    public async Task ClubLockedEvent_ProjectionTest()
-    {
-        //Given
-        var clubLockedEvent = new BaseEvent
-        {
-            EntityId = Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"),
-            EntityType = EntityType.TENNIS_CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_LOCKED,
-            EventData = new ClubLockedEvent()
-        };
-        
-        //When
-        await TestClubRepository.UpdateEntityAsync(clubLockedEvent);
-        
-        //Then
-        var projectedClub = await TestClubRepository.GetClubById(Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa"));
-        
-        Assert.That(projectedClub, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(projectedClub!.Id, Is.EqualTo(Guid.Parse("8aa54411-32fe-4b4c-a017-aa9710cb3bfa")));
-            Assert.That(projectedClub.Status, Is.EqualTo(Status.LOCKED));
-        });
+        Assert.That(club, Is.Null);
     }
 
     [Test]
-    public async Task ClubUnlockedEvent_ProjectionTest()
+    public async Task CreateClubTest()
     {
         //Given
-        var clubUnlockedEvent = new BaseEvent
+        var clubId = Guid.NewGuid();
+        var newClub = new Club
         {
-            EntityId = Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"),
-            EntityType = EntityType.TENNIS_CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_UNLOCKED,
-            EventData = new ClubUnlockedEvent()
+            Id = clubId,
+            Name = "Test Club",
+            Status = Status.ACTIVE
         };
 
         //When
-        await TestClubRepository.UpdateEntityAsync(clubUnlockedEvent);
+        TestClubRepository.CreateClub(newClub);
+        await TestClubRepository.Update();
 
         //Then
-        var projectedClub = await TestClubRepository.GetClubById(Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"));
-
-        Assert.That(projectedClub, Is.Not.Null);
+        var club = await TestClubRepository.GetClubById(clubId);
+        Assert.That(club, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            Assert.That(projectedClub!.Id, Is.EqualTo(Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac")));
-            Assert.That(projectedClub.Status, Is.EqualTo(Status.ACTIVE));
-        });
-    }
-    
-    [Test]
-    public async Task ClubDeletedEvent_ProjectionTest()
-    {
-        //Given
-        var clubDeletedEvent = new BaseEvent
-        {
-            EntityId = Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"),
-            EntityType = EntityType.TENNIS_CLUB,
-            EventId = Guid.NewGuid(),
-            EventType = EventType.TENNIS_CLUB_DELETED,
-            EventData = new ClubDeletedEvent()
-        };
-
-        //When
-        await TestClubRepository.UpdateEntityAsync(clubDeletedEvent);
-
-        //Then
-        var projectedClub = await TestClubRepository.GetClubById(Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac"));
-
-        Assert.That(projectedClub, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(projectedClub!.Id, Is.EqualTo(Guid.Parse("9ad0861f-89d0-40f2-899c-58525d381aac")));
-            Assert.That(projectedClub.Status, Is.EqualTo(Status.DELETED));
+            Assert.That(club!.Id, Is.EqualTo(clubId));
+            Assert.That(club.Status, Is.EqualTo(Status.ACTIVE));
         });
     }
 }
