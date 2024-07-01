@@ -14,7 +14,7 @@ public class ReservationCreatedEvent : DomainEvent
     public Guid? TournamentId { get; set; }
     [JsonPropertyName("participantIds")]
     public List<Guid>? ParticipantIds { get; set; }
-    [JsonPropertyName("courtIds")]
+    [JsonPropertyName("courtId")]
     public Guid CourtId { get; set; }
     
     public ReservationCreatedEvent(){}

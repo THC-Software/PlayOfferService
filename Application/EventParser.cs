@@ -33,6 +33,12 @@ public class EventParser
         newEventData["eventType"] = jsonEvent["eventType"].GetValue<string>();
         foreach (var kvp in originalEventData.AsObject())
         {
+            if (kvp.Value == null)
+            {
+                newEventData[kvp.Key] = null;
+                continue;
+            }
+            
             if (kvp.Value is JsonObject && kvp.Value?["$date"] != null)
             {
                 newEventData[kvp.Key] = DateTimeOffset.FromUnixTimeMilliseconds(kvp.Value["$date"]
@@ -43,7 +49,14 @@ public class EventParser
                 newEventData[kvp.Key] = kvp.Value.DeepClone();
             }
         }
-
+        
+        Guid? correlationId = null;
+        if (jsonEvent["correlationId"] != null)
+        {
+            correlationId = Guid.Parse(jsonEvent["correlationId"].GetValue<string>());
+        }
+        
+        
         return new T
         {
             EventId = Guid.Parse(jsonEvent["eventId"].GetValue<string>()),
@@ -52,6 +65,7 @@ public class EventParser
             EntityId = Guid.Parse(jsonEvent["entityId"].GetValue<string>()),
             EntityType = (EntityType)Enum.Parse(typeof(EntityType), jsonEvent["entityType"].GetValue<string>()),
             EventData = JsonSerializer.Deserialize<DomainEvent>(newEventData, JsonSerializerOptions.Default),
+            CorrelationId = correlationId
         };
     }
 }

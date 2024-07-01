@@ -41,7 +41,7 @@ public class ReservationEventHandler : IRequestHandler<TechnicalReservationEvent
             case EventType.ReservationRejectedEvent:
                 await HandleReservationRejectedEvent(reservationEvent);
                 break;
-            case EventType.ReservationLimitExceeded:
+            case EventType.ReservationLimitExceededEvent:
                 await HandleReservationLimitExceededEvent(reservationEvent);
                 break;
             case EventType.ReservationCancelledEvent:
