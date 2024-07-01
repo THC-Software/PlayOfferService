@@ -20,7 +20,7 @@ public enum EventType
     MEMBER_FULL_NAME_CHANGED,
     ReservationCreatedEvent,
     ReservationRejectedEvent,
-    ReservationLimitExceeded,
+    ReservationLimitExceededEvent,
     ReservationCancelledEvent,
     CourtCreatedEvent,
     CourtUpdatedEvent,
