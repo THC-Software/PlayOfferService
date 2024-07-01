@@ -92,6 +92,8 @@ public class JoinPlayOfferHandler : IRequestHandler<JoinPlayOfferCommand, Task>
             transaction.Rollback();
             throw new InvalidOperationException("Concurrent modification detected!");
         }
+        
+        transaction.Commit();
 
         return Task.CompletedTask;
     }
