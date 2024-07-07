@@ -36,5 +36,5 @@ spec:
     app: pos-postgres-read
   ports:
     - protocol: TCP
-      port: 5433
+      port: 5432
       targetPort: 5432
