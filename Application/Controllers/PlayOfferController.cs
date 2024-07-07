@@ -28,7 +28,7 @@ public class PlayOfferController : ControllerBase
     /// <response code="200">Returns a list of Play offers matching the query params</response>
     /// <response code="204">No Play offer with matching properties was found</response>
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "MEMBER,ADMIN")]
     [Route("club")]
     [ProducesResponseType(typeof(IEnumerable<PlayOfferDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
@@ -52,7 +52,7 @@ public class PlayOfferController : ControllerBase
     ///<response code="200">Returns a list of Play offers matching the query params</response>
     ///<response code="204">No Play offer with matching properties was found</response>
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "MEMBER,ADMIN")]
     [Route("participant")]
     [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
@@ -60,7 +60,7 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult<IEnumerable<PlayOfferDto>>> GetByParticipantIdAsync()
     {
-        var participantId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        var participantId = Guid.Parse(User.FindFirst("sub")!.Value);
         var result = await _mediator.Send(new GetPlayOffersByParticipantIdQuery(participantId));
 
         if (result.Count() == 0)
@@ -77,7 +77,7 @@ public class PlayOfferController : ControllerBase
     ///<response code="200">Returns a List of Play offers with creator matching the query params</response>
     ///<response code="204">No Play offers with matching creator was found</response>
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "MEMBER,ADMIN")]
     [Route("search")]
     [ProducesResponseType(typeof(IEnumerable<PlayOffer>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status204NoContent)]
@@ -112,17 +112,14 @@ public class PlayOfferController : ControllerBase
     ///<response code="400">Invalid Play Offer structure</response>
     ///<response code="401">Only members can create Play Offers</response>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "MEMBER")]
     [ProducesResponseType(typeof(PlayOffer), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
     public async Task<ActionResult<PlayOffer>> Create(CreatePlayOfferDto createPlayOfferDto)
     {
-        if (User.Claims.First(c => c.Type == "groups").Value != "MEMBER")
-            return Unauthorized("Only members can create Play Offers!");
-        
-        var creatorId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var creatorId = Guid.Parse(User.FindFirst("sub")!.Value);
         var clubId = Guid.Parse(User.FindFirst("tennisClubId")!.Value);
         
         Guid result;
@@ -147,17 +144,14 @@ public class PlayOfferController : ControllerBase
     ///<response code="400">No Play Offer with matching id found</response>
     ///<response code="401">Only creator can cancel Play Offers</response>
     [HttpDelete]
-    [Authorize]
+    [Authorize(Roles = "MEMBER")]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
     [Consumes("application/json")]
     [Produces("application/json")]
     public async Task<ActionResult> Delete(Guid playOfferId)
     {
-        if (User.Claims.First(c => c.Type == "groups").Value != "MEMBER")
-            return Unauthorized("Only members can cancel Play Offers!");
-        
-        var memberId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var memberId = Guid.Parse(User.FindFirst("sub")!.Value);
 
         try
         {
@@ -184,7 +178,7 @@ public class PlayOfferController : ControllerBase
     ///<response code="400">No playOffer with a matching playOfferId found</response>
     ///<response code="401">Only members can join Play Offers</response>
     [HttpPost]
-    [Authorize]
+    [Authorize(Roles = "MEMBER")]
     [Route("join")]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ActionResult), StatusCodes.Status400BadRequest)]
@@ -192,10 +186,7 @@ public class PlayOfferController : ControllerBase
     [Produces("application/json")]
     public async Task<ActionResult> Join(JoinPlayOfferDto joinPlayOfferDto)
     {
-        if (User.Claims.First(c => c.Type == "groups").Value != "MEMBER")
-            return Unauthorized("Only members can join Play Offers!");
-        
-        var memberId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var memberId = Guid.Parse(User.FindFirst("sub")!.Value);
         try
         {
             await _mediator.Send(new JoinPlayOfferCommand(joinPlayOfferDto, memberId));
