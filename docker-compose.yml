@@ -7,7 +7,7 @@ services:
       - "6379:6379"
     networks: 
       - global_network
-  pos_postgres_write:
+  pos-postgres-write:
     image: debezium/postgres:16-alpine
     restart: always
     environment:
@@ -15,10 +15,10 @@ services:
       POSTGRES_PASSWORD: pos_password
       POSTGRES_DB: pos_write_db
     ports:
-      - "5432:5432"
+      - "5434:5432"
     networks:
       - global_network
-  pos_postgres_read:
+  pos-postgres-read:
     image: debezium/postgres:16-alpine
     restart: always
     environment:
@@ -29,27 +29,27 @@ services:
       - "5433:5432"
     networks: 
       - global_network
-  pos_debezium:
+  pos-debezium:
     image: debezium/server
     restart: always
     ports:
       - "6380:8080"
     depends_on:
-      - pos_postgres_write
+      - pos-postgres-write
       - redis
     volumes:
       - ./debezium-conf:/debezium/conf
     networks:
       - global_network
-  pos_service:
+  pos-service:
     image: playofferservice
     restart: always
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - pos_postgres_write
-      - pos_postgres_read
+      - pos-postgres-write
+      - pos-postgres-read
     ports:
       - "8080:8080"
       - "8082:8081"

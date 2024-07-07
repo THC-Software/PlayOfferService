@@ -15,8 +15,10 @@ spec:
       containers:
         - name: redis
           image: redis:7.0-alpine
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 6379
+      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service

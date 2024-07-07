@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pos-postgres-read
+  name: pos-postgres-write
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: pos-postgres-read
+      app: pos-postgres-write
   template:
     metadata:
       labels:
-        app: pos-postgres-read
+        app: pos-postgres-write
     spec:
       containers:
-        - name: pos-postgres-read
+        - name: pos-postgres-write
           image: debezium/postgres:16-alpine
           env:
             - name: POSTGRES_USER
@@ -21,18 +21,20 @@ spec:
             - name: POSTGRES_PASSWORD
               value: pos_password
             - name: POSTGRES_DB
-              value: pos_read_db
+              value: pos_write_db
           ports:
             - containerPort: 5432
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: pos-postgres-read
+  name: pos-postgres-write
 spec:
   selector:
-    app: pos-postgres-read
+    app: pos-postgres-write
   ports:
     - protocol: TCP
-      port: 5433
+      port: 5432
       targetPort: 5432

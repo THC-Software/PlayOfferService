@@ -20,6 +20,8 @@ spec:
             name: http
           - containerPort: 8081
             name: https
+          imagePullPolicy: Always
+      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
