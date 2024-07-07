@@ -4,16 +4,13 @@ using PlayOfferService.Application;
 using PlayOfferService.Domain;
 using PlayOfferService.Domain.Repositories;
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using PlayOfferService.Application.Controllers;
+using Microsoft.AspNetCore.Authentication;
+using PlayOfferService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var readConnectionString = "Host=pos_postgres_read;Database=pos_read_db;Username=pos_user;Password=pos_password";
-var writeConnectionString = "Host=pos_postgres_write;Database=pos_write_db;Username=pos_user;Password=pos_password;";
+var readConnectionString = "Host=pos-postgres-read;Database=pos_read_db;Username=pos_user;Password=pos_password";
+var writeConnectionString = "Host=pos-postgres-write;Database=pos_write_db;Username=pos_user;Password=pos_password;";
 builder.Services.AddDbContext<DbReadContext>(options =>
     {
         options.UseNpgsql(readConnectionString);
@@ -39,6 +36,11 @@ builder.Services.AddScoped<WriteEventRepository>();
 builder.Services.AddControllers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
+builder.Services
+    .AddAuthentication("BasicScheme")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicScheme", null);
+builder.Services.AddAuthorization();
+
 if (builder.Environment.EnvironmentName != "Test")
 {
     builder.Services.AddHostedService<RedisPlayOfferStreamService>();
@@ -46,23 +48,6 @@ if (builder.Environment.EnvironmentName != "Test")
     builder.Services.AddHostedService<RedisMemberStreamService>();
     builder.Services.AddHostedService<RedisReservationStreamService>();
     builder.Services.AddHostedService<RedisCourtStreamService>();
-    
-    var publicKey = File.ReadAllText("publicKeyDev.pem");
-    var rsa = RSA.Create();
-    rsa.ImportFromPem(publicKey);
-    var jwtKey = new RsaSecurityKey(rsa);
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = jwtKey,
-            };
-        });
 }
 
 // Swagger configuration
@@ -126,9 +111,7 @@ readDbContext.Database.EnsureCreated();
 writeDbContext.Database.EnsureCreated();
 
 
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
+app.UseMiddleware<JwtClaimsMiddleware>(); // Use custom middleware to extract JWT claims
 app.UseAuthorization();
 
 app.MapControllers();

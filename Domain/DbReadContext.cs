@@ -24,6 +24,7 @@ public class DbReadContext : DbContext
         modelBuilder.ApplyConfiguration(new BaseEventConfiguration());
 
         // TODO: Remove before coop testing
+        /*
         var testClub = new Club { Id = Guid.Parse("1fc64a89-9e63-4e9f-96f7-e2120f0ca6c3"), Name = "Test Club", Status = Status.ACTIVE };
         var testMemberIds = new List<Guid> { Guid.Parse("0033506d-2d59-40d3-b996-74a251091027"), Guid.Parse("ccc1c8fc-89b5-4026-b190-9d9e7e7bc18d") };
 
@@ -49,5 +50,6 @@ public class DbReadContext : DbContext
             modelBuilder.Entity<Member>().HasData(testMember);
         }
         modelBuilder.Entity<PlayOffer>().HasData(testPlayOffer);
+        */
     }
 }

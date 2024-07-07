@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pos-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pos-service
+  template:
+    metadata:
+      labels:
+        app: pos-service
+    spec:
+      containers:
+        - name: pos-service
+          image: lolgame99/webarch_playofferservice
+          ports:
+          - containerPort: 8080
+            name: http
+          - containerPort: 8081
+            name: https
+          imagePullPolicy: Always
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pos-service
+spec:
+  selector:
+    app: pos-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      name: http
+    - protocol: TCP
+      port: 8082
+      targetPort: 8081
+      name: https
