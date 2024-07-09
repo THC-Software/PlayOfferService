@@ -89,8 +89,6 @@ Afterward each Event is handled by the respective `EventHandler` for the aggrega
 
 ### Event Sourcing
 
-TODO: Beschreiben wo events implementiert werden, besoderheiten WriteSide als EventStore + apply methoden in Aggregates
-
 Event Sourcing is a pattern that involves storing the state of an application as a sequence of events. These events represent changes to the state of the application and can be used to reconstruct the state of the application at any point in time.
 
 First a Request is received and the Controller creates a Command, which is then handled by the appropriate CommandHandler. The CommandHandler then creates an Event, which is stored in the Event Store.
@@ -137,8 +135,6 @@ The Optimistic Locking is implemented in the each CommandHandler in the [Command
 
 ### Domain Driven Design
 
-TODO: Design von Entitäten, enthalten business logic
-
 Domain-Driven Design (DDD) is an approach to software development that focuses on the core domain and domain logic of the application. It is used to model complex domains in software by creating a shared understanding of the domain between technical and non-technical stakeholders.
 
 In the PlayOfferService, DDD is used to model the core domain of the application, which includes the following entities:
@@ -150,8 +146,6 @@ In the PlayOfferService, DDD is used to model the core domain of the application
 - `Club`: Represents a club that can have multiple courts and members
 
 ### Transaction Log Trailing
-
-TODO: implementation debezium, für was verantwortlich --> projection von write zu read seite
 
 Transaction Log Trailing is a technique used to capture changes to a database by reading the transaction log of the database. It is used to implement change data capture (CDC) in a microservice architecture.
 
