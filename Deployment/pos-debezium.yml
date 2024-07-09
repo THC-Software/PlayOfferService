@@ -25,7 +25,7 @@ spec:
         - name: debezium-configmap
           configMap:
             name: debezium-configmap
-    restartPolicy: Always
+      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
