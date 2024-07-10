@@ -53,7 +53,7 @@ public class RedisPlayOfferStreamService : BackgroundService
                 var parsedEvent = ParseEvent(streamEntry);
                 await mediator.Send(parsedEvent, _cancellationToken);
             }
-            await Task.Delay(1000);
+            await Task.Delay(250);
         }
     }
     
