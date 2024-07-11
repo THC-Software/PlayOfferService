@@ -52,10 +52,14 @@ You can also use `kubectl port-forward` to forward a port from your local machin
 kubectl port-forward deployment/pos-service 8080:8080
 ```
 
+## API Documentation
+We provided a OpenAPI documentation for the PlayOfferService.
+It can be found in the [`openapi.json`](./openapi.json) file.
+
 ## Used patterns in microservice
+**All `.cs` files are linked to the respective file in the project**
 
 ### Saga
-TODO: Add file/line numbers
 The Saga pattern is used to maintain data consistency in a microservice architecture. It is a sequence of local transactions where each transaction updates the data and publishes a message or event to trigger the next transaction in the sequence. If a transaction fails, the saga executes a series of compensating transactions that undo the changes that were made by the preceding transactions.
 
 In the PlayOfferService the Saga Pattern is used in conjunction with the CourtService, to automatically create a Reservation if a PlayOffer is joined by a second Member. It includes the following Steps:
@@ -73,25 +77,44 @@ In the PlayOfferService the Saga Pattern is used in conjunction with the CourtSe
 The **compensation logic** for the Saga is implemented in the [ReservationEventHandler](./Application/Handlers/Events/ReservationEventHandler.cs) File in the functions in lines _81 - 102_.
 
 ### CQRS
-TODO: Add file/line numbers
-The CQRS pattern is used to separate the read and write operations of a system. It allows for the creation of different models for reading and writing data, which can be optimized for their respective use cases. The CQRS pattern is used in the PlayOfferService to separate the read and write operations for PlayOffers.
+The CQRS pattern is used in the PlayOfferService to separate the read and write operations for PlayOffers. The write operations are implemented using commands, which are located in the [Commands](./Application/Commands) folder. The read operations are implemented using queries, which are located in the [Queries](./Application/Queries) folder.
+Each query and command is then handled by their respective handlers, which are located in the root of the [Handlers](./Application/Handlers) folder. Each handler is responsible for executing the logic for a specific command or query.
 
-The write operations are implemented using commands, which are located in the [Commands](./Application/Commands) folder. The read operations are implemented using queries, which are located in the [Queries](./Application/Queries) folder.
+#### Queries
+The following queries are implemented in the PlayOfferService with their respective handlers:
+- [`GetPlayOffersByClubIdQuery.cs`](./Application/Queries/GetPlayOffersByClubIdQuery.cs)(_Line 1:8_): Returns all PlayOffers for a specific Club. The query is created and sent to the handler in the [`PlayOfferController.cs`](./Application/Controllers/PlayOfferController.cs)(_Line 40_).
+  - [`GetPlayOffersByClubIdHandler.cs`](./Application/Handlers/GetPlayOffersByClubIdHandler.cs)(_Line 1:49_): Handles the `GetPlayOffersByClubIdQuery` and returns the PlayOffers for the specified Club
+- [`GetPlayOffersByParticipantIdQuery.cs`](./Application/Queries/GetPlayOffersByParticipantIdQuery.cs)(_Line 1:8_): Returns all PlayOffers for a specific participant (either as creator or opponent). The query is created and sent to the handler in the [`PlayOfferController.cs`](./Application/Controllers/PlayOfferController.cs)(_Line 64_).
+  - [`GetPlayOffersByParticipantIdHandler.cs`](./Application/Handlers/GetPlayOffersByParticipantIdHandler.cs)(_Line 1:49_): Handles the `GetPlayOffersByParticipantIdQuery` and returns the PlayOffers for the specified participant
+- [`GetPlayOffersByCreatorNameQuery.cs`](./Application/Queries/GetPlayOffersByCreatorNameQuery.cs)(_Line 1:8_): Returns a specific PlayOffer by the name of it's creator. The query is created and sent to the handler in the [`PlayOfferController.cs`](./Application/Controllers/PlayOfferController.cs)(_Line 91_).
+  - [`GetPlayOffersByCreatorNameHandler.cs`](./Application/Handlers/GetPlayOffersByCreatorNameHandler.cs)(_Line 1:59_): Handles the `GetPlayOfferByCreatorNameQuery` and returns the PlayOffer with the specified Id
 
-These commands and queries are then handled by their respective handlers, which are located in the root of the [Handlers](./Application/Handlers) folder. Each handler is responsible for executing the logic for a specific command or query.
+#### Commands
+The following commands are implemented in the PlayOfferService with their respective handlers:
+- [`CancelPlayOfferCommand.cs`](./Application/Commands/CancelPlayOfferCommand.cs)(_Line 1:7_): Cancels a PlayOffer. The command is created and sent to the handler in the [`PlayOfferController.cs`](./Application/Controllers/PlayOfferController.cs)(_Line 158_).
+  - [`CancelPlayOfferHandler.cs`](./Application/Handlers/CancelPlayOfferHandler.cs)(_Line 1:79_): Handles the `CancelPlayOfferCommand` and cancels the PlayOffer
+- [`CreatePlayOfferCommand.cs`](./Application/Commands/CreatePlayOfferCommand.cs)(_Line 1:7_): Creates a new PlayOffer. The command is created and sent to the handler in the [`PlayOfferController.cs`](./Application/Controllers/PlayOfferController.cs)(_Line 128_).
+  - [`CreatePlayOfferHandler.cs`](./Application/Handlers/CreatePlayOfferHandler.cs)(_Line 1:87_): Handles the `CreatePlayOfferCommand` and creates a new 
+- [`JoinPlayOfferCommand.cs`](./Application/Commands/JoinPlayOfferCommand.cs)(_Line 1:7_): Joins a PlayOffer. The command is created and sent to the handler in the [`PlayOfferController.cs`](./Application/Controllers/PlayOfferController.cs)(_Line 192_).
+  - [`JoinPlayOfferHandler.cs`](./Application/Handlers/JoinPlayOfferHandler.cs)(_Line 1:100_): Handles the `JoinPlayOfferCommand` and joins the PlayOffer
+
 
 #### Projection
-TODO: Add file/line numbers
-The CQRS pattern is also used to implement projections in the PlayOfferService. Projections are used to transform the data from the write model to the read model. In the PlayOfferService, projections are implemented using the **Mediator Pattern** which is implemented in the [Events](./Application/Handlers/Events) folder.
+In the PlayOfferService, projections are implemented using the **Mediator Pattern** which is implemented, in dedicated `EventHandlers` for each entity, in the [Events](./Application/Handlers/Events) folder.
 
-Each Aggregate has a dedicated `RedisStreamReader` which subscribes to the Redis stream and listens to and parses the events for a specific aggregate, these can be found in the root of the [Application](./Application) folder.
-Afterward each Event is handled by the respective `EventHandler` for the aggregates, which can be found in the [Events](./Application/Handlers/Events) folder. These `EventHandlers` then update the read model accordingly.
+Each Entity has a dedicated `RedisStreamReader` which subscribes to the Redis stream and listens to, filters and parses the events for a specific entity:
+- [`PlayOfferEventHandler.cs`](./Application/Handlers/Events/PlayOfferEventHandler.cs)(_Line 1:94_): Handles the events for the `PlayOffer` entity
+- [`MemberEventHandler.cs`](./Application/Handlers/Events/MemberEventHandler.cs)(_Line 1:126_): Handles the events for the `Member` entity
+- [`ReservationEventHandler.cs`](./Application/Handlers/Events/ReservationEventHandler.cs)(_Line 1:151_): Handles the events for the `Reservation` entity
+- [`CourtEventHandler.cs`](./Application/Handlers/Events/CourtEventHandler.cs)(_Line 1:57_): Handles the events for the `Court` entity
+- [`ClubEventHandler.cs`](./Application/Handlers/Events/ClubEventHandler.cs)(_Line 1:116_): Handles the events for the `Club` entity
 
-### Queries
-TODO: Add file/line numbers, describe how it is implemented
-
-### Commands
-TODO: Add file/line numbers, describe how it is implemented
+The `EventHandlers` receive their events from the `RedisStreamService` and then apply the events to the respective entity:
+- [`RedisClubStreamService.cs`](./Application/RedisClubStreamService.cs)(_Line 1:82_): Read the events from the redis club stream and sends them to the `ClubEventHandler`
+- [`RedisCourtStreamService.cs`](./Application/RedisCourtStreamService.cs)(_Line 1:83_): Read the events from the redis court stream and sends them to the `CourtEventHandler`
+- [`RedisMemberStreamService.cs`](./Application/RedisMemberStreamService.cs)(_Line 1:86_): Read the events from the redis member stream and sends them to the `MemberEventHandler`
+- [`RedisPlayOfferStreamService.cs`](./Application/RedisPlayOfferStreamService.cs)(_Line 1:68_): Read the events from the redis play offer stream and sends them to the `PlayOfferEventHandler`
+- [`RedisReservationStreamService.cs`](./Application/RedisReservationStreamService.cs)(_Line 1:76_): Read the events from the redis reservation stream and sends them to the `ReservationEventHandler`
 
 ### Event Sourcing
 The write side of the CQRS implementation is using a event sourcing pattern. In the PlayOfferService, events are used to represent changes to the state of Entities.
@@ -161,8 +184,13 @@ All events which were read from the redis stream and were processed by the `Even
 Therefore the outcome of all events won't change if they are processed multiple times.
 
 ### Authentication and Authorization
-TODO: Add file/line numbers, describe how it is implemented
+In the PlayOfferService, Authentication and Authorization are implemented using a JWT token, which is is provided by the club service. All requests to the PlayOfferService must include a valid JWT token in the Authorization header.
 
+All Queries can be executed by users with the `ADMIN` and `MEMBER` role. The commands can only be executed by users with the `MEMBER` roles.
+A custom [`JwtClaimsMiddleware.cs`](./JwtClaimsMiddleware.cs)(_Line 1:43_) is used to extract the claims from the JWT token and add them to the `HttpContext` of the request.
+
+These claims are then checked with the `Authorize` attribute in the [`PlayOfferController.cs`](./Application/Controllers/PlayOfferController.cs)(_Lines 31,55,80,115,147,181_) to ensure that the user has the necessary roles to execute the request.
+Furthermore, most requests also extract the `memberId` and/or the `clubId` from the claims to ensure that the user can only access their own data, this can be seen in [`PlayOfferController.cs`](./Application/Controllers/PlayOfferController.cs)(_Lines 39,63,122:123,154,189_).
 
 ### Optimistic Locking
 In the PlayOfferService, Optimistic Locking is implemented using the `EFCore` and its transaction mechanism. When a request is received, the current amount of events is read and incremented by one.

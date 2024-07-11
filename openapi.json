@@ -1,0 +1,470 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "PlayOfferService API",
+    "description": "An ASP.NET Core Web API for managing PlayOffers",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/playoffers/club": {
+      "get": {
+        "tags": [
+          "PlayOffer"
+        ],
+        "summary": "Retrieve all Play Offers of the logged in users club",
+        "responses": {
+          "200": {
+            "description": "Returns a list of Play offers matching the query params",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayOfferDto"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Play offer with matching properties was found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/playoffers/participant": {
+      "get": {
+        "tags": [
+          "PlayOffer"
+        ],
+        "summary": "Retrieve all Play Offers of a logged in user",
+        "responses": {
+          "200": {
+            "description": "Returns a list of Play offers matching the query params",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayOffer"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Play offer with matching properties was found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/playoffers/search": {
+      "get": {
+        "tags": [
+          "PlayOffer"
+        ],
+        "summary": "Get all Play offers created by a member with a matching name",
+        "parameters": [
+          {
+            "name": "creatorName",
+            "in": "query",
+            "description": "Name of the creator in the format '[FirstName] [LastName]', '[FirstName]' or '[LastName]'",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a List of Play offers with creator matching the query params",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayOffer"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Play offers with matching creator was found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/playoffers": {
+      "post": {
+        "tags": [
+          "PlayOffer"
+        ],
+        "summary": "Create a new Play Offer for the logged in user",
+        "requestBody": {
+          "description": "The Play Offer to create",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlayOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayOffer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Play Offer structure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Returns the id of the created Play Offer"
+          },
+          "401": {
+            "description": "Only members can create Play Offers"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "PlayOffer"
+        ],
+        "summary": "Cancels a Play Offer with a matching id of the logged in user",
+        "parameters": [
+          {
+            "name": "playOfferId",
+            "in": "query",
+            "description": "The id of the Play Offer to cancel",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Play Offer with the matching id was cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No Play Offer with matching id found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Only creator can cancel Play Offers"
+          }
+        }
+      }
+    },
+    "/api/playoffers/join": {
+      "post": {
+        "tags": [
+          "PlayOffer"
+        ],
+        "summary": "Logged in user joins a Play Offer with a matching playOfferId",
+        "requestBody": {
+          "description": "The opponentId to add to the Play Offer with the matching playOfferId",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinPlayOfferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The opponentId was added to the Play Offer with the matching playOfferId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No playOffer with a matching playOfferId found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Only members can join Play Offers"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionResult": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ClubDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CourtDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreatePlayOfferDto": {
+        "type": "object",
+        "properties": {
+          "proposedStartTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "proposedEndTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "JoinPlayOfferDto": {
+        "type": "object",
+        "properties": {
+          "playOfferId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "acceptedStartTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MemberDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlayOffer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "clubId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "creatorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "opponentId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "proposedStartTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "proposedEndTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acceptedStartTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "isCancelled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlayOfferDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "club": {
+            "$ref": "#/components/schemas/ClubDto"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/MemberDto"
+          },
+          "opponent": {
+            "$ref": "#/components/schemas/MemberDto"
+          },
+          "proposedStartTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "proposedEndTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "acceptedStartTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reservation": {
+            "$ref": "#/components/schemas/ReservationDto"
+          },
+          "isCancelled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReservationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "court": {
+            "$ref": "#/components/schemas/CourtDto"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isCancelled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Status": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "JWT Authorization header using the Bearer scheme.",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}
