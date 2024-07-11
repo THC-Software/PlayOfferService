@@ -24,8 +24,13 @@ public class GetPlayOffersByClubIdHandler : IRequestHandler<GetPlayOffersByClubI
     public async Task<IEnumerable<PlayOfferDto>> Handle(GetPlayOffersByClubIdQuery request, CancellationToken cancellationToken)
     {
         var playOffers = await _playOfferRepository.GetPlayOffersByIds(null, null, request.ClubId);
+        var club = await _clubRepository.GetClubById(request.ClubId);
         
-        var clubDto = new ClubDto((await _clubRepository.GetClubById(request.ClubId))!);
+        var playOfferDtos = new List<PlayOfferDto>();
+        if (club == null)
+            return playOfferDtos;
+        
+        var clubDto = new ClubDto(club);
         var memberDtos = (await _memberRepository.GetAllMembers()).Select(member => new MemberDto(member)).ToList();
         var courtDtos = (await _courtRepository.GetAllCourts()).Select(court => new CourtDto(court)).ToList();
         var reservationDtos = (await _reservationRepository.GetAllReservations())
@@ -34,7 +39,7 @@ public class GetPlayOffersByClubIdHandler : IRequestHandler<GetPlayOffersByClubI
                 courtDtos.First(courtDto => courtDto.Id == reservation.CourtId)))
             .ToList();
         
-        var playOfferDtos = new List<PlayOfferDto>();
+        
         foreach (var playOffer in playOffers)
         {
             var creator = memberDtos.First(member => member.Id == playOffer.CreatorId);

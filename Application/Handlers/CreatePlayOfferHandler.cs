@@ -25,6 +25,9 @@ public class CreatePlayOfferHandler : IRequestHandler<CreatePlayOfferCommand, Gu
     public async Task<Guid> Handle(CreatePlayOfferCommand request, CancellationToken cancellationToken)
     {
         var playOfferDto = request.CreatePlayOfferDto;
+        
+        if (playOfferDto.ProposedStartTime >= playOfferDto.ProposedEndTime)
+            throw new InvalidOperationException("Proposed start time must be before proposed end time!");
 
         var club = await _clubRepository.GetClubById(request.ClubId);
         if (club == null)

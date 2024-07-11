@@ -56,7 +56,7 @@ public class RedisReservationStreamService : BackgroundService
 
                 await mediator.Send(parsedEvent, _cancellationToken);
             }
-            await Task.Delay(1000);
+            await Task.Delay(10000);
         }
     }
     
